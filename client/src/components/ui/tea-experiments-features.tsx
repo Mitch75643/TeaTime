@@ -222,13 +222,26 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
       };
       
       setCommunityPolls(prev => [newPoll, ...prev]);
-      onCreatePoll(newQuestion, newOptions.filter(opt => opt.trim()));
       
-      // Reset form
+      // Reset form and collapse create section
       setNewQuestion("");
       setNewOptions(["", ""]);
       setSelectedTemplate(null);
       setIsCreateExperimentExpanded(false);
+      
+      // Scroll to Community Results section
+      setTimeout(() => {
+        const communityResultsElement = document.querySelector('[data-section="community-results"]');
+        if (communityResultsElement) {
+          communityResultsElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      }, 100);
+      
+      // Don't call onCreatePoll to avoid opening modal
+      // onCreatePoll(newQuestion, newOptions.filter(opt => opt.trim()));
     }
   };
 
@@ -468,7 +481,7 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
       </Card>
 
       {/* View Community Results - Always Visible & Smaller */}
-      <Card className="border-green-200 dark:border-green-800">
+      <Card className="border-green-200 dark:border-green-800" data-section="community-results">
         <CardHeader className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300 text-sm sm:text-base">
@@ -506,13 +519,19 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
           ) : (
             <div className="space-y-3 sm:space-y-4">
               {communityPolls.map((poll) => (
-                <Card key={poll.id} className="border-purple-200 dark:border-purple-700 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                <Card key={poll.id} className={cn(
+                  "border-purple-200 dark:border-purple-700 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20",
+                  poll.username === "You" && "ring-2 ring-purple-400 ring-opacity-50"
+                )}>
                   <CardHeader className="pb-2 sm:pb-3">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="text-lg">{poll.userAvatar}</div>
                       <div className="flex-1">
                         <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
                           {poll.username}
+                          {poll.username === "You" && (
+                            <span className="ml-1 text-xs bg-purple-100 text-purple-700 px-1 rounded">Your experiment</span>
+                          )}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           {poll.totalVotes} votes
@@ -530,11 +549,12 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
                         <div key={option.id}>
                           <Button
                             onClick={() => handlePollVote(poll.id, option.id)}
-                            disabled={userVotes[poll.id] !== undefined}
+                            disabled={userVotes[poll.id] !== undefined || poll.username === "You"}
                             className={cn(
                               "w-full justify-between h-auto p-2 sm:p-3 text-left text-xs sm:text-sm",
                               userVotes[poll.id] === option.id && "ring-2 ring-purple-500 bg-purple-100 dark:bg-purple-900/30",
-                              userVotes[poll.id] && "cursor-default"
+                              (userVotes[poll.id] || poll.username === "You") && "cursor-default",
+                              poll.username === "You" && "opacity-75"
                             )}
                             variant={userVotes[poll.id] === option.id ? "default" : "outline"}
                           >
@@ -542,7 +562,7 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
                               <TestTube className="h-3 w-3 text-purple-600 flex-shrink-0" />
                               <span className="font-medium">{option.text}</span>
                             </div>
-                            {userVotes[poll.id] && (
+                            {(userVotes[poll.id] || poll.username === "You") && (
                               <div className="flex items-center gap-1 sm:gap-2">
                                 <span className="text-xs sm:text-sm font-medium">{option.percentage}%</span>
                                 <span className="text-xs text-gray-500">({option.votes})</span>
@@ -550,7 +570,7 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
                             )}
                           </Button>
                           
-                          {userVotes[poll.id] && (
+                          {(userVotes[poll.id] || poll.username === "You") && (
                             <div className="mt-1">
                               <Progress 
                                 value={option.percentage} 
@@ -566,6 +586,14 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
                       <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                           Thanks for voting! Results locked in.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {poll.username === "You" && (
+                      <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-xs text-purple-600 dark:text-purple-400 text-center font-medium">
+                          Your experiment is live! Others can vote on it.
                         </p>
                       </div>
                     )}
