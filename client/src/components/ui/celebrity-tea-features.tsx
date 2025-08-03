@@ -21,6 +21,13 @@ const trendingCelebs: CelebData[] = [
   { name: "Dua Lipa", postCount: 15, dramaMeter: 30, trending: false },
 ];
 
+const getTrendIcon = (index: number, trending: boolean) => {
+  if (index === 0) return "🔥";
+  if (index === 1) return "🎤";
+  if (trending) return "⬆️";
+  return "⬇️";
+};
+
 interface CelebrityTeaFeaturesProps {
   onSpillAbout: (celebName: string) => void;
 }
@@ -46,13 +53,13 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
     <div className="space-y-6">
       {/* Top Celebs List */}
       <Card className="border-pink-200 dark:border-pink-800">
-        <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20">
-          <CardTitle className="flex items-center gap-2 text-pink-700 dark:text-pink-300">
-            <Star className="h-5 w-5" />
-            📊 This Week's Trending Celebs
+        <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 pb-3">
+          <CardTitle className="flex items-center gap-2 text-pink-700 dark:text-pink-300 text-base font-medium">
+            <Star className="h-4 w-4" />
+            This Week's Trending Celebs
           </CardTitle>
-          <p className="text-sm text-pink-600 dark:text-pink-400">
-            The hottest names everyone's talking about
+          <p className="text-xs text-pink-600/70 dark:text-pink-400/70">
+            Based on recent posts & reactions
           </p>
         </CardHeader>
         <CardContent className="p-4">
@@ -69,37 +76,21 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
                 onClick={() => setSelectedCeleb(celeb.name)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <span className="text-lg font-bold text-pink-600 dark:text-pink-400">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-pink-600 dark:text-pink-400">
                       #{index + 1}
                     </span>
-                    {celeb.trending && (
-                      <Badge className="bg-red-100 text-red-700 text-xs">
-                        📈 TRENDING
-                      </Badge>
-                    )}
+                    <span className="text-base">
+                      {getTrendIcon(index, celeb.trending)}
+                    </span>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900 dark:text-gray-100">
-                        {celeb.name}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Camera className="h-3 w-3 text-pink-500" />
-                        <Eye className="h-3 w-3 text-pink-500" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-500">
-                        {celeb.postCount} posts this week
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Flame className="h-3 w-3 text-orange-500" />
-                        <span className="text-xs font-medium">
-                          {getDramaMeterText(celeb.dramaMeter)}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                      {celeb.name}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {celeb.postCount} mentions
+                    </span>
                   </div>
                 </div>
                 
