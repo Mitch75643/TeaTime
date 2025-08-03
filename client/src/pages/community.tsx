@@ -126,7 +126,7 @@ const communitySections = [
   },
   {
     id: "suggestions",
-    name: "Suggest Something",
+    name: "Feedback/Suggestions",
     emoji: "💡",
     icon: Lightbulb, 
     description: "Share feature ideas and feedback to improve TeaSpill",
