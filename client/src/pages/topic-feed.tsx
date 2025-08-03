@@ -11,6 +11,7 @@ import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
+import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
 import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
@@ -93,6 +94,9 @@ export default function TopicFeed() {
   const [storyCategory, setStoryCategory] = useState("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
+  
+  // Celebration hook
+  const { celebration, triggerCelebration, completeCelebration } = useCelebration();
   
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
@@ -403,6 +407,17 @@ export default function TopicFeed() {
         section={topicId}
         sectionTitle={`${topic.emoji} ${topic.name}`}
         promptText={selectedTopic}
+        onPostSuccess={(section) => {
+          // Trigger celebration for this topic
+          triggerCelebration(section as any);
+        }}
+      />
+      
+      {/* Celebration Animation */}
+      <CelebrationAnimation
+        isVisible={celebration.isVisible}
+        onComplete={completeCelebration}
+        type={celebration.type}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { CommunityModal } from "@/components/ui/community-section-modal";
+import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -148,6 +149,7 @@ const communitySections = [
 
 export default function Community() {
   const [, setLocation] = useLocation();
+  const { celebration, triggerCelebration, completeCelebration } = useCelebration();
   
   const handleSectionClick = (sectionId: string) => {
     // Map section IDs to topic IDs for navigation
@@ -265,6 +267,13 @@ export default function Community() {
       </div>
 
       <div className="pb-20"></div>
+      
+      {/* Celebration Animation */}
+      <CelebrationAnimation
+        isVisible={celebration.isVisible}
+        onComplete={completeCelebration}
+        type={celebration.type}
+      />
       
       <BottomNav />
     </div>

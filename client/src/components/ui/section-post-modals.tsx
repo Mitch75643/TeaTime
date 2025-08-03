@@ -10,6 +10,7 @@ import { X, Hash, Plus, Minus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { generateAlias } from "@/lib/aliases";
+import { CelebrationAnimation, useCelebration } from "./celebration-animations";
 import type { InsertPost } from "@shared/schema";
 
 interface SectionPostModalProps {
@@ -18,6 +19,7 @@ interface SectionPostModalProps {
   section: string;
   sectionTitle: string;
   promptText?: string;
+  onPostSuccess?: (section: string) => void;
 }
 
 const popularTags = [
@@ -50,7 +52,8 @@ export function SectionPostModal({
   onClose, 
   section, 
   sectionTitle,
-  promptText = ""
+  promptText = "",
+  onPostSuccess
 }: SectionPostModalProps) {
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
@@ -66,6 +69,7 @@ export function SectionPostModal({
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { celebration, triggerCelebration, completeCelebration } = useCelebration();
 
   // Pre-fill topic when modal opens with promptText for hot-topics
   useEffect(() => {
@@ -80,10 +84,12 @@ export function SectionPostModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
-      toast({
-        title: "Post created!",
-        description: "Your anonymous post has been shared with the community.",
-      });
+      
+      // Trigger celebration animation
+      triggerCelebration(section as any);
+      
+      // Call success callback
+      onPostSuccess?.(section);
       
       // Auto-route to story category filter for story posts
       if (section === "story-time" && storyType) {
@@ -92,7 +98,14 @@ export function SectionPostModal({
         }, 100);
       }
       
-      handleClose();
+      // Close modal after a brief delay to allow celebration to start
+      setTimeout(() => {
+        handleClose();
+        toast({
+          title: "Post created!",
+          description: "Your anonymous post has been shared with the community.",
+        });
+      }, 200);
     },
     onError: (error: any) => {
       toast({
@@ -412,6 +425,13 @@ export function SectionPostModal({
           </div>
         </div>
       </DialogContent>
+      
+      {/* Celebration Animation */}
+      <CelebrationAnimation
+        isVisible={celebration.isVisible}
+        onComplete={completeCelebration}
+        type={celebration.type}
+      />
     </Dialog>
   );
 }
