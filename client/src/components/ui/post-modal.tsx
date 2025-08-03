@@ -13,6 +13,7 @@ import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
 import { getAvatarById } from "@/lib/avatars";
 import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/draft-storage";
+import { HomeCategoryAnimation, useHomeCategoryAnimation } from "./home-category-animations";
 import type { InsertPost } from "@shared/schema";
 
 interface PostModalProps {
@@ -65,6 +66,7 @@ export function PostModal({
   const tagInputRef = useRef<HTMLInputElement>(null);
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
+  const { animation, triggerAnimation, completeAnimation } = useHomeCategoryAnimation();
 
   // Load draft and set defaults when modal opens
   useEffect(() => {
@@ -116,6 +118,14 @@ export function PostModal({
       // Invalidate all post queries to ensure posts appear everywhere they should
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       clearDraft(); // Clear draft after successful post
+      
+      // Trigger animation for home page posts
+      if (postContext.page === 'home' && category) {
+        // Map category values to animation categories
+        const animationCategory = category === 'drama' ? 'wrong' : category;
+        triggerAnimation(animationCategory);
+      }
+      
       toast({
         title: "Post created!",
         description: "Your anonymous post has been shared with the community.",
@@ -335,6 +345,13 @@ export function PostModal({
           </Button>
         </div>
       </DialogContent>
+      
+      {/* Home Category Animation */}
+      <HomeCategoryAnimation
+        isVisible={animation.isVisible}
+        onComplete={completeAnimation}
+        category={animation.category}
+      />
     </Dialog>
   );
 }
