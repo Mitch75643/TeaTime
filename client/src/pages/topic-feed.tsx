@@ -12,7 +12,7 @@ import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
-import { ArrowLeft, Plus, RefreshCw, MessageSquare, Users } from "lucide-react";
+import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -94,7 +94,6 @@ export default function TopicFeed() {
   const [storyCategory, setStoryCategory] = useState("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
-  const [activeTab, setActiveTab] = useState<"feed" | "replies">("feed");
   
   // Celebration hook
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
@@ -122,7 +121,6 @@ export default function TopicFeed() {
     };
   }, [topicId]);
 
-  // Query for the main feed posts
   const { data: posts = [], isLoading } = useQuery<Post[]>({
     queryKey: ['/api/posts', topicId, sortBy, storyCategory],
     select: (posts) => {
@@ -184,17 +182,6 @@ export default function TopicFeed() {
           });
       }
     }
-  });
-
-  // Query for user replies in this topic
-  const { data: userReplies = [], isLoading: isLoadingReplies } = useQuery({
-    queryKey: ['/api/comments/user-replies', topicId],
-    queryFn: async () => {
-      const response = await fetch(`/api/comments/user-replies?topic=${topicId}`);
-      if (!response.ok) throw new Error("Failed to fetch user replies");
-      return response.json();
-    },
-    enabled: activeTab === "replies"
   });
 
   if (!topic) {
@@ -359,167 +346,42 @@ export default function TopicFeed() {
         )}
       </div>
 
-      {/* Tab Toggle Section */}
-      <div className="container mx-auto px-4 py-4 pb-2">
-        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 max-w-md mx-auto">
-          <button
-            onClick={() => setActiveTab("feed")}
-            className={cn(
-              "flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-all",
-              activeTab === "feed"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-            )}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            The Feed
-          </button>
-          <button
-            onClick={() => setActiveTab("replies")}
-            className={cn(
-              "flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-all",
-              activeTab === "replies"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-            )}
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Your Replies
-          </button>
-        </div>
-      </div>
-
-      {/* Content Based on Active Tab */}
-      <div className="container mx-auto px-4 py-2 pb-20">
-        {activeTab === "feed" ? (
-          // The Feed Tab Content
-          <>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                  </div>
-                ))}
+      {/* Posts Feed */}
+      <div className="container mx-auto px-4 py-6 pb-20">
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
               </div>
-            ) : posts.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  No posts yet
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Be the first to start the conversation in {topic.name}!
-                </p>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <PostCard 
+                key={post.id} 
+                post={post}
+              />
+            ))}
+            
+            {/* Celebrity Tea specific Create Post button under posts */}
+            {topicId === "celebrity-tea" && posts.length > 0 && (
+              <div className="text-center pt-6 pb-4 border-t border-gray-200 dark:border-gray-700">
                 <Button
                   onClick={() => setIsPostModalOpen(true)}
-                  className={cn("text-white", topic.gradient)}
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full max-w-md"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Create First Post
+                  Share More Celebrity Tea
                 </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {posts.map((post) => (
-                  <PostCard 
-                    key={post.id} 
-                    post={post}
-                  />
-                ))}
-                
-                {/* Celebrity Tea specific Create Post button under posts */}
-                {topicId === "celebrity-tea" && posts.length > 0 && (
-                  <div className="text-center pt-6 pb-4 border-t border-gray-200 dark:border-gray-700">
-                    <Button
-                      onClick={() => setIsPostModalOpen(true)}
-                      className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full max-w-md"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Share More Celebrity Tea
-                    </Button>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      Got more gossip to spill? Keep the conversation going!
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        ) : (
-          // Your Replies Tab Content
-          <>
-            {isLoadingReplies ? (
-              <div className="space-y-4">
-                {[...Array(2)].map((_, i) => (
-                  <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
-                    <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-                  </div>
-                ))}
-              </div>
-            ) : userReplies.length === 0 ? (
-              <div className="text-center py-12">
-                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  No replies yet
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Join the conversation by commenting on posts in {topic.name}!
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Got more gossip to spill? Keep the conversation going!
                 </p>
-                <Button
-                  onClick={() => setActiveTab("feed")}
-                  variant="outline"
-                  className="border-gray-300 dark:border-gray-600"
-                >
-                  Browse The Feed
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {userReplies.map((reply: any) => (
-                  <div key={reply.id} className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <MessageSquare className="h-4 w-4 text-blue-500" />
-                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                        You replied to this
-                      </span>
-                    </div>
-                    
-                    {/* Parent Post Preview */}
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-                        {reply.parentPost?.content || "Original post"}
-                      </p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {reply.parentPost?.author || "Anonymous"}
-                        </span>
-                        <span className="text-xs text-gray-400">•</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {reply.parentPost?.createdAt ? new Date(reply.parentPost.createdAt).toLocaleDateString() : ''}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {/* Your Reply */}
-                    <div className="border-l-4 border-blue-500 pl-4">
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {reply.content}
-                      </p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {reply.createdAt ? new Date(reply.createdAt).toLocaleDateString() : ''}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
