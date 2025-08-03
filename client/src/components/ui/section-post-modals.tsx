@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { generateAlias } from "@/lib/aliases";
 import { CelebrationAnimation, useCelebration } from "./celebration-animations";
+import { CommunityTopicAnimation, useCommunityTopicAnimation } from "./community-topic-animations";
 import type { InsertPost } from "@shared/schema";
 
 interface SectionPostModalProps {
@@ -18,6 +19,7 @@ interface SectionPostModalProps {
   onClose: () => void;
   section: string;
   sectionTitle: string;
+  category?: string;
   promptText?: string;
   prefilledCelebrity?: string;
   onPostSuccess?: (section: string) => void;
@@ -53,6 +55,7 @@ export function SectionPostModal({
   onClose, 
   section, 
   sectionTitle,
+  category = "",
   promptText = "",
   prefilledCelebrity = "",
   onPostSuccess
@@ -72,6 +75,7 @@ export function SectionPostModal({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
+  const { animation: topicAnimation, triggerAnimation: triggerTopicAnimation, completeAnimation: completeTopicAnimation } = useCommunityTopicAnimation();
 
   // Pre-fill topic when modal opens with promptText for hot-topics
   useEffect(() => {
@@ -105,8 +109,12 @@ export function SectionPostModal({
       queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
       queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
       
-      // Trigger celebration animation
-      triggerCelebration(section as any);
+      // Trigger community topic animation or regular celebration
+      if (["celebrity-tea", "story-time", "hot-topics", "daily-debate", "feedback-suggestions"].includes(section)) {
+        triggerTopicAnimation(section);
+      } else {
+        triggerCelebration(section as any);
+      }
       
       // Call success callback
       onPostSuccess?.(section);
@@ -458,6 +466,13 @@ export function SectionPostModal({
         isVisible={celebration.isVisible}
         onComplete={completeCelebration}
         type={celebration.type}
+      />
+      
+      {/* Community Topic Animation */}
+      <CommunityTopicAnimation 
+        isVisible={topicAnimation.isVisible}
+        topic={topicAnimation.topic}
+        onComplete={completeTopicAnimation}
       />
     </Dialog>
   );

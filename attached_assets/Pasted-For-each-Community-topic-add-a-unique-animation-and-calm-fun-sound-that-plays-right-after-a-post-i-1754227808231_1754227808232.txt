@@ -1,0 +1,53 @@
+For each Community topic, add a unique animation and calm, fun sound that plays right after a post is submitted. These should reflect the theme of the topic, just like how “Cheese” is used as a fun idea for Tea Experiments. Here's the breakdown for each:
+
+---
+
+### 1. **Celebrity Tea**  
+- **Visual**: A paparazzi camera flash animation (not blinding), with sparkles and flashing star icons  
+- **Sound**: A gentle camera click + excited “ooh!” background murmur  
+- **Vibe**: Like a celeb got spotted!
+
+---
+
+### 2. **Story Time**  
+- **Visual**: A glowing open book animation, with sparkles rising out like magical dust  
+- **Sound**: A soft page-turn + twinkle sound  
+- **Vibe**: Like a story is being unlocked
+
+---
+
+### 3. **Hot Topics**  
+- **Visual**: A fiery flame emoji flickers on screen, maybe with a mini fire trail under the post  
+- **Sound**: Low, soft fire crackle or sizzle (not annoying!)  
+- **Vibe**: Like something just dropped and it's 🔥
+
+---
+
+### 4. **Daily Debate**  
+- **Visual**: Animated thought bubbles or question marks pop in, then fade  
+- **Sound**: A soft “hmm” thinking sound or subtle gavel tap  
+- **Vibe**: Like a respectful challenge just began
+
+---
+
+### 5. **Tea Experiments**  
+- **Visual**: Bubbling beaker or test tube, colored liquid mixing or fizzing  
+- **Sound**: A playful fizz-pop or soft “cheese!” voice (fun experiment shout)  
+- **Vibe**: Like launching a weird science test or meme-worthy experiment
+
+---
+
+### 6. **Feedback & Suggestions**  
+- **Visual**: Lightbulb icon appears with a gentle pulse, maybe spark animation  
+- **Sound**: Calm "ding" of realization or a quiet scribble sound  
+- **Vibe**: Like an idea was just dropped into the suggestion box
+
+---
+
+**General Notes:**
+- Each effect (visual + sound) should only appear after the post is successfully submitted.
+- Keep all effects brief (1–2 seconds) and not too loud.
+- Must work well on mobile and desktop.
+- Optional: Let users disable effects from settings if they want.
+
+All animations should feel smooth, expressive, and match the TeaSpill vibe — fun, clever, and drama-ready!
