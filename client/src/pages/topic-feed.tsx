@@ -247,6 +247,9 @@ export default function TopicFeed() {
             onCreateTopic={(topic, hashtag) => {
               setIsPostModalOpen(true);
             }}
+            onCreatePost={() => {
+              setIsPostModalOpen(true);
+            }}
           />
         )}
         

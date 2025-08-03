@@ -17,19 +17,20 @@ const trendingHashtags = [
   { tag: "#TruthBomb", count: 65, trending: "up" }
 ];
 
-const weeklyLeaderboard = [
-  { title: "AI will replace most jobs in 5 years", reactions: 342, emoji: "🤖" },
-  { title: "Social media is toxic for mental health", reactions: 298, emoji: "📱" },
-  { title: "Climate change isn't being taken seriously", reactions: 276, emoji: "🌍" },
-  { title: "Gen Z has it harder than previous generations", reactions: 245, emoji: "👶" },
-  { title: "Remote work is overrated", reactions: 198, emoji: "💻" }
+const weeklyHotTopics = [
+  { title: "AI will replace most jobs in 5 years", reactions: 342 },
+  { title: "Social media is toxic for mental health", reactions: 298 },
+  { title: "Climate change isn't being taken seriously", reactions: 276 },
+  { title: "Gen Z has it harder than previous generations", reactions: 245 },
+  { title: "Remote work is overrated", reactions: 198 }
 ];
 
 interface HotTopicsFeaturesProps {
   onCreateTopic: (topic?: string, hashtag?: string) => void;
+  onCreatePost: () => void;
 }
 
-export function HotTopicsFeatures({ onCreateTopic }: HotTopicsFeaturesProps) {
+export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeaturesProps) {
   const [newTopicIdea, setNewTopicIdea] = useState("");
   const [submittedIdeas, setSubmittedIdeas] = useState<string[]>([]);
 
@@ -50,45 +51,15 @@ export function HotTopicsFeatures({ onCreateTopic }: HotTopicsFeaturesProps) {
 
   return (
     <div className="space-y-6">
-      {/* Trending Hashtags */}
-      <Card className="border-red-200 dark:border-red-800">
-        <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
-          <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
-            <Hash className="h-5 w-5" />
-            🔥 Trending Hashtags
-          </CardTitle>
-          <p className="text-sm text-red-600 dark:text-red-400">
-            What everyone's talking about right now
-          </p>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {trendingHashtags.map((item, index) => (
-              <Button
-                key={item.tag}
-                variant="outline"
-                onClick={() => onCreateTopic("", item.tag)}
-                className="h-auto p-3 justify-start hover:border-red-300 dark:hover:border-red-700"
-              >
-                <div className="flex flex-col items-start w-full">
-                  <div className="flex items-center gap-1 w-full">
-                    <span className="font-medium text-sm">{item.tag}</span>
-                    {getTrendingIcon(item.trending)}
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-gray-500">{item.count} posts</span>
-                    {index < 3 && (
-                      <Badge className="bg-red-100 text-red-700 text-xs">
-                        HOT
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Create Post Button */}
+      <div className="text-center">
+        <Button
+          onClick={onCreatePost}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white w-full"
+        >
+          + Create Post
+        </Button>
+      </div>
 
       {/* This Week Leaderboard */}
       <Card className="border-orange-200 dark:border-orange-800">
@@ -100,7 +71,7 @@ export function HotTopicsFeatures({ onCreateTopic }: HotTopicsFeaturesProps) {
         </CardHeader>
         <CardContent className="p-4">
           <div className="space-y-3">
-            {weeklyLeaderboard.map((item, index) => (
+            {weeklyHotTopics.map((item, index) => (
               <div
                 key={index}
                 className={cn(
@@ -122,7 +93,7 @@ export function HotTopicsFeatures({ onCreateTopic }: HotTopicsFeaturesProps) {
                   )}>
                     #{index + 1}
                   </div>
-                  <span className="text-lg">{item.emoji}</span>
+
                 </div>
                 
                 <div className="flex-1">
@@ -137,67 +108,14 @@ export function HotTopicsFeatures({ onCreateTopic }: HotTopicsFeaturesProps) {
                   </div>
                 </div>
                 
-                <Button size="sm" variant="outline">
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Take
-                </Button>
+
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Submit Topic Ideas */}
-      <Card className="border-purple-200 dark:border-purple-800">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
-          <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
-            <Plus className="h-5 w-5" />
-            💡 Suggest New Hot Topics
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="What topic should everyone be discussing?"
-                value={newTopicIdea}
-                onChange={(e) => setNewTopicIdea(e.target.value)}
-                className="flex-1"
-                onKeyPress={(e) => e.key === "Enter" && submitTopicIdea()}
-              />
-              <Button
-                onClick={submitTopicIdea}
-                disabled={!newTopicIdea.trim()}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Submit
-              </Button>
-            </div>
-            
-            {submittedIdeas.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Your Submitted Ideas:
-                </p>
-                {submittedIdeas.map((idea, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg"
-                  >
-                    <Badge className="bg-purple-100 text-purple-700 text-xs">
-                      Submitted
-                    </Badge>
-                    <span className="text-sm text-purple-600 dark:text-purple-400">
-                      {idea}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
