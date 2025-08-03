@@ -1,0 +1,51 @@
+On the Daily Spill page, when a user submits a post, trigger a unique visual animation and soft sound effect based on the current week’s theme (e.g., Love Week, Pet Peeves Week, etc.). This should make posting feel expressive, relevant, and fun — and vary depending on the week.
+
+---
+
+🧠 System Behavior:
+- After a successful post submission, check what the current week’s theme is (this is already shown at the top of the Daily Spill page).
+- Based on the theme, trigger a **matching animation + sound effect.**
+- Effects should feel fun, lightweight, expressive, and mobile-friendly.
+
+---
+
+🎨 Example Weekly Themes and Effects:
+
+1. **❤️ Love Week**
+   - Visual: Red and pink hearts float upward from the post
+   - Sound: Soft romantic chime or gentle heart “bloop”
+
+2. **😤 Pet Peeves Week**
+   - Visual: Angry face emojis or scribbles pop up briefly
+   - Sound: Quiet grumble or eye-roll sound (funny but not loud)
+
+3. **😂 Cringe/Funny Week**
+   - Visual: “😂” emojis or comic-style “LOL” bubbles burst and fade
+   - Sound: Playful giggle or light cartoon boing (very subtle)
+
+4. **🤫 Secrets Week**
+   - Visual: Whisper bubbles or shushing face float up and fade
+   - Sound: Whisper “shhh” or light wind noise
+
+5. **😳 Embarrassing Moments Week**
+   - Visual: Blush emojis or sweat drops pop and fade
+   - Sound: Soft gasp or light "oops" chime
+
+6. **🔥 Drama Week**
+   - Visual: Floating drama masks 🎭 or explosive text bubbles
+   - Sound: A soft dramatic sting or rising suspense tone
+
+7. **✨ Self-Care Week**
+   - Visual: Calm sparkle or glowing wellness icons (like candles or leaves)
+   - Sound: Soft spa-like chime or gentle breath sound
+
+---
+
+🧩 Custom Logic:
+- If no theme is found for the week, default to a light sparkle animation and soft “sent” swoosh sound.
+- Must be expandable to support more themes later.
+- No sound or animation should block interaction — should last 1.5–2 seconds max.
+- Effects must work well on mobile and desktop.
+- All sounds must be calm, non-intrusive, and match the emotional tone of each theme.
+
+Bonus: Store visual/sound mappings in a config so future theme changes are easy to update.
