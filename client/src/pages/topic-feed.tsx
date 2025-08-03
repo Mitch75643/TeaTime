@@ -183,13 +183,18 @@ export default function TopicFeed() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Fixed Back Arrow - Always visible in top left */}
+      {/* Fixed Back Arrow - Always visible in top left with topic theme */}
       <div className="fixed top-4 left-4 z-50">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleBackClick}
-          className="bg-white dark:bg-gray-800 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
+          className={cn(
+            "shadow-lg border backdrop-blur-sm",
+            topic.gradient,
+            topic.textColor,
+            "hover:opacity-90 transition-opacity"
+          )}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
