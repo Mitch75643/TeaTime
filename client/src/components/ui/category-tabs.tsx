@@ -19,7 +19,7 @@ const categories = [
 
 export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsProps) {
   return (
-    <div className="bg-white px-4 py-3 border-b border-gray-200">
+    <div className="bg-white dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
         {categories.map((category) => (
           <Button
@@ -30,8 +30,8 @@ export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsP
               activeCategory === category.id
                 ? category.id === "drama"
                   ? "gradient-drama text-white"
-                  : "bg-purple-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "bg-purple-500 text-white dark:bg-purple-600"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             )}
             onClick={() => onCategoryChange(category.id)}
           >

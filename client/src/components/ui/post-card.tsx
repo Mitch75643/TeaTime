@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "./button";
 import { DramaVoting } from "./drama-voting";
-import { MessageCircle, MoreHorizontal } from "lucide-react";
+import { CommentsDrawer } from "./comments-drawer";
+import { MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import type { Post } from "@shared/schema";
@@ -40,8 +41,16 @@ const reactionEmojis = {
 };
 
 export function PostCard({ post }: PostCardProps) {
-  const [showComments, setShowComments] = useState(false);
+  const [userReactions, setUserReactions] = useState<Record<string, boolean>>({});
   const queryClient = useQueryClient();
+
+  // Load user reactions from localStorage
+  useEffect(() => {
+    const savedReactions = localStorage.getItem(`reactions-${post.id}`);
+    if (savedReactions) {
+      setUserReactions(JSON.parse(savedReactions));
+    }
+  }, [post.id]);
 
   const reactionMutation = useMutation({
     mutationFn: async ({ type }: { type: string }) => {
@@ -56,6 +65,11 @@ export function PostCard({ post }: PostCardProps) {
   });
 
   const handleReaction = (type: string) => {
+    // Update local state immediately for better UX
+    const newUserReactions = { ...userReactions, [type]: !userReactions[type] };
+    setUserReactions(newUserReactions);
+    localStorage.setItem(`reactions-${post.id}`, JSON.stringify(newUserReactions));
+    
     reactionMutation.mutate({ type });
   };
 
@@ -64,11 +78,12 @@ export function PostCard({ post }: PostCardProps) {
     post.category.charAt(0).toUpperCase() + post.category.slice(1);
 
   // Calculate trending score for visual indication
-  const trendingScore = (post.reactions?.fire || 0) * 3 + 
-                       (post.reactions?.eyes || 0) * 2 + 
-                       (post.reactions?.cry || 0) + 
-                       (post.reactions?.clown || 0) + 
-                       post.commentCount * 2;
+  const reactions = post.reactions as Record<string, number> || { fire: 0, cry: 0, eyes: 0, clown: 0 };
+  const trendingScore = (reactions.fire || 0) * 3 + 
+                       (reactions.eyes || 0) * 2 + 
+                       (reactions.cry || 0) + 
+                       (reactions.clown || 0) + 
+                       (post.commentCount || 0) * 2;
   const isTrending = trendingScore > 20;
 
   return (
@@ -148,45 +163,39 @@ export function PostCard({ post }: PostCardProps) {
       )}>
         <div className="flex items-center space-x-4">
           {Object.entries(reactionEmojis).map(([type, emoji]) => {
-            const count = post.reactions?.[type as keyof typeof post.reactions] || 0;
-            const isActive = false; // TODO: Track user reactions in session storage
+            const count = reactions[type as keyof typeof reactions] || 0;
+            const isActive = userReactions[type] || false;
             
             return (
               <Button
                 key={type}
                 variant="ghost"
                 className={cn(
-                  "flex items-center space-x-1 text-gray-600 hover:text-red-500 transition-colors p-1",
-                  isActive && type === "fire" && "text-red-500 font-medium",
-                  isActive && type === "cry" && "text-blue-500 font-medium",
-                  isActive && type === "eyes" && "text-yellow-500 font-medium",
-                  isActive && type === "clown" && "text-purple-500 font-medium"
+                  "flex items-center space-x-1 transition-all p-1 hover:scale-110",
+                  isActive ? (
+                    type === "fire" ? "text-red-500 font-medium bg-red-50 dark:bg-red-900/20" :
+                    type === "cry" ? "text-blue-500 font-medium bg-blue-50 dark:bg-blue-900/20" :
+                    type === "eyes" ? "text-yellow-600 font-medium bg-yellow-50 dark:bg-yellow-900/20" :
+                    "text-purple-500 font-medium bg-purple-50 dark:bg-purple-900/20"
+                  ) : "text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                 )}
                 onClick={() => handleReaction(type)}
                 disabled={reactionMutation.isPending}
               >
-                <span className="text-lg">{emoji}</span>
+                <span className={cn("text-lg transition-transform", isActive && "animate-pulse")}>{emoji}</span>
                 <span className="text-sm font-medium">{count}</span>
               </Button>
             );
           })}
         </div>
-        <Button
-          variant="ghost"
-          className="flex items-center space-x-1 text-gray-600 hover:text-gray-800 transition-colors p-1"
-          onClick={() => setShowComments(!showComments)}
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-sm font-medium">{post.commentCount}</span>
-        </Button>
+        <CommentsDrawer 
+          postId={post.id} 
+          commentCount={post.commentCount || 0}
+          isDrama={post.isDrama || false}
+        />
       </div>
 
-      {/* Comments Section - TODO: Implement */}
-      {showComments && (
-        <div className="pt-3 border-t border-gray-100">
-          <p className="text-sm text-gray-500 text-center">Comments coming soon...</p>
-        </div>
-      )}
+
     </article>
   );
 }

@@ -1,0 +1,92 @@
+🌟 IDEAS TO ADD OR IMPROVE
+🧩 Functional Enhancements
+Working Reactions Counter
+
+Make emoji buttons actually increment counts on click (🔥😭👀🤡 etc.)
+
+Comment System
+
+Add comment pop-up or slide-up drawer that lets users comment on a post
+
+Basic User Profiles (Non-Anonymous for Now)
+
+Allow people to pick a username and view their posts/reactions
+
+Post Tagging with Autocomplete
+
+Users can choose or search tags like #FML, #needadvice, #LOL, etc.
+
+Basic Content Moderation
+
+Add keyword-based filtering to block offensive words
+
+Search Functionality
+
+Let users search by keyword, tag, or category
+
+Voting UI for “Am I the Drama?”
+
+Add a voting section under these posts using the custom labels
+
+💅 Visual & UI Enhancements
+Theme Support
+
+Let users toggle between Light and Dark mode
+
+Gradient or Animated Backgrounds
+
+Add subtle gradient shifts or scroll-based animations for posts
+
+More Vibrant Category Badges
+
+Each category badge (e.g. “College”) could have a unique color or icon
+
+Custom Avatars or Emoji-Based Profiles
+
+If anonymous isn’t live yet, let users pick an emoji or avatar as their display
+
+Fun Animations
+
+Use hover effects or micro-animations when reacting, posting, or voting
+
+Post Highlighting
+
+Highlight posts with high engagement or that are trending
+
+🛠 Technical/Backend Ideas
+Local Storage for Post Drafts
+
+Save drafts in browser if someone navigates away
+
+Firebase or Supabase Backend
+
+For real-time posts, user management (later), and reactions
+
+Post Sorting Filters
+
+Sort by New, Trending, Most Reacted, Most Commented
+
+Daily Prompt/Question
+
+Post a daily “spill your tea” question at the top for engagement
+
+🎁 Fun Extras
+Confetti Animation for Iconic Votes
+
+If a post gets “Iconic behavior” votes, show a quick celebration animation
+
+Leaderboards
+
+Top reacted posts or “Most Iconic” of the week
+
+Anonymous Mode Toggle (Later)
+
+When ready, let users switch to anonymous before posting
+
+Post Length Limit
+
+Limit rants to ~500 characters for more snappy posts
+
+Emoji-Only Reaction Feed
+
+A tab showing which posts are getting the most 🔥, 😭, or 🤡

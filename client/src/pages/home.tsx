@@ -31,10 +31,10 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
-      <div className="sticky top-16 z-40 bg-white">
+      <div className="sticky top-16 z-40 bg-white dark:bg-gray-800">
         <CategoryTabs
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
