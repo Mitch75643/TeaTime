@@ -150,7 +150,7 @@ class AnonymousAuthService {
 
     try {
       // Register with server
-      const serverUser = await apiRequest('POST', '/api/auth/create-anon', userData) as AnonymousUser;
+      const serverUser = await apiRequest('POST', '/api/auth/create-anon', userData) as unknown as AnonymousUser;
 
       // Store locally
       const localUserData: LocalUserData = {
@@ -205,15 +205,19 @@ class AnonymousAuthService {
     try {
       const serverUser = await apiRequest('POST', `/api/auth/sync/${anonId}`, {
         deviceFingerprint: this.currentUser?.deviceFingerprint
-      }) as AnonymousUser;
+      }) as unknown as AnonymousUser;
 
       if (this.currentUser) {
         this.currentUser.sessionId = serverUser.sessionId;
-        this.currentUser.isUpgraded = serverUser.isUpgraded;
+        this.currentUser.isUpgraded = serverUser.isUpgraded || false;
         this.saveToLocalStorage();
       }
     } catch (error) {
-      console.error('Failed to sync with server:', error);
+      // Silently handle sync errors - user can continue without server sync
+      // Only log for debugging if needed
+      if (error instanceof Error && !error.message.includes('User not found')) {
+        console.error('Failed to sync with server:', error);
+      }
     }
   }
 
@@ -264,7 +268,7 @@ class AnonymousAuthService {
       const result = await apiRequest('POST', '/api/auth/upgrade', {
         anonId: this.currentUser.anonId,
         ...upgradeData
-      }) as { success: boolean; error?: string };
+      }) as unknown as { success: boolean; error?: string };
 
       if (result.success) {
         this.currentUser.isUpgraded = true;
@@ -284,7 +288,7 @@ class AnonymousAuthService {
       const result = await apiRequest('POST', '/api/auth/login', {
         ...loginData,
         deviceFingerprint: generateDeviceFingerprint()
-      }) as { success: boolean; error?: string; user?: AnonymousUser };
+      }) as unknown as { success: boolean; error?: string; user?: AnonymousUser };
 
       if (result.success && result.user) {
         // Replace current user with synced user
@@ -295,7 +299,7 @@ class AnonymousAuthService {
           deviceFingerprint: generateDeviceFingerprint(),
           isUpgraded: true,
           sessionId: result.user.sessionId,
-          preferences: result.user.preferences
+          preferences: result.user.preferences as Record<string, any> | undefined
         };
 
         this.currentUser = localUserData;
