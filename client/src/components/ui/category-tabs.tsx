@@ -14,7 +14,7 @@ const categories = [
   { id: "family", label: "Family", emoji: "👨‍👩‍👧" },
   { id: "money", label: "Money", emoji: "💸" },
   { id: "hot-takes", label: "Hot Takes", emoji: "🌍" },
-  { id: "drama", label: "Am I the Drama?", emoji: "🎭" },
+  { id: "drama", label: "Am I in the Wrong?", emoji: "🎭" },
 ];
 
 // Category colors for active and inactive states

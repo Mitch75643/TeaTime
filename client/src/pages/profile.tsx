@@ -237,7 +237,7 @@ export default function Profile() {
                       {new Date(post.createdAt!).toLocaleDateString()}
                     </span>
                     <span className="capitalize">
-                      {post.category === 'drama' ? '🎭 Am I the Drama?' : `${getCategoryEmoji(post.category)} ${post.category}`}
+                      {post.category === 'drama' ? '🎭 Am I in the Wrong?' : `${getCategoryEmoji(post.category)} ${post.category}`}
                     </span>
                   </div>
                   <div className="flex items-center space-x-3">

@@ -125,7 +125,7 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   const timeAgo = formatDistanceToNow(new Date(post.createdAt!), { addSuffix: true });
-  const categoryLabel = post.category === "drama" ? "Am I the Drama?" : 
+  const categoryLabel = post.category === "drama" ? "Am I in the Wrong?" : 
     post.category === "hot-takes" ? "Hot Takes" :
     post.category.charAt(0).toUpperCase() + post.category.slice(1);
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-TeaSpill is an anonymous social platform designed for sharing personal stories and gossip across different life categories. The application allows users to post anonymously about college, work, relationships, family, money, politics, and drama situations. It features a unique "Am I the Drama?" category where community members can vote on whether the poster was in the wrong, valid, or displaying iconic behavior. The platform emphasizes anonymous interaction through reaction systems (fire, cry, eyes, clown emojis) and community-driven content moderation.
+TeaSpill is an anonymous social platform designed for sharing personal stories and gossip across different life categories. The application allows users to post anonymously about college, work, relationships, family, money, politics, and drama situations. It features a unique "Am I in the Wrong?" category where community members can vote on whether the poster was in the wrong, valid, or displaying iconic behavior. The platform emphasizes anonymous interaction through reaction systems (fire, cry, eyes, clown emojis) and community-driven content moderation.
 
 ## User Preferences
 
