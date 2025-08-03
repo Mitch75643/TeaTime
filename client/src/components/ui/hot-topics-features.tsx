@@ -34,7 +34,6 @@ interface HotTopicsFeaturesProps {
 export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeaturesProps) {
   const [newTopicIdea, setNewTopicIdea] = useState("");
   const [submittedIdeas, setSubmittedIdeas] = useState<string[]>([]);
-  const [showTakes, setShowTakes] = useState(false);
   const [selectedTopicFilter, setSelectedTopicFilter] = useState("all");
 
   const submitTopicIdea = () => {
@@ -117,6 +116,7 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
                   onClick={() => onCreateTopic(item.title)}
                   className="hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/10"
                 >
+                  <Plus className="h-3 w-3 mr-1" />
                   Respond
                 </Button>
               </div>
@@ -125,64 +125,67 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
         </CardContent>
       </Card>
 
-      {/* View Takes Filter Section */}
+      {/* View Takes Section - Always Visible */}
       <Card className="border-gray-200 dark:border-gray-700">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <Eye className="h-5 w-5" />
-              💬 View Takes
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTakes(!showTakes)}
-              className={cn(
-                "transition-all",
-                showTakes && "bg-purple-100 border-purple-300 text-purple-700 dark:bg-purple-900/20 dark:border-purple-700 dark:text-purple-300"
-              )}
-            >
-              {showTakes ? "Hide Takes" : "Show Takes"}
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <Eye className="h-5 w-5" />
+            💬 View Takes
+          </CardTitle>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Browse community responses to hot topics
           </p>
         </CardHeader>
         
-        {showTakes && (
-          <CardContent className="pt-0">
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                  Filter by Topic:
-                </label>
-                <Select value={selectedTopicFilter} onValueChange={setSelectedTopicFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a topic to filter..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Takes</SelectItem>
-                    {weeklyHotTopics.map((topic, index) => (
-                      <SelectItem key={index} value={topic.title}>
-                        Topic #{index + 1}: {topic.title.slice(0, 40)}...
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  {selectedTopicFilter === "all" 
-                    ? "Showing responses to all hot topics" 
-                    : `Showing responses to: "${selectedTopicFilter.slice(0, 50)}..."`
-                  }
+        <CardContent className="pt-0">
+          <div className="space-y-4">
+            {/* Filter Dropdown */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                Filter by Topic:
+              </label>
+              <Select value={selectedTopicFilter} onValueChange={setSelectedTopicFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a topic to filter..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {weeklyHotTopics.map((topic, index) => (
+                    <SelectItem key={index} value={topic.title}>
+                      Topic #{index + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* No Posts State */}
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">👉</div>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Be the first to share something in this topic.
                 </p>
+                <Button 
+                  onClick={onCreatePost}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Post
+                </Button>
               </div>
             </div>
-          </CardContent>
-        )}
+            
+            <div className="text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {selectedTopicFilter === "all" 
+                  ? "Showing responses to all hot topics" 
+                  : `Showing responses to Topic #${weeklyHotTopics.findIndex(t => t.title === selectedTopicFilter) + 1}`
+                }
+              </p>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
     </div>
