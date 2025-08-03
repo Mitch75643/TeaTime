@@ -1,0 +1,50 @@
+In the "Hot Topics" section under the Community page, combine the “View Takes” feed with the Community Feed / Your Posts structure so that everything is connected, clean, and filterable.
+
+---
+
+🧩 Structural Changes:
+
+1. **Unified Feed Layout:**
+   - Display the feed in one connected UI block with a toggle or segmented control for:
+     - [All Takes] (shows all)
+     - [Your Takes] (shows posts submitted by the user)
+   - These two views should be side-by-side or tab-switched within the same component (not separate sections or stacked).
+
+2. **Topic-Based Filtering:**
+   - Use the Top 5 Hot Topics from the “This Week’s Hottest Discussions” leaderboard as filter buttons above the feed.
+   - When a user clicks one of these topic buttons:
+     - Filter both “All Takes” and “Your Takes” to only show responses to that specific hot topic.
+     - Visually highlight the selected topic filter.
+
+3. **Post Behavior:**
+   - When a user submits a post via the "+ Respond" button or from the post modal, the selected topic is tagged with the post.
+   - The feed should automatically show the new post in the correct filtered view.
+
+4. **Default View:**
+   - By default, show “All Takes” with no filter applied.
+   - If a filter is selected (e.g. “Should tipping be mandatory?”), only show posts for that topic across both views.
+
+---
+
+🎨 UI Guidelines:
+
+- Make the feed toggle (All / Your) and the topic filter bar visually cohesive.
+- Use compact tabs or pills for the 5 hot topics (truncate if text is long).
+- Feed cards should visually indicate which topic they’re responding to.
+- Support mobile responsiveness: toggle and filters should stack neatly on small screens.
+
+---
+
+💬 Empty State Behavior:
+
+- If no responses exist for a selected topic, show:
+  “No takes on this yet. Be the first to weigh in!” + a `+ Respond` button prefilled with that topic.
+
+---
+
+🚫 Don’t:
+- Don’t change the leaderboard design.
+- Don’t remove or rename the existing topics.
+- Don’t break existing submission flow — just tag and filter accordingly.
+- Don’t apply this logic to other community sections.
+

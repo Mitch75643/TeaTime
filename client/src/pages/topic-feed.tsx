@@ -92,6 +92,7 @@ export default function TopicFeed() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("new");
   const [storyCategory, setStoryCategory] = useState("all");
+  const [hotTopicFilter, setHotTopicFilter] = useState("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [activeTab, setActiveTab] = useState<'community' | 'user'>('community');
@@ -125,7 +126,7 @@ export default function TopicFeed() {
 
   // Community Feed - All posts from this topic
   const { data: communityPosts = [], isLoading: isLoadingCommunity } = useQuery<Post[]>({
-    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory],
+    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter],
     queryFn: async () => {
       const params = new URLSearchParams({
         sortBy,
@@ -135,6 +136,9 @@ export default function TopicFeed() {
       if (storyCategory !== "all") {
         params.append('storyCategory', storyCategory);
       }
+      if (hotTopicFilter !== "all") {
+        params.append('hotTopicFilter', hotTopicFilter);
+      }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
       if (!response.ok) throw new Error("Failed to fetch community posts");
       return response.json();
@@ -143,7 +147,7 @@ export default function TopicFeed() {
 
   // Your Posts - Only posts by current user for this topic
   const { data: userPosts = [], isLoading: isLoadingUser } = useQuery<Post[]>({
-    queryKey: ['/api/posts/user', topicId, sortBy, storyCategory],
+    queryKey: ['/api/posts/user', topicId, sortBy, storyCategory, hotTopicFilter],
     queryFn: async () => {
       const params = new URLSearchParams({
         sortBy,
@@ -153,6 +157,9 @@ export default function TopicFeed() {
       });
       if (storyCategory !== "all") {
         params.append('storyCategory', storyCategory);
+      }
+      if (hotTopicFilter !== "all") {
+        params.append('hotTopicFilter', hotTopicFilter);
       }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/user?${params}`);
       if (!response.ok) throw new Error("Failed to fetch user posts");
@@ -286,6 +293,8 @@ export default function TopicFeed() {
               setSelectedTopic("");
               setIsPostModalOpen(true);
             }}
+            selectedTopicFilter={hotTopicFilter}
+            onTopicFilterChange={setHotTopicFilter}
           />
         )}
         
@@ -389,6 +398,65 @@ export default function TopicFeed() {
               </div>
             </div>
           )}
+
+          {/* Hot Topics Filter Bar - Only for Hot Topics */}
+          {topicId === "hot-topics" && (
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by hot topic:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={hotTopicFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("all")}
+                  className="text-xs"
+                >
+                  🔥 All Takes
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "AI will replace most jobs in 5 years" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("AI will replace most jobs in 5 years")}
+                  className="text-xs"
+                >
+                  #1 AI Jobs
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Social media is toxic for mental health" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Social media is toxic for mental health")}
+                  className="text-xs"
+                >
+                  #2 Social Media
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Climate change isn't being taken seriously" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Climate change isn't being taken seriously")}
+                  className="text-xs"
+                >
+                  #3 Climate
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Gen Z has it harder than previous generations" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Gen Z has it harder than previous generations")}
+                  className="text-xs"
+                >
+                  #4 Gen Z
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Remote work is overrated" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Remote work is overrated")}
+                  className="text-xs"
+                >
+                  #5 Remote Work
+                </Button>
+              </div>
+            </div>
+          )}
           
           {/* Tab Headers */}
           <div className="flex border-b border-gray-200 dark:border-gray-700">
@@ -443,17 +511,31 @@ export default function TopicFeed() {
                   <div className="text-center py-12">
                     <div className="text-4xl mb-4">{topic.emoji}</div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      No posts yet in {topic.name}
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "No takes on this yet"
+                        : `No posts yet in ${topic.name}`
+                      }
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
-                      Be the first to share something in this topic!
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "Be the first to weigh in on this hot topic!"
+                        : "Be the first to share something in this topic!"
+                      }
                     </p>
                     <Button
-                      onClick={() => setIsPostModalOpen(true)}
+                      onClick={() => {
+                        if (topicId === "hot-topics" && hotTopicFilter !== "all") {
+                          setSelectedTopic(hotTopicFilter);
+                        }
+                        setIsPostModalOpen(true);
+                      }}
                       className={cn("shadow-lg", topic.gradient, topic.textColor)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Create First Post
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "+ Respond"
+                        : "Create First Post"
+                      }
                     </Button>
                   </div>
                 ) : (
@@ -484,17 +566,31 @@ export default function TopicFeed() {
                   <div className="text-center py-12">
                     <div className="text-4xl mb-4">✍️</div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      You haven't posted here yet
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "You haven't shared your take yet"
+                        : "You haven't posted here yet"
+                      }
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
-                      Share your thoughts about {topic.name.toLowerCase()} with the community!
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "Share your perspective on this hot topic!"
+                        : `Share your thoughts about ${topic.name.toLowerCase()} with the community!`
+                      }
                     </p>
                     <Button
-                      onClick={() => setIsPostModalOpen(true)}
+                      onClick={() => {
+                        if (topicId === "hot-topics" && hotTopicFilter !== "all") {
+                          setSelectedTopic(hotTopicFilter);
+                        }
+                        setIsPostModalOpen(true);
+                      }}
                       className={cn("shadow-lg", topic.gradient, topic.textColor)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Post
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "+ Respond"
+                        : "Create Your First Post"
+                      }
                     </Button>
                   </div>
                 ) : (

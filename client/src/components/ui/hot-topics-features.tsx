@@ -29,12 +29,18 @@ const weeklyHotTopics = [
 interface HotTopicsFeaturesProps {
   onCreateTopic: (topic?: string, hashtag?: string) => void;
   onCreatePost: () => void;
+  selectedTopicFilter?: string;
+  onTopicFilterChange?: (filter: string) => void;
 }
 
-export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeaturesProps) {
+export function HotTopicsFeatures({ 
+  onCreateTopic, 
+  onCreatePost, 
+  selectedTopicFilter = "all",
+  onTopicFilterChange 
+}: HotTopicsFeaturesProps) {
   const [newTopicIdea, setNewTopicIdea] = useState("");
   const [submittedIdeas, setSubmittedIdeas] = useState<string[]>([]);
-  const [selectedTopicFilter, setSelectedTopicFilter] = useState("all");
 
   const submitTopicIdea = () => {
     if (newTopicIdea.trim()) {
@@ -52,60 +58,55 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Create Post Button */}
       <div className="text-center">
         <Button
           onClick={onCreatePost}
-          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white w-full"
+          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3"
         >
-          + Create Post
+          + Share Your Take
         </Button>
       </div>
 
-      {/* This Week Leaderboard */}
+      {/* Compact Leaderboard */}
       <Card className="border-orange-200 dark:border-orange-800">
-        <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20">
-          <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
-            <Trophy className="h-5 w-5" />
-            🏆 This Week's Hottest Discussions
+        <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 pb-3">
+          <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300 text-base">
+            <Trophy className="h-4 w-4" />
+            🏆 This Week's Hottest
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            {weeklyHotTopics.map((item, index) => (
+        <CardContent className="p-3">
+          <div className="space-y-2">
+            {weeklyHotTopics.slice(0, 3).map((item, index) => (
               <div
                 key={index}
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-lg border transition-all hover:shadow-md cursor-pointer",
+                  "flex items-center gap-2 p-2 rounded-lg border transition-all hover:shadow-sm cursor-pointer text-sm",
                   index === 0 && "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-900/20",
                   index === 1 && "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/50",
-                  index === 2 && "border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/20",
-                  index > 2 && "border-gray-200 dark:border-gray-700"
+                  index === 2 && "border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/20"
                 )}
                 onClick={() => onCreateTopic(item.title)}
               >
-                <div className="flex items-center gap-2">
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
-                    index === 0 && "bg-yellow-500 text-white",
-                    index === 1 && "bg-gray-400 text-white", 
-                    index === 2 && "bg-orange-500 text-white",
-                    index > 2 && "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                  )}>
-                    #{index + 1}
-                  </div>
-
+                <div className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs",
+                  index === 0 && "bg-yellow-500 text-white",
+                  index === 1 && "bg-gray-400 text-white", 
+                  index === 2 && "bg-orange-500 text-white"
+                )}>
+                  #{index + 1}
                 </div>
                 
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 dark:text-gray-100 text-xs truncate">
                     {item.title}
                   </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Flame className="h-3 w-3 text-red-500" />
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <Flame className="h-2.5 w-2.5 text-red-500" />
                     <span className="text-xs text-gray-500">
-                      {item.reactions} takes this week
+                      {item.reactions} takes
                     </span>
                   </div>
                 </div>
@@ -113,11 +114,14 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
                 <Button 
                   size="sm" 
                   variant="outline"
-                  onClick={() => onCreateTopic(item.title)}
-                  className="hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCreateTopic(item.title);
+                  }}
+                  className="hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/10 h-7 px-2 text-xs"
                 >
-                  <Plus className="h-3 w-3 mr-1" />
-                  Respond
+                  <Plus className="h-2.5 w-2.5 mr-1" />
+                  +
                 </Button>
               </div>
             ))}
@@ -125,68 +129,7 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
         </CardContent>
       </Card>
 
-      {/* View Takes Section - Always Visible */}
-      <Card className="border-gray-200 dark:border-gray-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <Eye className="h-5 w-5" />
-            💬 View Takes
-          </CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Browse community responses to hot topics
-          </p>
-        </CardHeader>
-        
-        <CardContent className="pt-0">
-          <div className="space-y-4">
-            {/* Filter Dropdown */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                Filter by Topic:
-              </label>
-              <Select value={selectedTopicFilter} onValueChange={setSelectedTopicFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a topic to filter..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  {weeklyHotTopics.map((topic, index) => (
-                    <SelectItem key={index} value={topic.title}>
-                      Topic #{index + 1}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* No Posts State */}
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="text-center py-8">
-                <div className="text-4xl mb-4">👉</div>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Be the first to share something in this topic.
-                </p>
-                <Button 
-                  onClick={onCreatePost}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create First Post
-                </Button>
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {selectedTopicFilter === "all" 
-                  ? "Showing responses to all hot topics" 
-                  : `Showing responses to Topic #${weeklyHotTopics.findIndex(t => t.title === selectedTopicFilter) + 1}`
-                }
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
     </div>
   );

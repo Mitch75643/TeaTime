@@ -90,7 +90,7 @@ export class MemStorage implements IStorage {
     return post;
   }
 
-  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string): Promise<Post[]> {
+  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string, hotTopicFilter?: string): Promise<Post[]> {
     let posts = Array.from(this.posts.values());
     
     // Filter out removed posts
@@ -114,6 +114,11 @@ export class MemStorage implements IStorage {
     // Filter by story category (for Story Time topic)
     if (storyCategory && storyCategory !== 'all' && section === 'story-time') {
       posts = posts.filter(post => post.storyType === storyCategory);
+    }
+    
+    // Filter by hot topic (for Hot Topics section)
+    if (hotTopicFilter && hotTopicFilter !== 'all' && section === 'hot-topics') {
+      posts = posts.filter(post => post.topicTitle === hotTopicFilter);
     }
     
     if (category && category !== 'all') {

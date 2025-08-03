@@ -61,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/posts/:topicId/:sortBy/all", async (req, res) => {
     try {
       const { topicId, sortBy } = req.params;
-      const { postContext = 'community', section, storyCategory } = req.query;
+      const { postContext = 'community', section, storyCategory, hotTopicFilter } = req.query;
       
       const posts = await storage.getPosts(
         undefined, // category
@@ -70,7 +70,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         undefined, // userSessionId - not filtering by user
         postContext as string,
         topicId, // section
-        storyCategory as string // storyCategory
+        storyCategory as string, // storyCategory
+        hotTopicFilter as string // hotTopicFilter
       );
       res.json(posts);
     } catch (error) {
@@ -83,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/posts/:topicId/:sortBy/user", async (req, res) => {
     try {
       const { topicId, sortBy } = req.params;
-      const { postContext = 'community', section, storyCategory } = req.query;
+      const { postContext = 'community', section, storyCategory, hotTopicFilter } = req.query;
       const sessionId = req.session.id!;
       
       const posts = await storage.getPosts(
@@ -93,7 +94,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId, // userSessionId - filter by current user
         postContext as string,
         topicId, // section
-        storyCategory as string // storyCategory
+        storyCategory as string, // storyCategory
+        hotTopicFilter as string // hotTopicFilter
       );
       res.json(posts);
     } catch (error) {
