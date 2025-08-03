@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { getAvatarById } from "@/lib/avatars";
 import type { Comment, InsertComment } from "@shared/schema";
 
 interface CommentsDrawerProps {
@@ -172,14 +173,21 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                     )}>
                       <div className="flex items-start space-x-3">
                         <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center",
+                          "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden",
                           isDrama 
                             ? "bg-gradient-to-br from-orange-400 to-red-500"
                             : "bg-gradient-to-br from-purple-400 to-pink-400"
                         )}>
-                          <span className="text-white text-xs font-bold">
-                            {comment.alias.charAt(0)}
-                          </span>
+                          {comment.avatarId && getAvatarById(comment.avatarId) ? (
+                            <div 
+                              className="w-full h-full"
+                              dangerouslySetInnerHTML={{ __html: getAvatarById(comment.avatarId)?.svg || '' }}
+                            />
+                          ) : (
+                            <span className="text-white text-xs font-bold">
+                              {comment.alias.charAt(0)}
+                            </span>
+                          )}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">

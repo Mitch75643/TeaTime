@@ -1,8 +1,19 @@
 import { User, Flame } from "lucide-react";
 import { Button } from "./button";
 import { NotificationsPanel } from "./notifications-panel";
+import { getAvatarById } from "@/lib/avatars";
+import { useLocation } from "wouter";
+import { useUserAvatar } from "@/hooks/use-user-avatar";
 
 export function Header() {
+  const [, setLocation] = useLocation();
+  const { userAvatarId } = useUserAvatar();
+  const currentAvatar = getAvatarById(userAvatarId);
+
+  const handleProfileClick = () => {
+    setLocation('/profile');
+  };
+
   return (
     <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
@@ -15,9 +26,19 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
+            onClick={handleProfileClick}
+            className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-10 h-10"
           >
-            <User className="h-5 w-5" />
+            {currentAvatar ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30">
+                <div 
+                  className="w-full h-full"
+                  dangerouslySetInnerHTML={{ __html: currentAvatar.svg }}
+                />
+              </div>
+            ) : (
+              <User className="h-5 w-5" />
+            )}
           </Button>
         </div>
       </div>

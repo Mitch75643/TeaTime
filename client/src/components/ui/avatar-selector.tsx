@@ -23,6 +23,12 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
   const categoryAvatars = getAvatarsByCategory(selectedCategory);
 
   const handleSave = () => {
+    // Save to localStorage and dispatch event for real-time updates
+    localStorage.setItem('userAvatarId', tempSelectedId);
+    window.dispatchEvent(new CustomEvent('avatarChanged', { 
+      detail: { avatarId: tempSelectedId } 
+    }));
+    
     onSelect(tempSelectedId);
     setIsOpen(false);
   };

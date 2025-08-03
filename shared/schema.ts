@@ -58,6 +58,7 @@ export const comments = pgTable("comments", {
   parentCommentId: varchar("parent_comment_id"),
   content: text("content").notNull(),
   alias: varchar("alias").notNull(),
+  avatarId: varchar("avatar_id").default("happy-face"),
   reactions: jsonb("reactions").default({
     thumbsUp: 0,
     thumbsDown: 0,

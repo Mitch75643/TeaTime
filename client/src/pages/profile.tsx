@@ -27,15 +27,14 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { getAvatarById } from "@/lib/avatars";
+import { useUserAvatar } from "@/hooks/use-user-avatar";
 import type { Post } from "@shared/schema";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
-  const [selectedAvatarId, setSelectedAvatarId] = useState<string>(() => {
-    return localStorage.getItem('userAvatarId') || 'happy-face';
-  });
+  const { userAvatarId, updateAvatar } = useUserAvatar();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -54,8 +53,7 @@ export default function Profile() {
   };
 
   const handleAvatarSelect = (avatarId: string) => {
-    setSelectedAvatarId(avatarId);
-    localStorage.setItem('userAvatarId', avatarId);
+    updateAvatar(avatarId);
     toast({
       title: "Avatar updated!",
       description: "Your new profile picture has been saved.",
@@ -85,9 +83,7 @@ export default function Profile() {
 
   const deletePostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      return apiRequest(`/api/posts/${postId}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/posts/${postId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
@@ -134,11 +130,11 @@ export default function Profile() {
             <div className="flex flex-col items-center space-y-4">
               {/* Avatar with selector */}
               <div className="relative">
-                {getAvatarById(selectedAvatarId) ? (
+                {getAvatarById(userAvatarId) ? (
                   <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-purple-200 dark:border-purple-400">
                     <div 
                       className="w-full h-full"
-                      dangerouslySetInnerHTML={{ __html: getAvatarById(selectedAvatarId)?.svg || '' }}
+                      dangerouslySetInnerHTML={{ __html: getAvatarById(userAvatarId)?.svg || '' }}
                     />
                   </div>
                 ) : (
@@ -150,7 +146,7 @@ export default function Profile() {
                 {/* Avatar Selector Button */}
                 <div className="absolute -bottom-2 -right-2">
                   <AvatarSelector
-                    currentAvatarId={selectedAvatarId}
+                    currentAvatarId={userAvatarId}
                     onSelect={handleAvatarSelect}
                     className="w-8 h-8 border border-white dark:border-gray-800 shadow-lg"
                   />

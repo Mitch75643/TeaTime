@@ -56,3 +56,20 @@ The system implements session-based anonymous user tracking:
 - **Development**: Replit-specific plugins for development environment integration
 
 The architecture prioritizes anonymous user interaction, real-time-feeling updates through optimistic UI patterns, and a mobile-first responsive design. Content is categorized and filtered with built-in moderation utilities, while the drama voting system provides unique community engagement mechanics.
+
+## Recent Updates (January 2025)
+
+### Avatar Customization System
+- **Profile Picture Persistence**: Implemented comprehensive avatar system with 17 custom SVG avatars across 4 categories (Moods, Animals, Objects, Characters)
+- **Avatar Storage**: Using localStorage with custom event system for real-time updates across all app components
+- **Avatar Integration**: User-selected avatars now appear in post cards, comment sections, profile page, and top-right header navigation
+- **Header Navigation**: Top-right profile icon now displays user's selected avatar and provides clickable navigation to profile page
+- **Cross-Component Sync**: Created useUserAvatar hook for consistent avatar state management across all components
+
+### Avatar Categories
+- **Moods** (😊): Happy Vibes, Wink Queen, Sassy Energy, Sleepy Mood, Tea Shocked
+- **Animals** (🐱): Tea Cat, Gossip Bird, Drama Frog  
+- **Objects** (☕): Spilled Tea, Cool Sunglasses, Lipstick Kiss, Pizza Mood, Coffee Vibes
+- **Characters** (👽): Meme Energy, Alien Tea, Robot Gossip, Unicorn Dreams
+
+All avatars maintain user anonymity while allowing personality expression through gossip-themed, copyright-free SVG designs.
