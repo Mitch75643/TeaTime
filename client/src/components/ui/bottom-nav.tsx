@@ -22,7 +22,7 @@ export function BottomNav() {
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-2xl border-t border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto">
         {/* Gradient accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600"></div>
         
         <div className="flex items-center justify-around py-3 px-2 relative">
           {navItems.map((item, index) => {
@@ -39,13 +39,13 @@ export function BottomNav() {
                       className={cn(
                         "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
                         isActive 
-                          ? "text-purple-500 dark:text-purple-400" 
+                          ? "text-orange-500 dark:text-orange-400" 
                           : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                       )}
                     >
                       {/* Active glow effect */}
                       {isActive && (
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
                       )}
                       
                       <Icon className={cn(
@@ -76,13 +76,13 @@ export function BottomNav() {
                     className={cn(
                       "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
                       isActive 
-                        ? "text-purple-500 dark:text-purple-400" 
+                        ? "text-orange-500 dark:text-orange-400" 
                         : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                     )}
                   >
                     {/* Active glow effect */}
                     {isActive && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
                     )}
                     
                     <Icon className={cn(
