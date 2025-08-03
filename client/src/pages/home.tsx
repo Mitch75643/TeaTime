@@ -12,7 +12,7 @@ import { Plus, RefreshCw } from "lucide-react";
 import type { Post } from "@shared/schema";
 
 const categories = [
-  { id: "all", label: "All", emoji: "" },
+  { id: "all", label: "All", emoji: "✨" },
   { id: "school", label: "School", emoji: "🏫" },
   { id: "work", label: "Work", emoji: "💼" },
   { id: "relationships", label: "Relationships", emoji: "💕" },

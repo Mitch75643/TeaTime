@@ -252,9 +252,7 @@ export default function DailySpill() {
                   <p className="text-xs opacity-90">{currentTheme.description}</p>
                 </div>
               </div>
-              <Badge className="bg-white/20 text-white border-0 text-xs">
-                This Week
-              </Badge>
+
             </div>
             {/* Streak Badge attached to theme banner */}
             <div className="mt-2 pt-2 border-t border-white/20">
