@@ -226,18 +226,7 @@ export default function Profile() {
 
             {userPosts.map((post: Post) => (
               <div key={post.id} className="space-y-2">
-                <div className="relative">
-                  <PostCard post={post} />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeletePost(post.id)}
-                    disabled={deletePostMutation.isPending}
-                    className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                <PostCard post={post} />
                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-4">
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center">

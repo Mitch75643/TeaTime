@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getAvatarById } from "@/lib/avatars";
+import { useUserAvatar } from "@/hooks/use-user-avatar";
 import type { Comment, InsertComment } from "@shared/schema";
 
 interface CommentsDrawerProps {
@@ -32,6 +33,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   const [replyText, setReplyText] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { userAvatarId } = useUserAvatar();
 
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
     queryKey: ["/api/posts", postId, "comments"],
@@ -45,7 +47,10 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
   const createCommentMutation = useMutation({
     mutationFn: async (data: InsertComment) => {
-      return apiRequest("POST", `/api/posts/${postId}/comments`, data);
+      return apiRequest("POST", `/api/posts/${postId}/comments`, {
+        ...data,
+        avatarId: userAvatarId
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/posts", postId, "comments"] });
@@ -338,37 +343,51 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
           {/* Comment Input */}
           {!replyingTo && (
-            <div className="flex-shrink-0 border-t border-gray-600 pt-4 pb-2 space-y-3">
-              <Textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Add a comment..."
-                className="resize-none w-full"
-                maxLength={300}
-                rows={3}
-              />
-              <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
-                <span className="text-xs text-gray-500 order-2 sm:order-1">
-                  {comment.length}/300
-                </span>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={createCommentMutation.isPending || !comment.trim()}
-                  className={cn(
-                    "text-white w-full sm:w-auto order-1 sm:order-2",
-                    isDrama ? "gradient-drama" : "gradient-primary"
-                  )}
-                  size="sm"
-                >
-                  {createCommentMutation.isPending ? (
-                    "Posting..."
+            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-600 pt-4 pb-2">
+              <div className="flex space-x-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {getAvatarById(userAvatarId) ? (
+                    <div 
+                      className="w-full h-full"
+                      dangerouslySetInnerHTML={{ __html: getAvatarById(userAvatarId)?.svg || '' }}
+                    />
                   ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-1" />
-                      Post
-                    </>
+                    <span className="text-white text-xs font-bold">Y</span>
                   )}
-                </Button>
+                </div>
+                <div className="flex-1 space-y-3">
+                  <Textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Add a comment..."
+                    className="resize-none w-full"
+                    maxLength={300}
+                    rows={3}
+                  />
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                    <span className="text-xs text-gray-500 order-2 sm:order-1">
+                      {comment.length}/300
+                    </span>
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={createCommentMutation.isPending || !comment.trim()}
+                      className={cn(
+                        "text-white w-full sm:w-auto order-1 sm:order-2",
+                        isDrama ? "gradient-drama" : "gradient-primary"
+                      )}
+                      size="sm"
+                    >
+                      {createCommentMutation.isPending ? (
+                        "Posting..."
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-1" />
+                          Post
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -7,6 +7,7 @@ import { PostMenu } from "./post-menu";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { getAvatarById } from "@/lib/avatars";
+import { useUserAvatar } from "@/hooks/use-user-avatar";
 import type { Post } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
@@ -45,6 +46,7 @@ export function PostCard({ post }: PostCardProps) {
   const [userReactions, setUserReactions] = useState<Record<string, boolean>>({});
   const [sessionId, setSessionId] = useState<string>('');
   const queryClient = useQueryClient();
+  const { userAvatarId } = useUserAvatar();
 
   // Get current session ID
   useEffect(() => {
@@ -158,15 +160,29 @@ export function PostCard({ post }: PostCardProps) {
               ? "bg-gradient-to-br from-orange-400 to-red-500"
               : "bg-gradient-to-br from-purple-400 to-pink-400"
           )}>
-            {post.avatarId && post.avatarId !== 'default' ? (
-              <div 
-                className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: getAvatarById(post.avatarId)?.svg || '' }}
-              />
+            {/* Show user's current avatar for posts from their session, or post's saved avatar for others */}
+            {sessionId && post.sessionId === sessionId ? (
+              getAvatarById(userAvatarId) ? (
+                <div 
+                  className="w-full h-full"
+                  dangerouslySetInnerHTML={{ __html: getAvatarById(userAvatarId)?.svg || '' }}
+                />
+              ) : (
+                <span className="text-white text-xs font-bold">
+                  {post.alias.charAt(0)}
+                </span>
+              )
             ) : (
-              <span className="text-white text-xs font-bold">
-                {post.alias.charAt(0)}
-              </span>
+              post.avatarId && post.avatarId !== 'default' ? (
+                <div 
+                  className="w-full h-full"
+                  dangerouslySetInnerHTML={{ __html: getAvatarById(post.avatarId)?.svg || '' }}
+                />
+              ) : (
+                <span className="text-white text-xs font-bold">
+                  {post.alias.charAt(0)}
+                </span>
+              )
             )}
           </div>
           <div>
