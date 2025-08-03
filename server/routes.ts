@@ -133,26 +133,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Toggle reaction with "one emoji per post" logic
+  // Toggle reaction with "one emoji per post/comment" logic
   app.post("/api/reactions", async (req, res) => {
     try {
-      const { type, postId, remove } = req.body;
+      const { type, postId, commentId, remove } = req.body;
       const sessionId = req.session.id!;
       
-      // Get user's current reaction for this post
-      const currentReaction = await storage.getUserReactionForPost(postId, sessionId);
-      
-      if (remove || currentReaction === type) {
-        // Remove current reaction (toggle off)
-        await storage.removeAllUserReactionsForPost(postId, sessionId);
-      } else {
-        // Remove any existing reaction first, then add new one
-        if (currentReaction) {
-          await storage.removeAllUserReactionsForPost(postId, sessionId);
-        }
+      if (commentId) {
+        // Handle comment reactions
+        const currentReaction = await storage.getUserReactionForComment(commentId, sessionId);
         
-        // Add new reaction
-        await storage.addReaction({ type, postId }, sessionId);
+        if (remove || currentReaction === type) {
+          // Remove current reaction (toggle off)
+          await storage.removeAllUserReactionsForComment(commentId, sessionId);
+        } else {
+          // Remove any existing reaction first, then add new one
+          if (currentReaction) {
+            await storage.removeAllUserReactionsForComment(commentId, sessionId);
+          }
+          
+          // Add new reaction
+          await storage.addReaction({ type, commentId }, sessionId);
+        }
+      } else if (postId) {
+        // Handle post reactions
+        const currentReaction = await storage.getUserReactionForPost(postId, sessionId);
+        
+        if (remove || currentReaction === type) {
+          // Remove current reaction (toggle off)
+          await storage.removeAllUserReactionsForPost(postId, sessionId);
+        } else {
+          // Remove any existing reaction first, then add new one
+          if (currentReaction) {
+            await storage.removeAllUserReactionsForPost(postId, sessionId);
+          }
+          
+          // Add new reaction
+          await storage.addReaction({ type, postId }, sessionId);
+        }
+      } else {
+        throw new Error("Either postId or commentId must be provided");
       }
 
       res.json({ success: true });

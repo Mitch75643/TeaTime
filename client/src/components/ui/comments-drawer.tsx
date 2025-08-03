@@ -75,6 +75,14 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/posts", postId, "comments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to react to comment",
+        variant: "destructive",
+      });
     },
   });
 
@@ -225,7 +233,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
                             placeholder={`Reply to ${comment.alias}...`}
-                            className="resize-none text-sm"
+                            className="resize-none text-sm bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-500"
                             maxLength={300}
                             rows={2}
                           />
@@ -266,8 +274,8 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                           <div key={reply.id} className={cn(
                             "rounded-lg p-3 space-y-2",
                             isDrama 
-                              ? "bg-gradient-to-br from-orange-25 to-red-25 border border-orange-100"
-                              : "bg-gray-25 border border-gray-100"
+                              ? "bg-gradient-to-br from-orange-50/30 to-red-50/30 border border-orange-100"
+                              : "bg-white border border-gray-200"
                           )}>
                             <div className="flex items-start space-x-3">
                               <div className={cn(

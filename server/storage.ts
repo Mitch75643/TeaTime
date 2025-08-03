@@ -19,6 +19,10 @@ export interface IStorage {
   addReaction(reaction: ReactionInput, sessionId: string): Promise<void>;
   removeReaction(reaction: ReactionInput, sessionId: string): Promise<void>;
   hasUserReacted(postId: string | undefined, commentId: string | undefined, type: string, sessionId: string): Promise<boolean>;
+  getUserReactionForPost(postId: string, sessionId: string): Promise<string | null>;
+  getUserReactionForComment(commentId: string, sessionId: string): Promise<string | null>;
+  removeAllUserReactionsForPost(postId: string, sessionId: string): Promise<void>;
+  removeAllUserReactionsForComment(commentId: string, sessionId: string): Promise<void>;
   
   // Drama Votes
   addDramaVote(vote: DramaVoteInput, sessionId: string): Promise<void>;
@@ -264,9 +268,28 @@ export class MemStorage implements IStorage {
     return userReaction ? userReaction.type : null;
   }
 
+  async getUserReactionForComment(commentId: string, sessionId: string): Promise<string | null> {
+    const userReaction = Array.from(this.reactions.values()).find(r => 
+      r.sessionId === sessionId && r.commentId === commentId
+    );
+    return userReaction ? userReaction.type : null;
+  }
+
   async removeAllUserReactionsForPost(postId: string, sessionId: string): Promise<void> {
     const userReactions = Array.from(this.reactions.values()).filter(r => 
       r.sessionId === sessionId && r.postId === postId
+    );
+    
+    for (const reaction of userReactions) {
+      this.reactions.delete(reaction.id);
+    }
+    
+    await this.updateReactionCounts('post', postId);
+  }
+
+  async removeAllUserReactionsForComment(commentId: string, sessionId: string): Promise<void> {
+    const userReactions = Array.from(this.reactions.values()).filter(r => 
+      r.sessionId === sessionId && r.commentId === commentId
     );
     
     userReactions.forEach(reaction => {
@@ -274,7 +297,7 @@ export class MemStorage implements IStorage {
     });
 
     // Update reaction counts after removing all user reactions
-    await this.updateReactionCounts('post', postId);
+    await this.updateReactionCounts('comment', commentId);
   }
 
   async addDramaVote(vote: DramaVoteInput, sessionId: string): Promise<void> {
