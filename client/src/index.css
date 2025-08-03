@@ -1,63 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Soft pastel color palette */
-  --background: hsl(330, 30%, 98%);
-  --foreground: hsl(240, 10%, 15%);
-  --muted: hsl(320, 20%, 96%);
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(240, 10%, 3.9%);
+  --muted: hsl(240, 4.8%, 95.9%);
   --muted-foreground: hsl(240, 3.7%, 46.1%);
-  --popover: hsl(330, 30%, 99%);
-  --popover-foreground: hsl(240, 10%, 15%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 10%, 3.9%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(240, 10%, 15%);
-  --border: hsl(320, 20%, 90%);
-  --input: hsl(320, 15%, 94%);
-  --primary: hsl(320, 65%, 60%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(280, 40%, 85%);
-  --secondary-foreground: hsl(240, 10%, 15%);
-  --accent: hsl(300, 30%, 92%);
-  --accent-foreground: hsl(240, 10%, 15%);
-  --destructive: hsl(0, 70%, 65%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(320, 50%, 70%);
-  --radius: 1rem;
+  --card-foreground: hsl(240, 10%, 3.9%);
+  --border: hsl(240, 5.9%, 90%);
+  --input: hsl(240, 5.9%, 90%);
+  --primary: hsl(271, 81%, 56%);
+  --primary-foreground: hsl(355, 7%, 97%);
+  --secondary: hsl(240, 4.8%, 95.9%);
+  --secondary-foreground: hsl(240, 5.9%, 10%);
+  --accent: hsl(240, 4.8%, 95.9%);
+  --accent-foreground: hsl(240, 5.9%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(240, 5%, 64.9%);
+  --radius: 0.5rem;
   
-  /* TeaSpill Brand Colors - Soft pastels */
-  --tea-pink: hsl(320, 65%, 60%);
-  --tea-purple: hsl(280, 60%, 65%);
-  --tea-lavender: hsl(260, 50%, 75%);
-  --tea-blue: hsl(220, 60%, 80%);
-  --tea-mint: hsl(160, 50%, 80%);
-  --tea-peach: hsl(20, 70%, 85%);
-  --tea-rose: hsl(340, 60%, 85%);
-  --tea-cream: hsl(40, 40%, 95%);
+  /* Custom TeaSpill colors */
+  --primary-500: hsl(271, 81%, 56%);
+  --primary-600: hsl(266, 85%, 48%);
+  --primary-700: hsl(261, 90%, 40%);
+  --secondary-500: hsl(330, 81%, 60%);
+  --secondary-600: hsl(325, 84%, 52%);
 }
 
 .dark {
-  --background: hsl(260, 15%, 8%);
-  --foreground: hsl(320, 20%, 95%);
-  --muted: hsl(260, 10%, 15%);
-  --muted-foreground: hsl(320, 5%, 65%);
-  --popover: hsl(260, 15%, 10%);
-  --popover-foreground: hsl(320, 20%, 95%);
-  --card: hsl(260, 12%, 12%);
-  --card-foreground: hsl(320, 20%, 95%);
-  --border: hsl(260, 8%, 20%);
-  --input: hsl(260, 8%, 18%);
-  --primary: hsl(320, 65%, 60%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(260, 8%, 18%);
-  --secondary-foreground: hsl(320, 20%, 95%);
-  --accent: hsl(260, 8%, 18%);
-  --accent-foreground: hsl(320, 20%, 95%);
-  --destructive: hsl(0, 70%, 65%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(320, 40%, 50%);
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(271, 81%, 56%);
+  --primary-foreground: hsl(355, 7%, 97%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 85.7%, 97.3%);
+  --ring: hsl(240, 3.7%, 15.9%);
 }
 
 @layer base {
@@ -66,14 +60,11 @@
   }
 
   body {
-    @apply antialiased bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 400;
-    letter-spacing: -0.011em;
+    @apply font-sans antialiased bg-background text-foreground;
   }
 }
 
-/* Custom scrollbar styling */
+/* Custom scrollbar for horizontal scroll */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -83,96 +74,22 @@
   display: none;
 }
 
-/* Custom scrollbar for non-hidden scrolls */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--tea-pink));
-  border-radius: 3px;
-}
-
-/* Brand gradients with soft pastels */
+/* Gradient backgrounds for TeaSpill theme */
 .gradient-primary {
-  background: linear-gradient(135deg, hsl(var(--tea-pink)), hsl(var(--tea-purple)));
-}
-
-.gradient-secondary {
-  background: linear-gradient(135deg, hsl(var(--tea-lavender)), hsl(var(--tea-blue)));
+  background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
 }
 
 .gradient-drama {
-  background: linear-gradient(135deg, hsl(var(--tea-peach)), hsl(var(--tea-rose)));
+  background: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(0, 84%, 60%));
 }
 
-.gradient-soft {
-  background: linear-gradient(135deg, hsl(var(--tea-mint)), hsl(var(--tea-blue)));
-}
-
-/* Mobile-first container with soft background */
+/* Mobile-first container */
 .app-container {
-  max-width: 448px;
+  max-width: 448px; /* max-w-sm equivalent */
   margin: 0 auto;
   min-height: 100vh;
   position: relative;
-  background: hsl(var(--background));
-}
-
-/* Glassmorphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Smooth animations */
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.animate-bounce-gentle {
-  animation: bounceGentle 0.6s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes bounceGentle {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
+  background: white;
 }
 
 /* Ensure proper mobile viewport */
@@ -180,25 +97,4 @@
   .app-container {
     max-width: 100%;
   }
-}
-
-/* Custom button hover effects */
-.button-hover-lift {
-  transition: all 0.2s ease;
-}
-
-.button-hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-/* Emoji sizing for better readability */
-.emoji-lg {
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.emoji-xl {
-  font-size: 1.5rem;
-  line-height: 1;
 }

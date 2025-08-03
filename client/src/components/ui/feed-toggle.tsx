@@ -1,6 +1,5 @@
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
-import { TrendingUp, Sparkles } from "lucide-react";
 
 interface FeedToggleProps {
   feedType: "trending" | "new";
@@ -9,33 +8,31 @@ interface FeedToggleProps {
 
 export function FeedToggle({ feedType, onFeedTypeChange }: FeedToggleProps) {
   return (
-    <div className="glass px-6 py-3 border-b border-pink-100/30">
-      <div className="flex space-x-2 bg-white/40 rounded-2xl p-2 backdrop-blur-sm border border-pink-100/50">
+    <div className="bg-white px-4 py-2 border-b border-gray-100">
+      <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
         <Button
           variant="ghost"
           className={cn(
-            "flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300 button-hover-lift",
+            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             feedType === "trending"
-              ? "gradient-drama text-white shadow-lg transform scale-105"
-              : "text-gray-600 hover:bg-white/60 hover:text-gray-800"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:bg-white/50"
           )}
           onClick={() => onFeedTypeChange("trending")}
         >
-          <TrendingUp className="h-4 w-4 mr-2" />
-          Trending
+          🔥 Trending
         </Button>
         <Button
           variant="ghost"
           className={cn(
-            "flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300 button-hover-lift",
+            "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all",
             feedType === "new"
-              ? "gradient-secondary text-white shadow-lg transform scale-105"
-              : "text-gray-600 hover:bg-white/60 hover:text-gray-800"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:bg-white/50"
           )}
           onClick={() => onFeedTypeChange("new")}
         >
-          <Sparkles className="h-4 w-4 mr-2" />
-          Fresh
+          ⭐ New
         </Button>
       </div>
     </div>

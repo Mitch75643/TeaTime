@@ -62,10 +62,8 @@ export class MemStorage implements IStorage {
     
     if (sortBy === 'trending') {
       posts.sort((a, b) => {
-        const aReactions = a.reactions as any || {};
-        const bReactions = b.reactions as any || {};
-        const aScore = (aReactions.fire || 0) * 3 + (aReactions.eyes || 0) * 2 + (aReactions.cry || 0) + (aReactions.clown || 0) + (a.commentCount || 0) * 2;
-        const bScore = (bReactions.fire || 0) * 3 + (bReactions.eyes || 0) * 2 + (bReactions.cry || 0) + (bReactions.clown || 0) + (b.commentCount || 0) * 2;
+        const aScore = (a.reactions?.fire || 0) * 3 + (a.reactions?.eyes || 0) * 2 + (a.reactions?.cry || 0) + (a.reactions?.clown || 0) + a.commentCount * 2;
+        const bScore = (b.reactions?.fire || 0) * 3 + (b.reactions?.eyes || 0) * 2 + (b.reactions?.cry || 0) + (b.reactions?.clown || 0) + b.commentCount * 2;
         return bScore - aScore;
       });
     } else {
