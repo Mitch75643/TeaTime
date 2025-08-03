@@ -158,7 +158,7 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
       {/* Central Starburst */}
       <motion.div
-        className="absolute bg-gradient-to-r from-pink-400 to-purple-500 text-white p-4 rounded-full"
+        className="absolute bg-gradient-to-r from-orange-400 to-orange-600 text-white p-4 rounded-full"
         initial={{ scale: 0, rotate: 0 }}
         animate={{ 
           scale: [0, 1.3, 1],
@@ -423,9 +423,9 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
         <motion.div
           key={`chemical-${i}`}
           className={`absolute w-6 h-6 rounded-full ${
-            i % 4 === 0 ? 'bg-purple-400' : 
-            i % 4 === 1 ? 'bg-blue-400' : 
-            i % 4 === 2 ? 'bg-green-400' : 'bg-pink-400'
+            i % 4 === 0 ? 'bg-orange-400' : 
+            i % 4 === 1 ? 'bg-orange-500' : 
+            i % 4 === 2 ? 'bg-orange-600' : 'bg-orange-300'
           }`}
           initial={{ 
             scale: 0,

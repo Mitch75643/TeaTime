@@ -32,8 +32,8 @@ const categoryStyles = {
     inactive: "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50 border-amber-200"
   },
   "relationships": {
-    active: "bg-rose-500 text-white dark:bg-rose-600 border-rose-300",
-    inactive: "bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50 border-rose-200"
+    active: "bg-orange-500 text-white dark:bg-orange-600 border-orange-300",
+    inactive: "bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50 border-orange-200"
   },
   "family": {
     active: "bg-blue-500 text-white dark:bg-blue-600 border-blue-300",
@@ -64,9 +64,9 @@ export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsP
             className={cn(
               "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2 hover:scale-105 active:scale-95",
               activeCategory === category.id
-                ? categoryStyles[category.id as keyof typeof categoryStyles]?.active || "bg-purple-500 text-white border-purple-300"
+                ? categoryStyles[category.id as keyof typeof categoryStyles]?.active || "bg-orange-500 text-white border-orange-300"
                 : categoryStyles[category.id as keyof typeof categoryStyles]?.inactive || "bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200",
-              activeCategory === category.id && "ring-2 ring-purple-200 dark:ring-purple-800"
+              activeCategory === category.id && "ring-2 ring-orange-200 dark:ring-orange-800"
             )}
             onClick={() => onCategoryChange(category.id)}
           >

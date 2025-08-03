@@ -479,7 +479,7 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
               <Button 
                 onClick={createPoll}
                 disabled={!newQuestion.trim() || !newOptions.every(opt => opt.trim())}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs sm:text-sm"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs sm:text-sm"
               >
                 <TestTube className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Launch Experiment

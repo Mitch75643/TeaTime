@@ -11,7 +11,7 @@ interface WeeklyThemeAnimationProps {
 // Weekly theme configuration for easy updates
 const THEME_CONFIG = {
   "Love Week": {
-    colors: ["#ff69b4", "#ff1493", "#dc143c"],
+    colors: ["#FF7A00", "#FFD8B2", "#CC6200"],
     sound: "romantic-chime"
   },
   "Pet Peeves Week": {
@@ -23,11 +23,11 @@ const THEME_CONFIG = {
     sound: "giggle"
   },
   "Secrets Week": {
-    colors: ["#9370db", "#8a2be2", "#6a5acd"],
+    colors: ["#FF7A00", "#CC6200", "#3C2E20"],
     sound: "whisper"
   },
   "Embarrassing Moments Week": {
-    colors: ["#ff69b4", "#ffc0cb", "#ffb6c1"],
+    colors: ["#FF7A00", "#FFD8B2", "#FFE5D1"],
     sound: "gasp"
   },
   "Drama Week": {
@@ -40,15 +40,15 @@ const THEME_CONFIG = {
   },
   // Existing themes
   "Rant Week": {
-    colors: ["#ff4500", "#ff6347", "#ffa500"],
+    colors: ["#FF7A00", "#CC6200", "#FFD8B2"],
     sound: "grumble"
   },
   "Roast Week": {
-    colors: ["#ffd700", "#ffff00", "#ff69b4"],
+    colors: ["#FF7A00", "#FFD8B2", "#FFE5D1"],
     sound: "giggle"
   },
   "Unpopular Opinions": {
-    colors: ["#9370db", "#8a2be2", "#6a5acd"],
+    colors: ["#FF7A00", "#CC6200", "#3C2E20"],
     sound: "bubble-pop"
   },
   "Chaos Week": {
@@ -260,7 +260,7 @@ export function WeeklyThemeAnimation({ isVisible, onComplete, theme }: WeeklyThe
       {[...Array(8)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute text-pink-500"
+          className="absolute text-orange-500"
           initial={{ 
             scale: 0,
             x: 0,

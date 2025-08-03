@@ -13,23 +13,24 @@
   --card-foreground: hsl(240, 10%, 3.9%);
   --border: hsl(240, 5.9%, 90%);
   --input: hsl(240, 5.9%, 90%);
-  --primary: hsl(271, 81%, 56%);
-  --primary-foreground: hsl(355, 7%, 97%);
-  --secondary: hsl(240, 4.8%, 95.9%);
-  --secondary-foreground: hsl(240, 5.9%, 10%);
-  --accent: hsl(240, 4.8%, 95.9%);
-  --accent-foreground: hsl(240, 5.9%, 10%);
+  --primary: hsl(24, 100%, 50%); /* #FF7A00 */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(24, 100%, 90%); /* #FFE5D1 */
+  --secondary-foreground: hsl(24, 48%, 12%); /* #3C2E20 */
+  --accent: hsl(24, 100%, 85%); /* #FFD8B2 */
+  --accent-foreground: hsl(24, 48%, 12%); /* #3C2E20 */
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(240, 5%, 64.9%);
+  --ring: hsl(24, 100%, 39%); /* #CC6200 */
   --radius: 0.5rem;
   
-  /* Custom TeaSpill colors */
-  --primary-500: hsl(271, 81%, 56%);
-  --primary-600: hsl(266, 85%, 48%);
-  --primary-700: hsl(261, 90%, 40%);
-  --secondary-500: hsl(330, 81%, 60%);
-  --secondary-600: hsl(325, 84%, 52%);
+  /* Custom TeaSpill colors - Orange Theme */
+  --primary-500: hsl(24, 100%, 50%); /* #FF7A00 main orange */
+  --primary-600: hsl(24, 100%, 39%); /* #CC6200 darker orange */
+  --primary-700: hsl(24, 100%, 30%); /* Even darker for active states */
+  --secondary-500: hsl(24, 100%, 85%); /* #FFD8B2 lighter shade */
+  --secondary-600: hsl(24, 100%, 90%); /* #FFE5D1 accent */
+  --text-dark: hsl(24, 48%, 12%); /* #3C2E20 dark brown/charcoal */
 }
 
 .dark {
@@ -43,12 +44,12 @@
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(271, 81%, 56%);
-  --primary-foreground: hsl(355, 7%, 97%);
+  --primary: hsl(24, 100%, 50%); /* #FF7A00 */
+  --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(240, 3.7%, 15.9%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(24, 100%, 20%); /* Darker orange for dark mode */
+  --accent-foreground: hsl(24, 100%, 85%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 85.7%, 97.3%);
   --ring: hsl(240, 3.7%, 15.9%);
@@ -74,13 +75,17 @@
   display: none;
 }
 
-/* Gradient backgrounds for TeaSpill theme */
+/* Gradient backgrounds for TeaSpill theme - Orange Edition */
 .gradient-primary {
   background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
 }
 
+.gradient-orange {
+  background: linear-gradient(135deg, hsl(24, 100%, 50%), hsl(24, 100%, 85%));
+}
+
 .gradient-drama {
-  background: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(0, 84%, 60%));
+  background: linear-gradient(135deg, hsl(24, 100%, 50%), hsl(0, 84%, 60%));
 }
 
 /* Mobile-first container */

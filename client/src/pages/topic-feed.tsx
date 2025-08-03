@@ -32,7 +32,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Celebrity Tea",
     emoji: "🎤",
     description: "Spill the hottest celebrity gossip and entertainment drama",
-    gradient: "bg-gradient-to-br from-pink-500 to-rose-500", // Match Community card - Red
+    gradient: "bg-gradient-to-br from-orange-500 to-orange-600", // Match Community card - Red
     textColor: "text-white",
     count: 234
   },
@@ -68,7 +68,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Tea Experiments",
     emoji: "🧪",
     description: "Create polls and let the community decide",
-    gradient: "bg-gradient-to-br from-purple-500 to-violet-500", // Match Community card exactly
+    gradient: "bg-gradient-to-br from-orange-600 to-orange-700", // Match Community card exactly
     textColor: "text-white",
     count: 78
   },

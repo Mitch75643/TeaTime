@@ -17,7 +17,7 @@ const WEEKLY_THEMES = [
   { 
     name: "Love Week", 
     emoji: "💖", 
-    color: "from-pink-500 to-rose-500",
+    color: "from-orange-500 to-orange-600",
     description: "Share your romantic wins, fails, and everything in between" 
   },
   { 
@@ -35,7 +35,7 @@ const WEEKLY_THEMES = [
   { 
     name: "Unpopular Opinions", 
     emoji: "🤯", 
-    color: "from-purple-500 to-indigo-500",
+    color: "from-orange-600 to-orange-700",
     description: "Share those thoughts everyone disagrees with" 
   },
   { 
@@ -354,7 +354,7 @@ export default function DailySpill() {
       <main className="px-4 pb-20 space-y-4">
         {isLoading && (
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
             <p className="text-gray-500 mt-2">Loading today's spills...</p>
           </div>
         )}
@@ -370,7 +370,7 @@ export default function DailySpill() {
             </p>
             <Button
               onClick={() => setIsPostModalOpen(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl"
             >
               <Plus className="h-4 w-4 mr-2" />
               Share Your Story

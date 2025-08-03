@@ -42,7 +42,7 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
       
       <CardContent className="space-y-4">
         {/* Current/Preview Username Display */}
-        <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+        <div className="text-center p-4 bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg border border-orange-200 dark:border-orange-700">
           <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
             {previewUsername.alias}
           </div>

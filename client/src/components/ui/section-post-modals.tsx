@@ -453,7 +453,7 @@ export function SectionPostModal({
             <Button 
               onClick={handleSubmit} 
               disabled={createPostMutation.isPending}
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+              className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white"
             >
               {createPostMutation.isPending ? "Posting..." : "Share"}
             </Button>

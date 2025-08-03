@@ -149,7 +149,7 @@ export default function PostCreation() {
                 <Button 
                   type="submit"
                   disabled={!content.trim() || !category || createPostMutation.isPending}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                 >
                   {createPostMutation.isPending ? "Posting..." : "Post"}
                 </Button>

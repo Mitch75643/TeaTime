@@ -28,7 +28,7 @@ export function FloatingPostButton() {
         className={cn(
           "fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50",
           "w-14 h-14 rounded-full shadow-lg",
-          "bg-gradient-to-r from-purple-500 to-pink-500 text-white",
+          "bg-gradient-to-r from-orange-500 to-orange-600 text-white",
           "hover:scale-105 active:scale-95 transition-all duration-200",
           "border-4 border-white dark:border-gray-800"
         )}

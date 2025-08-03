@@ -44,11 +44,11 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
           variant="outline"
           size="icon"
           className={cn(
-            "rounded-full bg-white border-2 border-gray-300 hover:border-purple-500 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 shadow-sm",
+            "rounded-full bg-white border-2 border-gray-300 hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 shadow-sm",
             className
           )}
         >
-          <Edit2 className="h-4 w-4 text-gray-600 hover:text-purple-600" />
+          <Edit2 className="h-4 w-4 text-gray-600 hover:text-orange-600" />
         </Button>
       </DialogTrigger>
       
@@ -97,8 +97,8 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
                       className={cn(
                         "relative w-12 h-12 rounded-full border-2 transition-all hover:scale-105",
                         tempSelectedId === avatar.id
-                          ? "border-purple-500 ring-2 ring-purple-200"
-                          : "border-gray-200 hover:border-purple-300"
+                          ? "border-orange-500 ring-2 ring-orange-200"
+                          : "border-gray-200 hover:border-orange-300"
                       )}
                     >
                       <div 
@@ -106,7 +106,7 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
                         dangerouslySetInnerHTML={{ __html: avatar.svg }}
                       />
                       {tempSelectedId === avatar.id && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center">
                           <Check className="h-2.5 w-2.5 text-white" />
                         </div>
                       )}
@@ -128,7 +128,7 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
             </Button>
             <Button 
               onClick={handleSave}
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
               Save Avatar
             </Button>

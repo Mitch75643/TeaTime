@@ -57,7 +57,7 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
       <div className="text-center">
         <Button
           onClick={onCreatePost}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white w-full"
+          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white w-full"
         >
           + Create Post
         </Button>
@@ -168,7 +168,7 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
                 </p>
                 <Button 
                   onClick={onCreatePost}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create First Post

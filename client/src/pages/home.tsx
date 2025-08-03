@@ -46,7 +46,7 @@ export default function Home() {
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
           // Add a brief highlight effect
-          element.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)';
+          element.style.background = 'linear-gradient(135deg, rgba(255, 122, 0, 0.1) 0%, rgba(255, 216, 178, 0.1) 100%)';
           setTimeout(() => {
             element.style.background = '';
           }, 2000);
@@ -164,7 +164,7 @@ export default function Home() {
             </p>
             <Button 
               onClick={() => setIsPostModalOpen(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
             >
               Create Post
             </Button>
