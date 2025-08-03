@@ -110,6 +110,11 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
   const [suggestions] = useState<Suggestion[]>(sampleSuggestions);
   const [userVotes, setUserVotes] = useState<Record<string, boolean>>({});
 
+  const handleCategoryClick = (categoryId: SuggestionCategory) => {
+    // Toggle: if same category is clicked, close it; otherwise open the new one
+    setSelectedCategory(prev => prev === categoryId ? null : categoryId);
+  };
+
   const selectedCategoryData = suggestionCategories.find(cat => cat.id === selectedCategory);
 
   const handleSubmit = () => {
@@ -152,40 +157,41 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
   };
 
   return (
-    <div className="space-y-4">
-      {/* Category Selection */}
-      {!selectedCategory && (
-        <Card className="border-gray-200 dark:border-gray-700">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              What would you like to share?
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-2">
-            {suggestionCategories.map((category) => (
-              <Button
-                key={category.id}
-                variant="outline"
-                onClick={() => setSelectedCategory(category.id)}
-                className={cn(
-                  "w-full justify-start h-auto p-3 text-left",
-                  category.color,
-                  category.bgColor
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">{category.emoji}</span>
-                  <div>
-                    <p className={cn("font-medium text-sm", category.textColor)}>
-                      {category.name}
-                    </p>
-                  </div>
+    <div className="space-y-4 mt-6">
+      {/* Category Selection - Always Visible */}
+      <Card className="border-gray-200 dark:border-gray-700">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            What would you like to share?
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-2">
+          {suggestionCategories.map((category) => (
+            <Button
+              key={category.id}
+              variant={selectedCategory === category.id ? "default" : "outline"}
+              onClick={() => handleCategoryClick(category.id)}
+              className={cn(
+                "w-full justify-start h-auto p-3 text-left",
+                category.color,
+                selectedCategory === category.id ? category.bgColor : "",
+                selectedCategory === category.id ? category.textColor : ""
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-lg">{category.emoji}</span>
+                <div>
+                  <p className={cn("font-medium text-sm", 
+                    selectedCategory === category.id ? category.textColor : category.textColor
+                  )}>
+                    {category.name}
+                  </p>
                 </div>
-              </Button>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+              </div>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
 
       {/* Selected Category Form */}
       {selectedCategory && selectedCategoryData && (

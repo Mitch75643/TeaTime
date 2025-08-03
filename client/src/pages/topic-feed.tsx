@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -97,6 +97,11 @@ export default function TopicFeed() {
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
   const topic = topicConfig[topicId];
+
+  // Scroll to top when topic changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [topicId]);
 
   const { data: posts = [], isLoading } = useQuery<Post[]>({
     queryKey: ['/api/posts', topicId, sortBy],
@@ -218,7 +223,7 @@ export default function TopicFeed() {
       </div>
 
       {/* Topic-Specific Features */}
-      <div className="px-4 pt-6 pb-6 space-y-6 max-w-2xl mx-auto">
+      <div className="px-4 pt-8 pb-6 space-y-6 max-w-2xl mx-auto">
         {topicId === "celebrity-tea" && (
           <CelebrityTeaFeatures 
             onSpillAbout={(celebName) => {
