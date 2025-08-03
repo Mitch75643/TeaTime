@@ -103,8 +103,22 @@ export default function TopicFeed() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [topicId]);
 
+  // Listen for story category changes from post submission
+  useEffect(() => {
+    const handleStoryCategoryChange = (event: CustomEvent) => {
+      if (topicId === "story-time" && event.detail) {
+        setStoryCategory(event.detail);
+      }
+    };
+
+    window.addEventListener('setStoryCategory', handleStoryCategoryChange as EventListener);
+    return () => {
+      window.removeEventListener('setStoryCategory', handleStoryCategoryChange as EventListener);
+    };
+  }, [topicId]);
+
   const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ['/api/posts', topicId, sortBy],
+    queryKey: ['/api/posts', topicId, sortBy, storyCategory],
     select: (posts) => {
       // Filter posts by topic and sort them
       let filteredPosts = posts.filter(post => {
@@ -113,7 +127,13 @@ export default function TopicFeed() {
           case "celebrity-tea":
             return post.category === "gossip" || post.celebrityName;
           case "story-time": 
-            return post.category === "story" || post.storyType;
+            const isStoryPost = post.category === "story" || post.storyType;
+            if (!isStoryPost) return false;
+            // Additional filtering by story category
+            if (storyCategory !== "all") {
+              return post.storyType === storyCategory;
+            }
+            return true;
           case "hot-topics":
             return post.topicTitle || post.category === "other";
           case "daily-debate":

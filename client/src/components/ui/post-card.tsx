@@ -36,6 +36,22 @@ const categoryColors: Record<string, string> = {
   drama: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-700",
 };
 
+const storyTypeEmojis: Record<string, string> = {
+  horror: "😱",
+  funny: "😂",
+  weird: "🤔",
+  romantic: "💕",
+  embarrassing: "😳",
+};
+
+const storyTypeColors: Record<string, string> = {
+  horror: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-700",
+  funny: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700",
+  weird: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700",
+  romantic: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300 border-pink-200 dark:border-pink-700",
+  embarrassing: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-700",
+};
+
 const reactionEmojis = {
   thumbsUp: "👍",
   thumbsDown: "👎",
@@ -203,6 +219,15 @@ export function PostCard({ post }: PostCardProps) {
           )}>
             {categoryEmojis[post.category]} {categoryLabel}
           </span>
+          {/* Story Type Badge */}
+          {post.storyType && (
+            <span className={cn(
+              "px-2 py-1 text-xs font-medium rounded-full border whitespace-nowrap",
+              storyTypeColors[post.storyType] || "bg-gray-100 text-gray-700 border-gray-200"
+            )}>
+              {storyTypeEmojis[post.storyType]} {post.storyType.charAt(0).toUpperCase() + post.storyType.slice(1)}
+            </span>
+          )}
           <PostMenu 
             postId={post.id} 
             isOwner={post.sessionId === sessionId && sessionId !== ''} 

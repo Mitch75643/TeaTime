@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 const storyCategories = [
   { id: "horror", name: "Horror", emoji: "😱" },
   { id: "funny", name: "Funny", emoji: "😂" },
-  { id: "weird", name: "Weird", emoji: "🤨" },
-  { id: "romantic", name: "Romantic", emoji: "💘" },
+  { id: "weird", name: "Weird", emoji: "🤔" },
+  { id: "romantic", name: "Romantic", emoji: "💕" },
   { id: "embarrassing", name: "Embarrassing", emoji: "😳" }
 ];
 
@@ -80,7 +80,7 @@ export function StoryTimeFeatures({
               onClick={() => onCategoryChange?.("all")}
               className="flex items-center gap-2 h-12 px-4"
             >
-              🔄 All
+              🧃 All
             </Button>
             {storyCategories.map((category) => (
               <Button

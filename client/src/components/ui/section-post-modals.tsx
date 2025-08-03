@@ -84,6 +84,14 @@ export function SectionPostModal({
         title: "Post created!",
         description: "Your anonymous post has been shared with the community.",
       });
+      
+      // Auto-route to story category filter for story posts
+      if (section === "story-time" && storyType) {
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('setStoryCategory', { detail: storyType }));
+        }, 100);
+      }
+      
       handleClose();
     },
     onError: (error: any) => {
