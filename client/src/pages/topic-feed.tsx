@@ -94,6 +94,7 @@ export default function TopicFeed() {
   const [storyCategory, setStoryCategory] = useState("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
+  const [activeTab, setActiveTab] = useState<'community' | 'user'>('community');
   
   // Celebration hook
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
@@ -174,6 +175,8 @@ export default function TopicFeed() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
     setIsRefreshing(false);
   };
 
@@ -322,113 +325,130 @@ export default function TopicFeed() {
         )}
       </div>
 
-      {/* Community Feed Section */}
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Users className="h-5 w-5 text-purple-500" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Community Feed
-            </h2>
+      {/* Posts Section with Tabs */}
+      <div className="container mx-auto px-4 py-6 pb-20">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {/* Tab Headers */}
+          <div className="flex border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setActiveTab('community')}
+              className={cn(
+                "flex-1 px-6 py-4 text-sm font-medium transition-colors",
+                "flex items-center justify-center space-x-2",
+                activeTab === 'community'
+                  ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-b-2 border-purple-500"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              )}
+            >
+              <Users className="h-4 w-4" />
+              <span>Community Feed</span>
+              <span className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                {communityPosts.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('user')}
+              className={cn(
+                "flex-1 px-6 py-4 text-sm font-medium transition-colors",
+                "flex items-center justify-center space-x-2",
+                activeTab === 'user'
+                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              )}
+            >
+              <User className="h-4 w-4" />
+              <span>Your Posts</span>
+              <span className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                {userPosts.length}
+              </span>
+            </button>
           </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {communityPosts.length} posts
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === 'community' && (
+              <div className="space-y-4">
+                {isLoadingCommunity ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : communityPosts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-4">{topic.emoji}</div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      No posts yet in {topic.name}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      Be the first to share something in this topic!
+                    </p>
+                    <Button
+                      onClick={() => setIsPostModalOpen(true)}
+                      className={cn("shadow-lg", topic.gradient, topic.textColor)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create First Post
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {communityPosts.map((post: Post) => (
+                      <PostCard 
+                        key={post.id} 
+                        post={post}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'user' && (
+              <div className="space-y-4">
+                {isLoadingUser ? (
+                  <div className="space-y-4">
+                    {[...Array(2)].map((_, i) => (
+                      <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : userPosts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-4">✍️</div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      You haven't posted here yet
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      Share your thoughts about {topic.name.toLowerCase()} with the community!
+                    </p>
+                    <Button
+                      onClick={() => setIsPostModalOpen(true)}
+                      className={cn("shadow-lg", topic.gradient, topic.textColor)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Your First Post
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {userPosts.map((post: Post) => (
+                      <PostCard 
+                        key={post.id} 
+                        post={post}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-
-        {isLoadingCommunity ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        ) : communityPosts.length === 0 ? (
-          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="text-4xl mb-4">{topic.emoji}</div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              No posts yet in {topic.name}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Be the first to share something in this topic!
-            </p>
-            <Button
-              onClick={() => setIsPostModalOpen(true)}
-              className={cn("shadow-lg", topic.gradient, topic.textColor)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Post
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {communityPosts.map((post: Post) => (
-              <PostCard 
-                key={post.id} 
-                post={post}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="container mx-auto px-4">
-        <div className="border-t border-gray-200 dark:border-gray-700"></div>
-      </div>
-
-      {/* Your Posts Section */}
-      <div className="container mx-auto px-4 py-6 pb-20 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <User className="h-5 w-5 text-blue-500" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Your Posts
-            </h2>
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {userPosts.length} posts
-          </div>
-        </div>
-
-        {isLoadingUser ? (
-          <div className="space-y-4">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        ) : userPosts.length === 0 ? (
-          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="text-4xl mb-4">✍️</div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              You haven't posted here yet
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Share your thoughts about {topic.name.toLowerCase()} with the community!
-            </p>
-            <Button
-              onClick={() => setIsPostModalOpen(true)}
-              className={cn("shadow-lg", topic.gradient, topic.textColor)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Post
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {userPosts.map((post: Post) => (
-              <PostCard 
-                key={post.id} 
-                post={post}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Floating Add Button */}
