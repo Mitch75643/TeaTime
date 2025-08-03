@@ -6,6 +6,7 @@ import { getAvatarById } from "@/lib/avatars";
 import { useLocation } from "wouter";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
+import fessrLogo from "../../assets/fessr-logo.png";
 
 export function Header() {
   const [, setLocation] = useLocation();
@@ -21,7 +22,11 @@ export function Header() {
     <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Flame className="h-6 w-6" />
+          <img 
+            src={fessrLogo} 
+            alt="Fessr Logo" 
+            className="h-7 w-7 object-contain"
+          />
           <h1 className="text-xl font-bold">Fessr</h1>
         </div>
         <div className="flex items-center space-x-3">

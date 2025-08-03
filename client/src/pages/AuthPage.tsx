@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Fingerprint, Key, User, Mail, AlertCircle } from "lucide-react";
 import { LoginPage } from "@/components/auth/LoginPage";
 import { useLocation } from "wouter";
+import fessrLogo from "../assets/fessr-logo.png";
 
 export function AuthPage() {
   const [, setLocation] = useLocation();
@@ -33,8 +34,12 @@ export function AuthPage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 p-4 flex items-center justify-center">
       <Card className="w-full max-w-lg mx-auto shadow-xl border-orange-200 dark:border-orange-800">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="mx-auto w-20 h-20 flex items-center justify-center">
+            <img 
+              src={fessrLogo} 
+              alt="Fessr Logo" 
+              className="w-16 h-16 object-contain"
+            />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
             Welcome to Fessr

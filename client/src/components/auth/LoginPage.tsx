@@ -10,6 +10,7 @@ import { Shield, Fingerprint, Key, User, Mail, AlertCircle, Check } from "lucide
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { checkBiometricSupport, authenticateWithBiometrics, isBiometricEnabled } from "@/lib/biometricAuth";
 import { useLocation } from "wouter";
+import fessrLogo from "../../assets/fessr-logo.png";
 
 interface LoginPageProps {
   onLoginSuccess?: () => void;
@@ -147,8 +148,12 @@ export function LoginPage({ onLoginSuccess, onStayAnonymous }: LoginPageProps) {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 p-4 flex items-center justify-center">
       <Card className="w-full max-w-md mx-auto shadow-xl border-orange-200 dark:border-orange-800">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center">
-            <Shield className="w-6 h-6 text-white" />
+          <div className="mx-auto w-16 h-16 flex items-center justify-center">
+            <img 
+              src={fessrLogo} 
+              alt="Fessr Logo" 
+              className="w-12 h-12 object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
             Welcome to Fessr
