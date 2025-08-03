@@ -19,8 +19,12 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 max-w-md mx-auto">
-        <div className="flex items-center justify-around py-2 relative">
+      {/* Floating Navigation with gradient accent */}
+      <nav className="fixed bottom-4 left-4 right-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto">
+        {/* Gradient accent bar */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-t-2xl"></div>
+        
+        <div className="flex items-center justify-around py-3 px-2 relative">
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = location === item.path;
@@ -28,17 +32,36 @@ export function BottomNav() {
             // Add spacer for the floating button in the middle
             if (index === 1) {
               return (
-                <div key={`spacer-${index}`} className="flex-1 flex justify-center">
+                <div key={`spacer-${index}`} className="flex-1 flex justify-center relative">
                   <Link href={item.path!}>
                     <Button
                       variant="ghost"
                       className={cn(
-                        "flex flex-col items-center py-2 px-3 transition-colors",
-                        isActive ? "text-purple-500 dark:text-purple-400" : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                        "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
+                        isActive 
+                          ? "text-purple-500 dark:text-purple-400" 
+                          : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                       )}
                     >
-                      <Icon className="h-5 w-5 mb-1" />
-                      <span className="text-xs font-medium">{item.label}</span>
+                      {/* Active glow effect */}
+                      {isActive && (
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                      )}
+                      
+                      <Icon className={cn(
+                        "h-6 w-6 transition-all duration-300",
+                        isActive ? "mb-1 scale-110" : "mb-0"
+                      )} />
+                      
+                      {/* Dynamic label - only show when active */}
+                      <span className={cn(
+                        "text-xs font-medium transition-all duration-300 overflow-hidden",
+                        isActive 
+                          ? "max-h-6 opacity-100 mt-1" 
+                          : "max-h-0 opacity-0 mt-0"
+                      )}>
+                        {item.label}
+                      </span>
                     </Button>
                   </Link>
                 </div>
@@ -46,17 +69,36 @@ export function BottomNav() {
             }
             
             return (
-              <div key={item.id} className="flex-1 flex justify-center">
+              <div key={item.id} className="flex-1 flex justify-center relative">
                 <Link href={item.path!}>
                   <Button
                     variant="ghost"
                     className={cn(
-                      "flex flex-col items-center py-2 px-3 transition-colors",
-                      isActive ? "text-purple-500 dark:text-purple-400" : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                      "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
+                      isActive 
+                        ? "text-purple-500 dark:text-purple-400" 
+                        : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                     )}
                   >
-                    <Icon className="h-5 w-5 mb-1" />
-                    <span className="text-xs font-medium">{item.label}</span>
+                    {/* Active glow effect */}
+                    {isActive && (
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
+                    )}
+                    
+                    <Icon className={cn(
+                      "h-6 w-6 transition-all duration-300",
+                      isActive ? "mb-1 scale-110" : "mb-0"
+                    )} />
+                    
+                    {/* Dynamic label - only show when active */}
+                    <span className={cn(
+                      "text-xs font-medium transition-all duration-300 overflow-hidden",
+                      isActive 
+                        ? "max-h-6 opacity-100 mt-1" 
+                        : "max-h-0 opacity-0 mt-0"
+                    )}>
+                      {item.label}
+                    </span>
                   </Button>
                 </Link>
               </div>
