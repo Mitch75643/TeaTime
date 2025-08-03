@@ -1,0 +1,42 @@
+In the “Story Time” topic under the Community page, combine the story categories (e.g. Horror, Funny, Weird, etc.) with the Community Feed and Your Posts view.
+
+---
+
+🧩 Functional Changes:
+
+1. **Single Unified Feed:**
+   - Show one connected box layout with toggle tabs: “Community Feed” and “Your Posts” (like before), but more compact and visually unified.
+   - On mobile and desktop, these views should share space and only switch the content inside, not load separate large blocks.
+
+2. **Story Category Filter:**
+   - When a user selects a story type (e.g. Horror, Funny, Weird) while posting, that tag is saved with the post.
+   - Add a filter bar at the top of the feed with the same story categories as buttons or pills: [Horror] [Funny] [Weird] [Other].
+   - When a user clicks one, filter both the “Community Feed” and “Your Posts” to only show posts from that story category.
+
+3. **Default View:**
+   - When the Story Time page loads, default to showing all story types in both Community Feed and Your Posts.
+   - If a filter is active, visually indicate the selected filter with a highlight or bold style.
+
+---
+
+🎨 UI Notes:
+
+- Feed and filter bar should feel clean and responsive on both desktop and mobile.
+- The category pills/buttons should use their original color styling (if any).
+- Combine the Community Feed and Your Posts into one card-style UI with a toggle or segmented control on top.
+- Only show the posts related to the category selected.
+
+---
+
+📦 Optional Enhancements:
+
+- Allow the app to remember the last selected category and default to it when returning to the Story Time page.
+- If no posts exist in the selected category, show: “No posts in this category yet. Be the first!” with a ‘+ Create Post’ button.
+
+---
+
+🚫 Don’t:
+- Don’t remove or rename the original story categories.
+- Don’t apply this to any other community topic.
+- Don’t change how the post modal works — just ensure it tags the post with the selected category.
+

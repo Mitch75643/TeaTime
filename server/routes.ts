@@ -69,7 +69,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         undefined, // tags
         undefined, // userSessionId - not filtering by user
         postContext as string,
-        topicId // section
+        topicId, // section
+        storyCategory as string // storyCategory
       );
       res.json(posts);
     } catch (error) {
@@ -91,7 +92,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         undefined, // tags
         sessionId, // userSessionId - filter by current user
         postContext as string,
-        topicId // section
+        topicId, // section
+        storyCategory as string // storyCategory
       );
       res.json(posts);
     } catch (error) {

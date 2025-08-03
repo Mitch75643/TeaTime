@@ -53,7 +53,7 @@ export function StoryTimeFeatures({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Create Post Button */}
       <div className="flex justify-center">
         <Button
@@ -61,42 +61,32 @@ export function StoryTimeFeatures({
           className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <BookOpen className="h-4 w-4 mr-2" />
-          + Create Post
+          + Create Story
         </Button>
       </div>
 
-      {/* Category Filters */}
+      {/* Random Story Prompt */}
       <Card className="border-blue-200 dark:border-blue-800">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-          <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-            <BookOpen className="h-5 w-5" />
-            📚 Story Categories
-          </CardTitle>
-        </CardHeader>
         <CardContent className="p-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">💡 Story Prompt:</p>
+              <p className="text-blue-700 dark:text-blue-300 italic">
+                {randomPrompt || "Click generate for a writing prompt!"}
+              </p>
+            </div>
             <Button
-              variant={selectedCategory === "all" ? "default" : "outline"}
-              onClick={() => onCategoryChange?.("all")}
-              className="flex items-center gap-2 h-12 px-4"
+              variant="outline"
+              size="sm"
+              onClick={generateRandomPrompt}
+              className="ml-4"
             >
-              🧃 All
+              <Sparkles className="h-4 w-4 mr-1" />
+              Generate
             </Button>
-            {storyCategories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                onClick={() => onCategoryChange?.(category.id)}
-                className="flex items-center gap-2 h-12 px-4"
-              >
-                {category.emoji} {category.name}
-              </Button>
-            ))}
           </div>
         </CardContent>
       </Card>
-
-
     </div>
   );
 }

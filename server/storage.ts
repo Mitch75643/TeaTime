@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 export interface IStorage {
   // Posts
   createPost(post: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post>;
-  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<Post[]>;
+  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string): Promise<Post[]>;
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
@@ -74,7 +74,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
       postContext: insertPost.postContext || 'home',
-      communitySection: insertPost.communitySection || null,
+      communitySection: insertPost.communitySection || undefined,
       reportCount: 0,
       isRemoved: false,
       postType: insertPost.postType || 'standard',
@@ -90,7 +90,7 @@ export class MemStorage implements IStorage {
     return post;
   }
 
-  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<Post[]> {
+  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string): Promise<Post[]> {
     let posts = Array.from(this.posts.values());
     
     // Filter out removed posts
@@ -109,6 +109,11 @@ export class MemStorage implements IStorage {
     // Filter by community section
     if (section) {
       posts = posts.filter(post => post.communitySection === section);
+    }
+    
+    // Filter by story category (for Story Time topic)
+    if (storyCategory && storyCategory !== 'all' && section === 'story-time') {
+      posts = posts.filter(post => post.storyType === storyCategory);
     }
     
     if (category && category !== 'all') {
@@ -162,7 +167,7 @@ export class MemStorage implements IStorage {
       ...insertComment,
       id,
       alias,
-      avatarId: insertComment.avatarId || 'happy-face',
+      avatarId: 'happy-face',
       parentCommentId: insertComment.parentCommentId || null,
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
       createdAt: new Date(),

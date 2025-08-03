@@ -331,6 +331,65 @@ export default function TopicFeed() {
       {/* Posts Section with Tabs */}
       <div className="container mx-auto px-4 py-6 pb-20">
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {/* Story Category Filter Bar - Only for Story Time */}
+          {topicId === "story-time" && (
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by story type:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={storyCategory === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("all")}
+                  className="text-xs"
+                >
+                  📖 All Stories
+                </Button>
+                <Button
+                  variant={storyCategory === "horror" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("horror")}
+                  className="text-xs"
+                >
+                  😱 Horror
+                </Button>
+                <Button
+                  variant={storyCategory === "funny" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("funny")}
+                  className="text-xs"
+                >
+                  😂 Funny
+                </Button>
+                <Button
+                  variant={storyCategory === "weird" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("weird")}
+                  className="text-xs"
+                >
+                  🤔 Weird
+                </Button>
+                <Button
+                  variant={storyCategory === "romantic" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("romantic")}
+                  className="text-xs"
+                >
+                  💕 Romantic
+                </Button>
+                <Button
+                  variant={storyCategory === "embarrassing" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("embarrassing")}
+                  className="text-xs"
+                >
+                  😳 Embarrassing
+                </Button>
+              </div>
+            </div>
+          )}
+          
           {/* Tab Headers */}
           <div className="flex border-b border-gray-200 dark:border-gray-700">
             <button
