@@ -216,7 +216,7 @@ export default function Profile() {
             className={cn(
               "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm",
               activeTab === "posts"
-                ? "bg-white dark:bg-gray-600 text-purple-600 dark:text-purple-400 shadow-sm"
+                ? "bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-300"
             )}
             onClick={() => setActiveTab("posts")}
@@ -229,7 +229,7 @@ export default function Profile() {
             className={cn(
               "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm",
               activeTab === "settings"
-                ? "bg-white dark:bg-gray-600 text-purple-600 dark:text-purple-400 shadow-sm"
+                ? "bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-300"
             )}
             onClick={() => setActiveTab("settings")}
@@ -251,7 +251,7 @@ export default function Profile() {
 
             {isLoading && (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
                 <p className="text-gray-500 mt-2">Loading your posts...</p>
               </div>
             )}
@@ -402,8 +402,8 @@ export default function Profile() {
                 ✓ No personal data is stored or tracked
               </p>
             </div>
-            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <p className="text-sm text-purple-800 dark:text-purple-300">
+            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <p className="text-sm text-orange-800 dark:text-orange-300">
                 ✓ Content is moderated for safety
               </p>
             </div>
