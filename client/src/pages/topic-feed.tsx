@@ -251,7 +251,13 @@ export default function TopicFeed() {
 
       {/* Topic-Specific Features */}
       <div className="px-4 pt-6 pb-6 space-y-6 max-w-2xl mx-auto">
-
+        {topicId === "celebrity-tea" && (
+          <CelebrityTeaFeatures 
+            onSpillAbout={(celebName) => {
+              setIsPostModalOpen(true);
+            }}
+          />
+        )}
         
         {topicId === "story-time" && (
           <StoryTimeFeatures 
@@ -351,17 +357,6 @@ export default function TopicFeed() {
                 post={post}
               />
             ))}
-          </div>
-        )}
-
-        {/* Celebrity Leaderboard - moved to bottom */}
-        {topicId === "celebrity-tea" && (
-          <div className="mt-8">
-            <CelebrityTeaFeatures 
-              onSpillAbout={(celebName) => {
-                setIsPostModalOpen(true);
-              }}
-            />
           </div>
         )}
       </div>
