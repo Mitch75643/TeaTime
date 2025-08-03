@@ -142,10 +142,9 @@ function CountdownTimer() {
   }, []);
 
   return (
-    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-      <Calendar className="h-4 w-4" />
-      <span>⏳ New prompt in: {timeLeft}</span>
-    </div>
+    <span className="text-sm font-medium opacity-90">
+      ⏳ New prompt in: {timeLeft}
+    </span>
   );
 }
 
@@ -161,18 +160,18 @@ function SpillStreak() {
   };
 
   const getStreakIcon = (days: number) => {
-    if (days < 3) return <Star className="h-4 w-4" />;
-    if (days < 7) return <Flame className="h-4 w-4" />;
-    if (days < 14) return <Crown className="h-4 w-4" />;
-    return <Trophy className="h-4 w-4" />;
+    if (days < 3) return <Star className="h-3 w-3" />;
+    if (days < 7) return <Flame className="h-3 w-3" />;
+    if (days < 14) return <Crown className="h-3 w-3" />;
+    return <Trophy className="h-3 w-3" />;
   };
 
   return (
-    <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg px-3 py-2">
-      <div className="text-yellow-600 dark:text-yellow-400">
+    <div className="flex items-center space-x-2 bg-white/10 rounded-md px-2 py-1">
+      <div className="text-white">
         {getStreakIcon(streak)}
       </div>
-      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+      <span className="text-xs font-medium text-white">
         {getStreakMessage(streak)}
       </span>
     </div>
@@ -241,7 +240,7 @@ export default function DailySpill() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
-      {/* Theme of the Week Banner */}
+      {/* Theme of the Week Banner with Streak */}
       <div className="px-4 pt-4">
         <Card className={cn("border-0 text-white bg-gradient-to-r", currentTheme.color)}>
           <CardContent className="p-3">
@@ -256,6 +255,10 @@ export default function DailySpill() {
               <Badge className="bg-white/20 text-white border-0 text-xs">
                 This Week
               </Badge>
+            </div>
+            {/* Streak Badge attached to theme banner */}
+            <div className="mt-2 pt-2 border-t border-white/20">
+              <SpillStreak />
             </div>
           </CardContent>
         </Card>
@@ -289,8 +292,8 @@ export default function DailySpill() {
           )}
           <CardHeader className="pb-3">
             <div className="flex items-center space-x-2 mb-2">
-              <Coffee className="h-5 w-5" />
-              <span className="text-sm font-medium opacity-90">{dateString}</span>
+              <Calendar className="h-4 w-4" />
+              <CountdownTimer />
             </div>
             <CardTitle className="text-xl font-bold flex items-center space-x-2">
               <span>☕ Daily Spill</span>
@@ -316,41 +319,9 @@ export default function DailySpill() {
         </Card>
       </div>
 
-      {/* User Engagement Features */}
-      <div className="px-4 pb-4 space-y-3">
-        {/* Spill Streak */}
-        <SpillStreak />
-        
-        {/* Progress Bar */}
-        <Card className="border-gray-200 dark:border-gray-700">
-          <CardContent className="p-3">
-            <SpillProgress totalSpills={posts.length} />
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Stats */}
-      <div className="px-4 pb-4">
-        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-              <Calendar className="h-4 w-4" />
-              <span className="text-sm">Today's Prompt</span>
-            </div>
-            <CountdownTimer />
-          </div>
-          <div className="flex items-center space-x-4 text-sm">
-            <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-              <Users className="h-4 w-4" />
-              <span>{posts.length}</span>
-            </div>
-            <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-              <MessageCircle className="h-4 w-4" />
-              <span>{posts.reduce((sum, post) => sum + (post.commentCount || 0), 0)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+
+
 
       {/* Spill of the Day Highlight */}
       {spillOfTheDay && (
