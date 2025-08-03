@@ -134,12 +134,14 @@ export function PostCard({ post }: PostCardProps) {
   const isTrending = trendingScore > 20;
 
   return (
-    <article className={cn(
-      "rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden",
-      post.isDrama 
-        ? "bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200"
-        : "bg-white border-gray-100"
-    )}>
+    <article 
+      id={`post-${post.id}`}
+      className={cn(
+        "rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden",
+        post.isDrama 
+          ? "bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200"
+          : "bg-white border-gray-100"
+      )}>
       {/* Trending Badge */}
       {isTrending && !post.isDrama && (
         <div className="absolute top-0 right-0 gradient-drama text-white px-3 py-1 text-xs font-bold rounded-bl-lg">

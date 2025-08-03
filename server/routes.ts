@@ -108,8 +108,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Content contains inappropriate language" });
       }
 
+      const sessionId = req.session.id!;
       const alias = generateAlias();
       const comment = await storage.createComment(validatedData, alias);
+      
+      // Create notification for post owner or parent comment owner
+      try {
+        if (validatedData.parentCommentId) {
+          // Reply to comment - notify the comment owner
+          const comments = await storage.getComments(validatedData.postId);
+          const parent = comments.find(c => c.id === validatedData.parentCommentId);
+          if (parent && parent.sessionId && parent.sessionId !== sessionId) {
+            await storage.createNotification({
+              recipientSessionId: parent.sessionId,
+              type: 'comment_reply',
+              message: `${alias} replied to your comment`,
+              postId: validatedData.postId,
+              commentId: comment.id,
+              triggerAlias: alias,
+            });
+          }
+        } else {
+          // Reply to post - notify the post owner
+          const post = await storage.getPost(validatedData.postId);
+          if (post && post.sessionId && post.sessionId !== sessionId) {
+            await storage.createNotification({
+              recipientSessionId: post.sessionId,
+              type: 'post_reply',
+              message: `${alias} commented on your post`,
+              postId: validatedData.postId,
+              commentId: comment.id,
+              triggerAlias: alias,
+            });
+          }
+        }
+      } catch (notifError) {
+        console.error('Failed to create notification:', notifError);
+        // Don't fail the comment creation if notification fails
+      }
+      
       res.json(comment);
     } catch (error) {
       if (error instanceof Error) {
@@ -243,6 +280,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error reporting post:", error);
       res.status(500).json({ error: "Failed to submit report" });
+    }
+  });
+
+  // Notification endpoints
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const notifications = await storage.getNotifications(sessionId);
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const count = await storage.getUnreadNotificationCount(sessionId);
+      res.json({ count });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      await storage.markNotificationAsRead(req.params.id, sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/mark-all-read", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      await storage.markAllNotificationsAsRead(sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
 

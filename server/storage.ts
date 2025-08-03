@@ -1,4 +1,4 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -33,6 +33,13 @@ export interface IStorage {
   reportPost(postId: string, reporterSessionId: string, reason: string): Promise<{ success: boolean; error?: string; postRemoved?: boolean; userFlagged?: boolean }>;
   getUserFlags(sessionId: string): Promise<UserFlag | undefined>;
   flagUser(sessionId: string): Promise<void>;
+  
+  // Notifications
+  createNotification(notification: NotificationInput): Promise<void>;
+  getNotifications(sessionId: string): Promise<Notification[]>;
+  markNotificationAsRead(notificationId: string, sessionId: string): Promise<void>;
+  markAllNotificationsAsRead(sessionId: string): Promise<void>;
+  getUnreadNotificationCount(sessionId: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -42,6 +49,7 @@ export class MemStorage implements IStorage {
   private dramaVotes: Map<string, DramaVote>;
   private reports: Map<string, Report>;
   private userFlags: Map<string, UserFlag>;
+  private notifications: Map<string, Notification>;
 
   constructor() {
     this.posts = new Map();
@@ -50,6 +58,7 @@ export class MemStorage implements IStorage {
     this.dramaVotes = new Map();
     this.reports = new Map();
     this.userFlags = new Map();
+    this.notifications = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -441,6 +450,52 @@ export class MemStorage implements IStorage {
       };
       this.userFlags.set(flagId, newFlag);
     }
+  }
+
+  // Notification methods
+  async createNotification(notification: NotificationInput): Promise<void> {
+    const id = randomUUID();
+    const newNotification: Notification = {
+      id,
+      recipientSessionId: notification.recipientSessionId,
+      type: notification.type,
+      message: notification.message,
+      postId: notification.postId || null,
+      commentId: notification.commentId || null,
+      triggerAlias: notification.triggerAlias,
+      isRead: false,
+      createdAt: new Date(),
+    };
+    this.notifications.set(id, newNotification);
+  }
+
+  async getNotifications(sessionId: string): Promise<Notification[]> {
+    return Array.from(this.notifications.values())
+      .filter(n => n.recipientSessionId === sessionId)
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async markNotificationAsRead(notificationId: string, sessionId: string): Promise<void> {
+    const notification = this.notifications.get(notificationId);
+    if (notification && notification.recipientSessionId === sessionId) {
+      notification.isRead = true;
+      this.notifications.set(notificationId, notification);
+    }
+  }
+
+  async markAllNotificationsAsRead(sessionId: string): Promise<void> {
+    for (const [id, notification] of this.notifications.entries()) {
+      if (notification.recipientSessionId === sessionId && !notification.isRead) {
+        notification.isRead = true;
+        this.notifications.set(id, notification);
+      }
+    }
+  }
+
+  async getUnreadNotificationCount(sessionId: string): Promise<number> {
+    return Array.from(this.notifications.values())
+      .filter(n => n.recipientSessionId === sessionId && !n.isRead)
+      .length;
   }
 }
 

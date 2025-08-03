@@ -83,6 +83,18 @@ export const dramaVotes = pgTable("drama_votes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  recipientSessionId: varchar("recipient_session_id").notNull(),
+  type: varchar("type").notNull(), // 'post_reply' | 'comment_reply'
+  message: text("message").notNull(),
+  postId: varchar("post_id"),
+  commentId: varchar("comment_id"),
+  triggerAlias: varchar("trigger_alias").notNull(), // Who triggered the notification
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
@@ -140,6 +152,15 @@ export const reportSchema = z.object({
   reason: z.enum(["spam", "harassment", "inappropriate", "misinformation", "other"]),
 });
 
+export const notificationSchema = z.object({
+  recipientSessionId: z.string(),
+  type: z.enum(['post_reply', 'comment_reply']),
+  message: z.string(),
+  postId: z.string().optional(),
+  commentId: z.string().optional(),
+  triggerAlias: z.string(),
+});
+
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 
   sessionId?: string;
@@ -152,6 +173,8 @@ export type Reaction = typeof reactions.$inferSelect;
 export type DramaVote = typeof dramaVotes.$inferSelect;
 export type UserFlag = typeof userFlags.$inferSelect;
 export type Report = typeof reports.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
 export type ReactionInput = z.infer<typeof reactionSchema>;
 export type DramaVoteInput = z.infer<typeof dramaVoteSchema>;
 export type ReportInput = z.infer<typeof reportSchema>;
+export type NotificationInput = z.infer<typeof notificationSchema>;

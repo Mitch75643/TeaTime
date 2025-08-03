@@ -1,5 +1,6 @@
-import { Bell, User, Flame } from "lucide-react";
+import { User, Flame } from "lucide-react";
 import { Button } from "./button";
+import { NotificationsPanel } from "./notifications-panel";
 
 export function Header() {
   return (
@@ -10,13 +11,7 @@ export function Header() {
           <h1 className="text-xl font-bold">TeaSpill</h1>
         </div>
         <div className="flex items-center space-x-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
-          >
-            <Bell className="h-5 w-5" />
-          </Button>
+          <NotificationsPanel />
           <Button
             variant="ghost"
             size="icon"

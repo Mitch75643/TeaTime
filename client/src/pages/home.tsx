@@ -17,7 +17,32 @@ export default function Home() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [seenPostIds, setSeenPostIds] = useState<Set<string>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  // Check for focus parameter in URL (from notifications)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusParam = urlParams.get('focus');
+    if (focusParam) {
+      setFocusPostId(focusParam);
+      // Remove the parameter from URL without page reload
+      window.history.replaceState({}, '', window.location.pathname);
+      
+      // Scroll to post after a brief delay to ensure it's rendered
+      setTimeout(() => {
+        const element = document.getElementById(`post-${focusParam}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add a brief highlight effect
+          element.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)';
+          setTimeout(() => {
+            element.style.background = '';
+          }, 2000);
+        }
+      }, 100);
+    }
+  }, []);
 
   const { data: allPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
