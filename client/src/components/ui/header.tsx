@@ -1,4 +1,4 @@
-import { User, Flame, Settings } from "lucide-react";
+import { User, Flame } from "lucide-react";
 import { Button } from "./button";
 import { NotificationsPanel } from "./notifications-panel";
 import { AuthButton } from "../auth/AuthButton";
@@ -17,10 +17,6 @@ export function Header() {
     setLocation('/profile');
   };
 
-  const handleSettingsClick = () => {
-    setLocation('/settings');
-  };
-
   return (
     <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
@@ -31,16 +27,6 @@ export function Header() {
         <div className="flex items-center space-x-3">
           <NotificationsPanel />
           {user ? (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSettingsClick}
-                className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
-                title="Settings"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -64,7 +50,6 @@ export function Header() {
                 <User className="h-5 w-5" />
               )}
             </Button>
-            </>
           ) : (
             <AuthButton />
           )}

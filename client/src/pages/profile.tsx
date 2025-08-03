@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -28,7 +28,12 @@ import {
   Star,
   Flame,
   Zap,
-  FlaskConical
+  FlaskConical,
+  Fingerprint,
+  RotateCw,
+  Key,
+  Check,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +44,13 @@ import { useUserAlias } from "@/hooks/use-user-alias";
 import { AliasSelector } from "@/components/ui/alias-selector";
 import { useLocation } from "wouter";
 import type { Post } from "@shared/schema";
+import { useAnonymousAuth } from "@/lib/anonymousAuth";
+import { checkBiometricSupport, isBiometricEnabled } from "@/lib/biometricAuth";
+import { SyncSetup } from "@/components/auth/SyncSetup";
+import { BiometricSetup } from "@/components/auth/BiometricSetup";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
@@ -49,6 +61,20 @@ export default function Profile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  
+  // Authentication states
+  const { user, isUpgraded, clearUserData } = useAnonymousAuth();
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
+  const [biometricDialogOpen, setBiometricDialogOpen] = useState(false);
+  const [biometricSupported, setBiometricSupported] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+
+  useEffect(() => {
+    checkBiometricSupport().then(setBiometricSupported);
+    if (user?.anonId) {
+      setBiometricEnabled(isBiometricEnabled(user.anonId));
+    }
+  }, [user?.anonId]);
 
   // Get user's posts (using session ID for identification)
   const { data: userPosts = [], isLoading } = useQuery<Post[]>({
@@ -73,8 +99,27 @@ export default function Profile() {
   };
 
   const handleClearData = () => {
-    localStorage.clear();
-    window.location.reload();
+    clearUserData();
+    toast({
+      title: "All data cleared",
+      description: "Your anonymous session and local data have been cleared.",
+    });
+    setTimeout(() => window.location.reload(), 1000);
+  };
+
+  const handleSyncComplete = () => {
+    setSyncDialogOpen(false);
+    toast({
+      title: "Cross-Device Sync Enabled",
+      description: "You can now access your account from other devices.",
+    });
+  };
+
+  const handleBiometricComplete = () => {
+    setBiometricDialogOpen(false);
+    if (user?.anonId) {
+      setBiometricEnabled(isBiometricEnabled(user.anonId));
+    }
   };
 
   const handleExportData = () => {
@@ -407,6 +452,110 @@ export default function Profile() {
                 ✓ Content is moderated for safety
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Account & Authentication */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Key className="h-5 w-5 mr-2" />
+              Account & Authentication
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Account Status */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Account Type</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {isUpgraded ? 'Anonymous with sync enabled' : 'Anonymous only'}
+                </p>
+              </div>
+              {isUpgraded ? (
+                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                  <Check className="h-3 w-3 mr-1" />
+                  Synced
+                </Badge>
+              ) : (
+                <Badge variant="secondary">Anonymous</Badge>
+              )}
+            </div>
+
+            {/* Cross-Device Sync */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Cross-Device Sync</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Access your account from other devices
+                </p>
+              </div>
+              {isUpgraded ? (
+                <Button variant="outline" size="sm" disabled>
+                  <Check className="h-4 w-4 mr-1" />
+                  Enabled
+                </Button>
+              ) : (
+                <Dialog open={syncDialogOpen} onOpenChange={setSyncDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <RotateCw className="h-4 w-4 mr-1" />
+                      Enable
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Enable Cross-Device Sync</DialogTitle>
+                    </DialogHeader>
+                    <SyncSetup onComplete={handleSyncComplete} />
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+
+            {/* Biometric Authentication */}
+            {biometricSupported && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Biometric Login</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Use Face ID, Touch ID, or fingerprint
+                  </p>
+                </div>
+                {biometricEnabled ? (
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                    <Fingerprint className="h-3 w-3 mr-1" />
+                    Active
+                  </Badge>
+                ) : (
+                  <Dialog open={biometricDialogOpen} onOpenChange={setBiometricDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Fingerprint className="h-4 w-4 mr-1" />
+                        Setup
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Setup Biometric Login</DialogTitle>
+                      </DialogHeader>
+                      <BiometricSetup 
+                        onComplete={handleBiometricComplete}
+                        userId={user?.anonId || ''}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            )}
+
+            {/* Privacy Notice */}
+            <Alert>
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                Biometric data never leaves your device. Only encrypted authentication tokens are stored locally.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
 
