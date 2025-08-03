@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "./button";
 import { SearchPage } from "./search-page";
 import { FloatingPostButton } from "./floating-post-button";
-import { Home, Coffee, User, Users } from "lucide-react";
+import { Home, Coffee, Settings, Users } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -14,15 +14,15 @@ export function BottomNav() {
     { id: "home", label: "Home", icon: Home, path: "/" },
     { id: "daily", label: "Daily", icon: Coffee, path: "/daily-spill" },
     { id: "community", label: "Community", icon: Users, path: "/community" },
-    { id: "me", label: "Profile", icon: User, path: "/profile" },
+    { id: "me", label: "Profile", icon: Settings, path: "/profile" },
   ];
 
   return (
     <>
-      {/* Floating Navigation with gradient accent */}
-      <nav className="fixed bottom-4 left-4 right-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto">
+      {/* Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-2xl border-t border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto">
         {/* Gradient accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-t-2xl"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500"></div>
         
         <div className="flex items-center justify-around py-3 px-2 relative">
           {navItems.map((item, index) => {
