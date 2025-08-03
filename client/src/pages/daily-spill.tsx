@@ -6,8 +6,77 @@ import { BottomNav } from "@/components/ui/bottom-nav";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, Plus, Calendar, Users, MessageCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Coffee, Plus, Calendar, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Trophy } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
+
+const WEEKLY_THEMES = [
+  { 
+    name: "Love Week", 
+    emoji: "💖", 
+    color: "from-pink-500 to-rose-500",
+    description: "Share your romantic wins, fails, and everything in between" 
+  },
+  { 
+    name: "Rant Week", 
+    emoji: "😡", 
+    color: "from-red-500 to-orange-500",
+    description: "Let it all out - what's been bothering you lately?" 
+  },
+  { 
+    name: "Roast Week", 
+    emoji: "😂", 
+    color: "from-yellow-500 to-orange-500",
+    description: "Time to spill the tea and serve some friendly roasts" 
+  },
+  { 
+    name: "Unpopular Opinions", 
+    emoji: "🤯", 
+    color: "from-purple-500 to-indigo-500",
+    description: "Share those thoughts everyone disagrees with" 
+  },
+  { 
+    name: "Chaos Week", 
+    emoji: "🌪️", 
+    color: "from-green-500 to-teal-500",
+    description: "When life gets messy - share your chaotic moments" 
+  }
+];
+
+const THEMED_PROMPTS: Record<string, string[]> = {
+  "Love Week": [
+    "What's the most romantic thing someone has done for you?",
+    "Share your biggest dating red flag story",
+    "Tell us about a crush that went completely wrong",
+    "What's your most embarrassing love confession?",
+  ],
+  "Rant Week": [
+    "What's something that everyone loves but you can't stand?",
+    "Vent about the most annoying thing that happened today",
+    "What's a trend that needs to die immediately?",
+    "Share your biggest pet peeve that no one understands",
+  ],
+  "Roast Week": [
+    "What's the funniest comeback you've ever heard?",
+    "Share a time when someone got roasted so hard it was legendary",
+    "What's the most savage thing you've witnessed?",
+    "Tell us about a roast that went too far",
+  ],
+  "Unpopular Opinions": [
+    "What's an unpopular opinion you'll defend to the death?",
+    "Share a belief that makes people think you're crazy",
+    "What's something popular that you think is overrated?",
+    "Defend something everyone hates but you secretly love",
+  ],
+  "Chaos Week": [
+    "What's the most chaotic thing that happened to you this week?",
+    "Share a moment when everything went wrong at once",
+    "Tell us about a time you caused complete chaos by accident",
+    "What's your most 'main character energy' moment?",
+  ]
+};
 
 const DAILY_PROMPTS = [
   "What's the wildest thing you saw this week?",
@@ -19,9 +88,23 @@ const DAILY_PROMPTS = [
   "What's something you did that you're secretly proud of?",
 ];
 
+function getCurrentWeekTheme() {
+  const today = new Date();
+  const weekOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24 * 7));
+  return WEEKLY_THEMES[weekOfYear % WEEKLY_THEMES.length];
+}
+
 function getDailyPrompt() {
   const today = new Date();
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+  const currentTheme = getCurrentWeekTheme();
+  
+  // Use themed prompts if available, otherwise fall back to general prompts
+  const themedPrompts = THEMED_PROMPTS[currentTheme.name];
+  if (themedPrompts) {
+    return themedPrompts[dayOfYear % themedPrompts.length];
+  }
+  
   return DAILY_PROMPTS[dayOfYear % DAILY_PROMPTS.length];
 }
 
@@ -66,10 +149,67 @@ function CountdownTimer() {
   );
 }
 
+function SpillStreak() {
+  const [streak, setStreak] = useState(3); // This would come from user data in real app
+  
+  const getStreakMessage = (days: number) => {
+    if (days === 0) return "Start your spill streak today!";
+    if (days < 3) return `${days}-day streak! Keep going!`;
+    if (days < 7) return `${days}-day streak! You're on fire! 🔥`;
+    if (days < 14) return `${days}-day streak! Legendary spiller! 👑`;
+    return `${days}-day streak! Tea master! ☕👑`;
+  };
+
+  const getStreakIcon = (days: number) => {
+    if (days < 3) return <Star className="h-4 w-4" />;
+    if (days < 7) return <Flame className="h-4 w-4" />;
+    if (days < 14) return <Crown className="h-4 w-4" />;
+    return <Trophy className="h-4 w-4" />;
+  };
+
+  return (
+    <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg px-3 py-2">
+      <div className="text-yellow-600 dark:text-yellow-400">
+        {getStreakIcon(streak)}
+      </div>
+      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+        {getStreakMessage(streak)}
+      </span>
+    </div>
+  );
+}
+
+function SpillProgress({ totalSpills }: { totalSpills: number }) {
+  const dailyGoal = 50; // Could be dynamic
+  const progress = Math.min((totalSpills / dailyGoal) * 100, 100);
+  
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-gray-600 dark:text-gray-400">Daily Spill Goal</span>
+        <span className="font-medium text-gray-900 dark:text-gray-100">
+          {totalSpills}/{dailyGoal} spills
+        </span>
+      </div>
+      <Progress value={progress} className="h-2" />
+      {progress >= 100 && (
+        <div className="text-center">
+          <Badge className="bg-green-100 text-green-700 border-green-200">
+            🎉 Daily goal reached! Amazing community!
+          </Badge>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DailySpill() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [hasSpilledToday, setHasSpilledToday] = useState(false); // Would track user's daily participation
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const todayPrompt = getDailyPrompt();
   const dateString = getDateString();
+  const currentTheme = getCurrentWeekTheme();
 
   // Get posts with daily spill tag
   const { data: posts = [], isLoading } = useQuery<Post[]>({
@@ -81,19 +221,85 @@ export default function DailySpill() {
     },
   });
 
+  // Handle post submission success
+  const handlePostSuccess = () => {
+    setHasSpilledToday(true);
+    setShowSuccessMessage(true);
+    setTimeout(() => setShowSuccessMessage(false), 5000);
+  };
+
+  // Get "Spill of the Day" - highest reacted post
+  const spillOfTheDay = posts.length > 0 
+    ? posts.reduce((best, current) => {
+        const currentReactions = (current.fireReactions || 0) + (current.cryReactions || 0) + (current.eyesReactions || 0) + (current.clownReactions || 0);
+        const bestReactions = (best.fireReactions || 0) + (best.cryReactions || 0) + (best.eyesReactions || 0) + (best.clownReactions || 0);
+        return currentReactions > bestReactions ? current : best;
+      })
+    : null;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
+      {/* Theme of the Week Banner */}
+      <div className="px-4 pt-4">
+        <Card className={cn("border-0 text-white bg-gradient-to-r", currentTheme.color)}>
+          <CardContent className="p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-lg">{currentTheme.emoji}</span>
+                <div>
+                  <p className="font-bold text-sm">{currentTheme.name}</p>
+                  <p className="text-xs opacity-90">{currentTheme.description}</p>
+                </div>
+              </div>
+              <Badge className="bg-white/20 text-white border-0 text-xs">
+                This Week
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="px-4 pt-2">
+          <Card className="bg-green-100 border-green-200 text-green-800">
+            <CardContent className="p-3">
+              <div className="flex items-center space-x-2">
+                <Trophy className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Amazing! Your spill has been added to today's collection! 🎉
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Daily Prompt Card */}
-      <div className="px-4 pt-6 pb-4">
-        <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-0">
+      <div className="px-4 pt-4 pb-4">
+        <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-0 relative overflow-hidden">
+          {spillOfTheDay && (
+            <div className="absolute top-2 right-2">
+              <Badge className="bg-yellow-400 text-yellow-900 border-0 text-xs font-bold">
+                ⭐ Spill of the Day
+              </Badge>
+            </div>
+          )}
           <CardHeader className="pb-3">
             <div className="flex items-center space-x-2 mb-2">
               <Coffee className="h-5 w-5" />
               <span className="text-sm font-medium opacity-90">{dateString}</span>
             </div>
-            <CardTitle className="text-xl font-bold">☕ Daily Spill</CardTitle>
+            <CardTitle className="text-xl font-bold flex items-center space-x-2">
+              <span>☕ Daily Spill</span>
+              {spillOfTheDay && (
+                <div className="text-sm bg-white/20 rounded-full px-2 py-1">
+                  🏆 Featured
+                </div>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-lg font-medium mb-4 leading-relaxed">
@@ -110,6 +316,19 @@ export default function DailySpill() {
         </Card>
       </div>
 
+      {/* User Engagement Features */}
+      <div className="px-4 pb-4 space-y-3">
+        {/* Spill Streak */}
+        <SpillStreak />
+        
+        {/* Progress Bar */}
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardContent className="p-3">
+            <SpillProgress totalSpills={posts.length} />
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Stats */}
       <div className="px-4 pb-4">
         <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
@@ -118,6 +337,7 @@ export default function DailySpill() {
               <Calendar className="h-4 w-4" />
               <span className="text-sm">Today's Prompt</span>
             </div>
+            <CountdownTimer />
           </div>
           <div className="flex items-center space-x-4 text-sm">
             <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
@@ -131,6 +351,28 @@ export default function DailySpill() {
           </div>
         </div>
       </div>
+
+      {/* Spill of the Day Highlight */}
+      {spillOfTheDay && (
+        <div className="px-4 pb-4">
+          <Card className="border-2 border-yellow-400 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
+            <CardHeader className="pb-2">
+              <div className="flex items-center space-x-2">
+                <Trophy className="h-5 w-5 text-yellow-600" />
+                <CardTitle className="text-lg text-yellow-700 dark:text-yellow-300">
+                  ⭐ Spill of the Day
+                </CardTitle>
+                <Badge className="bg-yellow-400 text-yellow-900 text-xs">
+                  Most Reactions
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <PostCard post={spillOfTheDay} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Posts Feed */}
       <main className="px-4 pb-20 space-y-4">
@@ -161,16 +403,26 @@ export default function DailySpill() {
         )}
 
         {posts.map((post: Post) => (
-          <PostCard key={post.id} post={post} />
+          <PostCard 
+            key={post.id} 
+            post={post} 
+          />
         ))}
       </main>
 
       <SectionPostModal 
-        isOpen={isPostModalOpen} 
+        isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
-        section="daily-tea"
-        sectionTitle="☕ Daily Spill"
-        promptText={todayPrompt}
+        onSuccess={handlePostSuccess}
+        category="daily"
+        title="Daily Spill"
+        prompt={todayPrompt}
+        sectionConfig={{
+          color: "border-purple-500",
+          bgColor: "bg-purple-50 dark:bg-purple-900/20",
+          textColor: "text-purple-700 dark:text-purple-300",
+          emoji: "☕"
+        }}
       />
       
       <BottomNav />
