@@ -100,6 +100,7 @@ export default function TopicFeed() {
   const [sortBy, setSortBy] = useState<SortOption>("new");
   const [storyCategory, setStoryCategory] = useState("all");
   const [funCategory, setFunCategory] = useState("meme");
+  const [selectedTopic, setSelectedTopic] = useState("");
   
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
@@ -245,9 +246,11 @@ export default function TopicFeed() {
         {topicId === "hot-topics" && (
           <HotTopicsFeatures 
             onCreateTopic={(topic, hashtag) => {
+              setSelectedTopic(topic || "");
               setIsPostModalOpen(true);
             }}
             onCreatePost={() => {
+              setSelectedTopic("");
               setIsPostModalOpen(true);
             }}
           />
@@ -371,9 +374,13 @@ export default function TopicFeed() {
       {/* Section-specific Post Modal */}
       <SectionPostModal
         isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
+        onClose={() => {
+          setIsPostModalOpen(false);
+          setSelectedTopic("");
+        }}
         section={topicId}
         sectionTitle={`${topic.emoji} ${topic.name}`}
+        promptText={selectedTopic}
       />
     </div>
   );

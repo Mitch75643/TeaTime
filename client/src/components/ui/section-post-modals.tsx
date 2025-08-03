@@ -37,6 +37,14 @@ const hotTopicsTags = [
   "#tech", "#hot-takes", "#social", "#entertainment", "#news"
 ];
 
+const weeklyHotTopics = [
+  "AI will replace most jobs in 5 years",
+  "Social media is toxic for mental health", 
+  "Climate change isn't being taken seriously",
+  "Gen Z has it harder than previous generations",
+  "Remote work is overrated"
+];
+
 export function SectionPostModal({ 
   isOpen, 
   onClose, 
@@ -58,6 +66,13 @@ export function SectionPostModal({
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Pre-fill topic when modal opens with promptText for hot-topics
+  useEffect(() => {
+    if (isOpen && section === "hot-topics" && promptText) {
+      setTopicTitle(promptText);
+    }
+  }, [isOpen, section, promptText]);
 
   const createPostMutation = useMutation({
     mutationFn: async (data: InsertPost) => {
@@ -144,7 +159,7 @@ export function SectionPostModal({
     if (section === "story-time") {
       postData.storyType = storyType as any;
     }
-    if (section === "hot-topics" && topicTitle.trim()) {
+    if (section === "hot-topics") {
       postData.topicTitle = topicTitle.trim();
     }
     if (section === "tea-experiments") {
@@ -250,15 +265,20 @@ export function SectionPostModal({
           {/* Hot Topics - Custom Topic Field */}
           {section === "hot-topics" && (
             <div>
-              <Label htmlFor="topic-title">What's the hot topic you want to spill tea about?</Label>
-              <Input
-                id="topic-title"
-                value={topicTitle}
-                onChange={(e) => setTopicTitle(e.target.value)}
-                placeholder="e.g., AI girlfriends, cancel culture, TikTok bans..."
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">Share trending subjects that everyone's talking about</p>
+              <Label htmlFor="topic-title">Select a Hot Topic</Label>
+              <Select value={topicTitle} onValueChange={setTopicTitle}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose from this week's hottest discussions..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {weeklyHotTopics.map((topic, index) => (
+                    <SelectItem key={index} value={topic}>
+                      #{index + 1}: {topic}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 mt-1">Pick one of the week's hottest topics to share your take</p>
             </div>
           )}
 
@@ -304,7 +324,7 @@ export function SectionPostModal({
           <div>
             <Label htmlFor="content">
               {section === "daily-debate" ? "Your Bold Statement" : 
-               section === "hot-topics" ? "Your Take" : "Your Post"}
+               section === "hot-topics" ? "Your Response" : "Your Post"}
             </Label>
             <Textarea
               id="content"

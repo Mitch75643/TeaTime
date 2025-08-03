@@ -103,12 +103,20 @@ export function HotTopicsFeatures({ onCreateTopic, onCreatePost }: HotTopicsFeat
                   <div className="flex items-center gap-2 mt-1">
                     <Flame className="h-3 w-3 text-red-500" />
                     <span className="text-xs text-gray-500">
-                      {item.reactions} reactions this week
+                      {item.reactions} takes this week
                     </span>
                   </div>
                 </div>
                 
-
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => onCreateTopic(item.title)}
+                  className="hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/10"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Take
+                </Button>
               </div>
             ))}
           </div>
