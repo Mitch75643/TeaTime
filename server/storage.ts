@@ -60,16 +60,16 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
       postContext: insertPost.postContext || 'home',
-      communitySection: insertPost.communitySection || null,
+      communitySection: insertPost.communitySection,
       reportCount: 0,
       isRemoved: false,
       postType: insertPost.postType || 'standard',
-      celebrityName: insertPost.celebrityName || null,
-      storyType: insertPost.storyType || null,
-      topicTitle: insertPost.topicTitle || null,
-      pollOptions: insertPost.pollOptions || null,
-      pollVotes: insertPost.postType === 'poll' ? {optionA: 0, optionB: 0} : null,
-      debateVotes: insertPost.postType === 'debate' ? {up: 0, down: 0} : null,
+      celebrityName: insertPost.celebrityName,
+      storyType: insertPost.storyType,
+      topicTitle: insertPost.topicTitle,
+      pollOptions: insertPost.pollOptions,
+      pollVotes: insertPost.postType === 'poll' ? {optionA: 0, optionB: 0} : undefined,
+      debateVotes: insertPost.postType === 'debate' ? {up: 0, down: 0} : undefined,
       allowComments: insertPost.allowComments !== false,
     };
     this.posts.set(id, post);
@@ -109,8 +109,10 @@ export class MemStorage implements IStorage {
     
     if (sortBy === 'trending') {
       posts.sort((a, b) => {
-        const aScore = (a.reactions?.fire || 0) * 3 + (a.reactions?.eyes || 0) * 2 + (a.reactions?.cry || 0) + (a.reactions?.clown || 0) + a.commentCount * 2;
-        const bScore = (b.reactions?.fire || 0) * 3 + (b.reactions?.eyes || 0) * 2 + (b.reactions?.cry || 0) + (b.reactions?.clown || 0) + b.commentCount * 2;
+        const aReactions = a.reactions as any || {};
+        const bReactions = b.reactions as any || {};
+        const aScore = (aReactions.laugh || 0) * 3 + (aReactions.thumbsUp || 0) * 2 + (aReactions.sad || 0) + (aReactions.thumbsDown || 0) * 0.5 + (a.commentCount || 0) * 2;
+        const bScore = (bReactions.laugh || 0) * 3 + (bReactions.thumbsUp || 0) * 2 + (bReactions.sad || 0) + (bReactions.thumbsDown || 0) * 0.5 + (b.commentCount || 0) * 2;
         return bScore - aScore;
       });
     } else {
@@ -146,22 +148,37 @@ export class MemStorage implements IStorage {
       ...insertComment,
       id,
       alias,
+      parentCommentId: insertComment.parentCommentId || null,
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
       createdAt: new Date(),
     };
     this.comments.set(id, comment);
     
-    // Update post comment count
-    const postComments = Array.from(this.comments.values()).filter(c => c.postId === insertComment.postId);
+    // Update post comment count (only count top-level comments)
+    const postComments = Array.from(this.comments.values()).filter(c => 
+      c.postId === insertComment.postId && !c.parentCommentId
+    );
     await this.updatePostCommentCount(insertComment.postId, postComments.length);
     
     return comment;
   }
 
   async getComments(postId: string): Promise<Comment[]> {
-    return Array.from(this.comments.values())
+    const allComments = Array.from(this.comments.values())
       .filter(comment => comment.postId === postId)
       .sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
+    
+    // Organize comments hierarchically
+    const topLevelComments = allComments.filter(c => !c.parentCommentId);
+    const replies = allComments.filter(c => c.parentCommentId);
+    
+    // Build the hierarchical structure
+    const commentsWithReplies = topLevelComments.map(comment => ({
+      ...comment,
+      replies: replies.filter(reply => reply.parentCommentId === comment.id)
+    }));
+    
+    return commentsWithReplies;
   }
 
   async updateCommentReactions(commentId: string, reactions: Record<string, number>): Promise<void> {
@@ -383,9 +400,9 @@ export class MemStorage implements IStorage {
       // Increment flag count
       const updatedFlag = {
         ...existingFlag,
-        flagCount: existingFlag.flagCount + 1,
+        flagCount: (existingFlag.flagCount || 0) + 1,
         lastFlaggedAt: new Date(),
-        isBanned: existingFlag.flagCount + 1 >= 3 // Ban after 3 flags
+        isBanned: ((existingFlag.flagCount || 0) + 1) >= 3 // Ban after 3 flags
       };
       this.userFlags.set(existingFlag.id, updatedFlag);
     } else {

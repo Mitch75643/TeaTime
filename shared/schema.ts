@@ -54,6 +54,7 @@ export const reports = pgTable("reports", {
 export const comments = pgTable("comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   postId: varchar("post_id").notNull().references(() => posts.id),
+  parentCommentId: varchar("parent_comment_id"),
   content: text("content").notNull(),
   alias: varchar("alias").notNull(),
   reactions: jsonb("reactions").default({
@@ -113,10 +114,12 @@ export const insertPostSchema = createInsertSchema(posts).pick({
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
   postId: true,
+  parentCommentId: true,
   content: true,
 }).extend({
   content: z.string().min(1).max(300),
   postId: z.string(),
+  parentCommentId: z.string().optional(),
 });
 
 export const reactionSchema = z.object({

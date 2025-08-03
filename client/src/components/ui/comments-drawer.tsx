@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./sh
 import { Button } from "./button";
 import { Textarea } from "./textarea";
 import { ScrollArea } from "./scroll-area";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle, Send, Reply } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
@@ -18,15 +18,17 @@ interface CommentsDrawerProps {
 }
 
 const reactionEmojis = {
-  fire: "🔥",
-  cry: "😭",
-  eyes: "👀",
-  clown: "🤡",
+  thumbsUp: "👍",
+  thumbsDown: "👎",
+  laugh: "😂",
+  sad: "😢",
 };
 
 export function CommentsDrawer({ postId, commentCount, isDrama = false }: CommentsDrawerProps) {
   const [comment, setComment] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -48,9 +50,11 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
       queryClient.invalidateQueries({ queryKey: ["/api/posts", postId, "comments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       setComment("");
+      setReplyText("");
+      setReplyingTo(null);
       toast({
-        title: "Comment posted!",
-        description: "Your anonymous comment has been added.",
+        title: replyingTo ? "Reply posted!" : "Comment posted!",
+        description: replyingTo ? "Your reply has been added." : "Your anonymous comment has been added.",
       });
     },
     onError: (error: any) => {
@@ -75,9 +79,10 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   });
 
   const handleSubmit = () => {
-    if (!comment.trim()) return;
+    const content = replyingTo ? replyText.trim() : comment.trim();
+    if (!content) return;
 
-    if (comment.length > 300) {
+    if (content.length > 300) {
       toast({
         title: "Comment too long",
         description: "Comments must be 300 characters or less.",
@@ -88,8 +93,19 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
     createCommentMutation.mutate({
       postId,
-      content: comment.trim(),
+      parentCommentId: replyingTo || undefined,
+      content,
     });
+  };
+
+  const handleReply = (commentId: string) => {
+    setReplyingTo(commentId);
+    setReplyText("");
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
+    setReplyText("");
   };
 
   const handleReaction = (type: string, commentId: string) => {
@@ -138,53 +154,166 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
             ) : (
               <div className="space-y-4">
                 {comments.map((comment) => (
-                  <div key={comment.id} className={cn(
-                    "rounded-lg p-3 space-y-2",
-                    isDrama 
-                      ? "bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200"
-                      : "bg-gray-50 border border-gray-200"
-                  )}>
-                    <div className="flex items-start space-x-3">
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center",
-                        isDrama 
-                          ? "bg-gradient-to-br from-orange-400 to-red-500"
-                          : "bg-gradient-to-br from-purple-400 to-pink-400"
-                      )}>
-                        <span className="text-white text-xs font-bold">
-                          {comment.alias.charAt(0)}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <p className="text-sm font-medium text-gray-900">{comment.alias}</p>
-                          <span className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(comment.createdAt!), { addSuffix: true })}
+                  <div key={comment.id} className="space-y-2">
+                    {/* Main Comment */}
+                    <div className={cn(
+                      "rounded-lg p-3 space-y-2",
+                      isDrama 
+                        ? "bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200"
+                        : "bg-gray-50 border border-gray-200"
+                    )}>
+                      <div className="flex items-start space-x-3">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center",
+                          isDrama 
+                            ? "bg-gradient-to-br from-orange-400 to-red-500"
+                            : "bg-gradient-to-br from-purple-400 to-pink-400"
+                        )}>
+                          <span className="text-white text-xs font-bold">
+                            {comment.alias.charAt(0)}
                           </span>
                         </div>
-                        <p className="text-gray-800 mt-1">{comment.content}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <p className="text-sm font-medium text-gray-900">{comment.alias}</p>
+                            <span className="text-xs text-gray-500">
+                              {formatDistanceToNow(new Date(comment.createdAt!), { addSuffix: true })}
+                            </span>
+                          </div>
+                          <p className="text-gray-800 mt-1">{comment.content}</p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* Comment Reactions */}
-                    <div className="flex items-center space-x-3 ml-11">
-                      {Object.entries(reactionEmojis).map(([type, emoji]) => {
-                        const count = comment.reactions?.[type as keyof typeof comment.reactions] || 0;
+                      
+                      {/* Comment Actions */}
+                      <div className="flex items-center justify-between ml-11">
+                        {/* Reactions */}
+                        <div className="flex items-center space-x-3">
+                          {Object.entries(reactionEmojis).map(([type, emoji]) => {
+                            const count = comment.reactions?.[type as keyof typeof comment.reactions] || 0;
+                            
+                            return (
+                              <Button
+                                key={type}
+                                variant="ghost"
+                                className="flex items-center space-x-1 text-gray-600 hover:text-red-500 transition-colors p-1 h-auto"
+                                onClick={() => handleReaction(type, comment.id)}
+                                disabled={reactionMutation.isPending}
+                              >
+                                <span className="text-sm">{emoji}</span>
+                                <span className="text-xs font-medium">{count}</span>
+                              </Button>
+                            );
+                          })}
+                        </div>
                         
-                        return (
-                          <Button
-                            key={type}
-                            variant="ghost"
-                            className="flex items-center space-x-1 text-gray-600 hover:text-red-500 transition-colors p-1 h-auto"
-                            onClick={() => handleReaction(type, comment.id)}
-                            disabled={reactionMutation.isPending}
-                          >
-                            <span className="text-sm">{emoji}</span>
-                            <span className="text-xs font-medium">{count}</span>
-                          </Button>
-                        );
-                      })}
+                        {/* Reply Button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-500 hover:text-gray-700 p-1 h-auto"
+                          onClick={() => handleReply(comment.id)}
+                        >
+                          <Reply className="h-3 w-3 mr-1" />
+                          <span className="text-xs">Reply</span>
+                        </Button>
+                      </div>
+
+                      {/* Reply Input (if replying to this comment) */}
+                      {replyingTo === comment.id && (
+                        <div className="ml-11 mt-3 space-y-2">
+                          <Textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder={`Reply to ${comment.alias}...`}
+                            className="resize-none text-sm"
+                            maxLength={300}
+                            rows={2}
+                          />
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">
+                              {replyText.length}/300
+                            </span>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={cancelReply}
+                                className="text-xs"
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleSubmit}
+                                disabled={createCommentMutation.isPending || !replyText.trim()}
+                                className={cn(
+                                  "text-white text-xs",
+                                  isDrama ? "gradient-drama" : "gradient-primary"
+                                )}
+                                size="sm"
+                              >
+                                {createCommentMutation.isPending ? "Posting..." : "Reply"}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Replies */}
+                    {(comment as any).replies && (comment as any).replies.length > 0 && (
+                      <div className="ml-8 space-y-2">
+                        {(comment as any).replies.map((reply: any) => (
+                          <div key={reply.id} className={cn(
+                            "rounded-lg p-3 space-y-2",
+                            isDrama 
+                              ? "bg-gradient-to-br from-orange-25 to-red-25 border border-orange-100"
+                              : "bg-gray-25 border border-gray-100"
+                          )}>
+                            <div className="flex items-start space-x-3">
+                              <div className={cn(
+                                "w-6 h-6 rounded-full flex items-center justify-center",
+                                isDrama 
+                                  ? "bg-gradient-to-br from-orange-300 to-red-400"
+                                  : "bg-gradient-to-br from-purple-300 to-pink-300"
+                              )}>
+                                <span className="text-white text-xs font-bold">
+                                  {reply.alias.charAt(0)}
+                                </span>
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <p className="text-sm font-medium text-gray-900">{reply.alias}</p>
+                                  <span className="text-xs text-gray-500">
+                                    {formatDistanceToNow(new Date(reply.createdAt!), { addSuffix: true })}
+                                  </span>
+                                </div>
+                                <p className="text-gray-800 mt-1 text-sm">{reply.content}</p>
+                              </div>
+                            </div>
+                            
+                            {/* Reply Reactions */}
+                            <div className="flex items-center space-x-3 ml-9">
+                              {Object.entries(reactionEmojis).map(([type, emoji]) => {
+                                const count = reply.reactions?.[type as keyof typeof reply.reactions] || 0;
+                                
+                                return (
+                                  <Button
+                                    key={type}
+                                    variant="ghost"
+                                    className="flex items-center space-x-1 text-gray-600 hover:text-red-500 transition-colors p-1 h-auto"
+                                    onClick={() => handleReaction(type, reply.id)}
+                                    disabled={reactionMutation.isPending}
+                                  >
+                                    <span className="text-xs">{emoji}</span>
+                                    <span className="text-xs font-medium">{count}</span>
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -192,39 +321,41 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
           </ScrollArea>
 
           {/* Comment Input */}
-          <div className="border-t pt-4 space-y-3">
-            <Textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Add a comment..."
-              className="resize-none"
-              maxLength={300}
-              rows={3}
-            />
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">
-                {comment.length}/300
-              </span>
-              <Button
-                onClick={handleSubmit}
-                disabled={createCommentMutation.isPending || !comment.trim()}
-                className={cn(
-                  "text-white",
-                  isDrama ? "gradient-drama" : "gradient-primary"
-                )}
-                size="sm"
-              >
-                {createCommentMutation.isPending ? (
-                  "Posting..."
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-1" />
-                    Post
-                  </>
-                )}
-              </Button>
+          {!replyingTo && (
+            <div className="border-t pt-4 space-y-3">
+              <Textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="resize-none"
+                maxLength={300}
+                rows={3}
+              />
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">
+                  {comment.length}/300
+                </span>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={createCommentMutation.isPending || !comment.trim()}
+                  className={cn(
+                    "text-white",
+                    isDrama ? "gradient-drama" : "gradient-primary"
+                  )}
+                  size="sm"
+                >
+                  {createCommentMutation.isPending ? (
+                    "Posting..."
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-1" />
+                      Post
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>
