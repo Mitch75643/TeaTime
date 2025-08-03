@@ -94,6 +94,16 @@ All avatars maintain user anonymity while allowing personality expression throug
 - **Suggestions Features**: Bug reports, feature requests, and general ideas with upvote/downvote system, status badges (Planned, In Review, Completed), and admin feedback visibility
 - **Interactive Elements**: Each topic now has unique specialized components with topic-specific icons, animations, and themed styling that align with TeaSpill's gossip culture
 
+### Community Topic Celebration Animations (January 2025)
+- **Celebrity Tea**: Paparazzi camera flash with sparkles and gentle camera click + excited murmur sounds
+- **Story Time**: Glowing open book with magical sparkles rising out, plus soft page-turn and twinkle sounds  
+- **Hot Topics**: Flickering flame emoji with fire trail effects and soft fire crackle/sizzle sounds
+- **Daily Debate**: Animated thought bubbles and question marks with soft "hmm" thinking sounds
+- **Tea Experiments**: Chemistry-themed bubbling beaker animation with playful fizz-pop sounds (triggers on "Launch Experiment")
+- **Feedback & Suggestions**: Pulsing lightbulb with spark animations and calm "ding" realization sounds
+- **Smart Animation System**: Each animation plays for 1-2 seconds after successful post submission, all sounds are gentle and natural (under 1 second), works perfectly on mobile and desktop, matches TeaSpill's fun expressive vibe
+- **Enhanced Daily Spill**: Prominent yellow-highlighted prompt display with clear user guidance above text area
+
 ### Home Page UI Polish (January 2025)
 - **Enhanced Modal UX**: Added prominent close button with circular background and hover effects for better mobile accessibility
 - **Page Branding**: Implemented gradient "Spill the Tea" header with tagline to establish page identity and brand personality
