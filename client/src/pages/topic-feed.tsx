@@ -339,6 +339,9 @@ export default function TopicFeed() {
             onVote={(suggestionId, voteType) => {
               console.log(`Voted ${voteType} on suggestion ${suggestionId}`);
             }}
+            onCelebrationTrigger={(type) => {
+              triggerCelebration(type);
+            }}
           />
         )}
       </div>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Zap, Flame, MessageSquare, FlaskConical } from "lucide-react";
+import { Camera, Zap, Flame, MessageSquare, FlaskConical, Bug, Lightbulb, MessageCircle } from "lucide-react";
 
 interface CelebrationProps {
   isVisible: boolean;
   onComplete: () => void;
-  type: "celebrity-tea" | "story-time" | "hot-topics" | "daily-debate" | "tea-experiments";
+  type: "celebrity-tea" | "story-time" | "hot-topics" | "daily-debate" | "tea-experiments" | "bug-report" | "feature-request" | "general-feedback";
 }
 
 // Audio helper function
@@ -15,17 +15,19 @@ const playSound = (soundType: string) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
     switch (soundType) {
-      case "camera-shutter":
-        // Quick click sound
-        const clickOsc = audioContext.createOscillator();
-        const clickGain = audioContext.createGain();
-        clickOsc.connect(clickGain);
-        clickGain.connect(audioContext.destination);
-        clickOsc.frequency.setValueAtTime(800, audioContext.currentTime);
-        clickGain.gain.setValueAtTime(0.3, audioContext.currentTime);
-        clickGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-        clickOsc.start(audioContext.currentTime);
-        clickOsc.stop(audioContext.currentTime + 0.1);
+      case "twinkle":
+        // Soft twinkle/glitter sound
+        const twinkleOsc = audioContext.createOscillator();
+        const twinkleGain = audioContext.createGain();
+        twinkleOsc.connect(twinkleGain);
+        twinkleGain.connect(audioContext.destination);
+        twinkleOsc.type = "sine";
+        twinkleOsc.frequency.setValueAtTime(1500, audioContext.currentTime);
+        twinkleOsc.frequency.exponentialRampToValueAtTime(2000, audioContext.currentTime + 0.3);
+        twinkleGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+        twinkleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        twinkleOsc.start(audioContext.currentTime);
+        twinkleOsc.stop(audioContext.currentTime + 0.4);
         break;
         
       case "whoosh":
@@ -42,18 +44,19 @@ const playSound = (soundType: string) => {
         whooshOsc.stop(audioContext.currentTime + 0.3);
         break;
         
-      case "sizzle":
-        // Sizzling fire sound
-        const sizzleOsc = audioContext.createOscillator();
-        const sizzleGain = audioContext.createGain();
-        sizzleOsc.connect(sizzleGain);
-        sizzleGain.connect(audioContext.destination);
-        sizzleOsc.type = "sawtooth";
-        sizzleOsc.frequency.setValueAtTime(200, audioContext.currentTime);
-        sizzleGain.gain.setValueAtTime(0.15, audioContext.currentTime);
-        sizzleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-        sizzleOsc.start(audioContext.currentTime);
-        sizzleOsc.stop(audioContext.currentTime + 0.4);
+      case "flame-whoosh":
+        // Soft flame whoosh sound
+        const flameOsc = audioContext.createOscillator();
+        const flameGain = audioContext.createGain();
+        flameOsc.connect(flameGain);
+        flameGain.connect(audioContext.destination);
+        flameOsc.type = "sine";
+        flameOsc.frequency.setValueAtTime(300, audioContext.currentTime);
+        flameOsc.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.3);
+        flameGain.gain.setValueAtTime(0.12, audioContext.currentTime);
+        flameGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        flameOsc.start(audioContext.currentTime);
+        flameOsc.stop(audioContext.currentTime + 0.3);
         break;
         
       case "clash":
@@ -70,18 +73,47 @@ const playSound = (soundType: string) => {
         clashOsc.stop(audioContext.currentTime + 0.2);
         break;
         
-      case "fizz":
-        // Bubbly fizzing sound
-        const fizzOsc = audioContext.createOscillator();
-        const fizzGain = audioContext.createGain();
-        fizzOsc.connect(fizzGain);
-        fizzGain.connect(audioContext.destination);
-        fizzOsc.type = "square";
-        fizzOsc.frequency.setValueAtTime(300, audioContext.currentTime);
-        fizzGain.gain.setValueAtTime(0.1, audioContext.currentTime);
-        fizzGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        fizzOsc.start(audioContext.currentTime);
-        fizzOsc.stop(audioContext.currentTime + 0.5);
+      case "bubbling":
+        // Soft bubbling lab sound
+        const bubbleOsc = audioContext.createOscillator();
+        const bubbleGain = audioContext.createGain();
+        bubbleOsc.connect(bubbleGain);
+        bubbleGain.connect(audioContext.destination);
+        bubbleOsc.type = "sine";
+        bubbleOsc.frequency.setValueAtTime(250, audioContext.currentTime);
+        bubbleOsc.frequency.setValueAtTime(350, audioContext.currentTime + 0.1);
+        bubbleOsc.frequency.setValueAtTime(280, audioContext.currentTime + 0.2);
+        bubbleGain.gain.setValueAtTime(0.08, audioContext.currentTime);
+        bubbleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        bubbleOsc.start(audioContext.currentTime);
+        bubbleOsc.stop(audioContext.currentTime + 0.4);
+        break;
+        
+      case "ping":
+        // Soft ping for bug reports
+        const pingOsc = audioContext.createOscillator();
+        const pingGain = audioContext.createGain();
+        pingOsc.connect(pingGain);
+        pingGain.connect(audioContext.destination);
+        pingOsc.frequency.setValueAtTime(800, audioContext.currentTime);
+        pingGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        pingGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        pingOsc.start(audioContext.currentTime);
+        pingOsc.stop(audioContext.currentTime + 0.2);
+        break;
+        
+      case "ding":
+        // Lightbulb ding for feature requests
+        const dingOsc = audioContext.createOscillator();
+        const dingGain = audioContext.createGain();
+        dingOsc.connect(dingGain);
+        dingGain.connect(audioContext.destination);
+        dingOsc.frequency.setValueAtTime(1000, audioContext.currentTime);
+        dingOsc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+        dingGain.gain.setValueAtTime(0.12, audioContext.currentTime);
+        dingGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        dingOsc.start(audioContext.currentTime);
+        dingOsc.stop(audioContext.currentTime + 0.3);
         break;
     }
   } catch (error) {
@@ -100,19 +132,28 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
       // Play sound effect
       switch (type) {
         case "celebrity-tea":
-          playSound("camera-shutter");
+          playSound("twinkle");
           break;
         case "story-time":
           playSound("whoosh");
           break;
         case "hot-topics":
-          playSound("sizzle");
+          playSound("flame-whoosh");
           break;
         case "daily-debate":
           playSound("clash");
           break;
         case "tea-experiments":
-          playSound("fizz");
+          playSound("bubbling");
+          break;
+        case "bug-report":
+          playSound("ping");
+          break;
+        case "feature-request":
+          playSound("ding");
+          break;
+        case "general-feedback":
+          playSound("whoosh");
           break;
       }
       
@@ -128,61 +169,69 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
 
   const renderCelebrityTea = () => (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
-      {/* Paparazzi Flashes */}
-      {[...Array(6)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-full h-full bg-white"
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: [0, 0.8, 0, 0.6, 0, 0.4, 0],
-          }}
-          transition={{
-            duration: 1.5,
-            delay: i * 0.1,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
-      
-      {/* Camera Icon */}
+      {/* Central Starburst */}
       <motion.div
-        className="absolute bg-pink-500 text-white p-4 rounded-full"
+        className="absolute bg-gradient-to-r from-pink-400 to-purple-500 text-white p-4 rounded-full"
         initial={{ scale: 0, rotate: 0 }}
         animate={{ 
-          scale: [0, 1.2, 1],
-          rotate: [0, -10, 10, 0]
+          scale: [0, 1.3, 1],
+          rotate: [0, 180, 360]
         }}
-        transition={{ duration: 1, ease: "backOut" }}
+        transition={{ duration: 1.2, ease: "backOut" }}
       >
-        <Camera className="h-8 w-8" />
+        <div className="text-2xl">⭐</div>
       </motion.div>
       
-      {/* Sparkle Burst */}
-      {[...Array(12)].map((_, i) => (
+      {/* Sparkle and Glitter Burst */}
+      {[...Array(16)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute text-yellow-400 text-2xl"
+          className="absolute text-3xl"
           initial={{ 
             scale: 0,
             x: 0,
             y: 0,
-            opacity: 1
+            opacity: 1,
+            rotate: 0
           }}
           animate={{
-            scale: [0, 1, 0.5],
-            x: Math.cos(i * 30 * Math.PI / 180) * 150,
-            y: Math.sin(i * 30 * Math.PI / 180) * 150,
-            opacity: [1, 1, 0]
+            scale: [0, 1.2, 0.8],
+            x: Math.cos(i * 22.5 * Math.PI / 180) * 180,
+            y: Math.sin(i * 22.5 * Math.PI / 180) * 180,
+            opacity: [1, 1, 0],
+            rotate: [0, 360]
           }}
           transition={{
-            duration: 1.5,
-            delay: 0.3,
+            duration: 1.8,
+            delay: 0.2,
             ease: "easeOut"
           }}
         >
-          ✨
+          {i % 2 === 0 ? "✨" : "💫"}
         </motion.div>
+      ))}
+      
+      {/* Gentle Twinkle Effects */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={`twinkle-${i}`}
+          className="absolute w-2 h-2 bg-yellow-300 rounded-full"
+          initial={{ 
+            scale: 0,
+            x: Math.random() * 400 - 200,
+            y: Math.random() * 400 - 200,
+            opacity: 0
+          }}
+          animate={{
+            scale: [0, 1, 0],
+            opacity: [0, 1, 0]
+          }}
+          transition={{
+            duration: 1,
+            delay: Math.random() * 1.5,
+            ease: "easeInOut"
+          }}
+        />
       ))}
     </div>
   );
@@ -239,33 +288,56 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
 
   const renderHotTopics = () => (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
-      {/* Fire Burst */}
+      {/* Heatwave Center */}
       <motion.div
         className="relative"
         initial={{ scale: 0 }}
-        animate={{ scale: [0, 1.3, 1] }}
-        transition={{ duration: 0.8, ease: "backOut" }}
+        animate={{ scale: [0, 1.2, 1] }}
+        transition={{ duration: 1, ease: "backOut" }}
       >
         <motion.div
-          className="bg-red-500 text-white p-4 rounded-full"
+          className="bg-gradient-to-r from-orange-400 to-red-500 text-white p-4 rounded-full"
           animate={{
             boxShadow: [
-              "0 0 0px rgba(239, 68, 68, 0.7)",
-              "0 0 30px rgba(239, 68, 68, 0.7)",
-              "0 0 0px rgba(239, 68, 68, 0.7)"
+              "0 0 0px rgba(251, 146, 60, 0.5)",
+              "0 0 40px rgba(251, 146, 60, 0.8)",
+              "0 0 20px rgba(251, 146, 60, 0.6)"
             ]
           }}
-          transition={{ duration: 1.5, repeat: 2 }}
+          transition={{ duration: 2, repeat: 1 }}
         >
           <Flame className="h-8 w-8" />
         </motion.div>
       </motion.div>
       
-      {/* Fire Emojis Float */}
-      {[...Array(8)].map((_, i) => (
+      {/* Heatwave Ripples */}
+      {[...Array(3)].map((_, i) => (
+        <motion.div
+          key={`ripple-${i}`}
+          className="absolute border-2 border-orange-300 rounded-full"
+          initial={{ 
+            width: 0,
+            height: 0,
+            opacity: 0.8
+          }}
+          animate={{
+            width: [0, 200 + i * 50, 300 + i * 50],
+            height: [0, 200 + i * 50, 300 + i * 50],
+            opacity: [0.8, 0.4, 0]
+          }}
+          transition={{
+            duration: 1.5,
+            delay: i * 0.3,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+      
+      {/* Floating Flame Emojis */}
+      {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute text-3xl"
+          className="absolute text-2xl"
           initial={{ 
             scale: 0,
             x: 0,
@@ -273,14 +345,14 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
             opacity: 1
           }}
           animate={{
-            scale: [0, 1, 0.7],
-            x: Math.cos(i * 45 * Math.PI / 180) * 120,
-            y: Math.sin(i * 45 * Math.PI / 180) * 120,
+            scale: [0, 1, 0.8],
+            x: Math.cos(i * 60 * Math.PI / 180) * 140,
+            y: Math.sin(i * 60 * Math.PI / 180) * 140,
             opacity: [1, 1, 0]
           }}
           transition={{
-            duration: 1.2,
-            delay: 0.4,
+            duration: 1.4,
+            delay: 0.5,
             ease: "easeOut"
           }}
         >
@@ -338,48 +410,221 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
       {/* Background Color Blip */}
       <motion.div
-        className="absolute inset-0 bg-purple-400"
+        className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-400"
         initial={{ opacity: 0 }}
         animate={{ 
-          opacity: [0, 0.3, 0]
+          opacity: [0, 0.2, 0]
         }}
-        transition={{ duration: 1.5, ease: "easeInOut" }}
+        transition={{ duration: 2, ease: "easeInOut" }}
       />
       
-      {/* Potion Flask */}
+      {/* Chemical Burst Center */}
       <motion.div
-        className="relative bg-purple-600 text-white p-4 rounded-full"
+        className="relative bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-5 rounded-full"
         initial={{ scale: 0, y: 20 }}
         animate={{ 
-          scale: [0, 1.2, 1],
+          scale: [0, 1.3, 1],
           y: [20, -10, 0]
         }}
-        transition={{ duration: 1, ease: "backOut" }}
+        transition={{ duration: 1.2, ease: "backOut" }}
       >
-        <FlaskConical className="h-8 w-8" />
+        <FlaskConical className="h-10 w-10" />
       </motion.div>
       
-      {/* Bubbles */}
-      {[...Array(15)].map((_, i) => (
+      {/* Colorful Chemical Burst */}
+      {[...Array(12)].map((_, i) => (
         <motion.div
-          key={i}
-          className="absolute w-4 h-4 bg-purple-300 rounded-full opacity-70"
+          key={`chemical-${i}`}
+          className={`absolute w-6 h-6 rounded-full ${
+            i % 4 === 0 ? 'bg-purple-400' : 
+            i % 4 === 1 ? 'bg-blue-400' : 
+            i % 4 === 2 ? 'bg-green-400' : 'bg-pink-400'
+          }`}
           initial={{ 
             scale: 0,
-            x: Math.random() * 200 - 100,
-            y: 50
+            x: 0,
+            y: 0,
+            opacity: 1
           }}
           animate={{
-            scale: [0, 1, 0],
-            y: [50, -150],
-            x: Math.random() * 200 - 100
+            scale: [0, 1.2, 0.6],
+            x: Math.cos(i * 30 * Math.PI / 180) * 160,
+            y: Math.sin(i * 30 * Math.PI / 180) * 160,
+            opacity: [1, 0.8, 0]
           }}
           transition={{
-            duration: 2,
-            delay: Math.random() * 1,
+            duration: 1.8,
+            delay: 0.3,
             ease: "easeOut"
           }}
         />
+      ))}
+      
+      {/* Bubbling Effect */}
+      {[...Array(20)].map((_, i) => (
+        <motion.div
+          key={`bubble-${i}`}
+          className="absolute w-3 h-3 bg-white rounded-full opacity-60"
+          initial={{ 
+            scale: 0,
+            x: Math.random() * 300 - 150,
+            y: 100
+          }}
+          animate={{
+            scale: [0, 1, 0],
+            y: [100, -200],
+            x: Math.random() * 300 - 150
+          }}
+          transition={{
+            duration: 2.5,
+            delay: Math.random() * 1.5,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+    </div>
+  );
+
+  const renderBugReport = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Bug Icon */}
+      <motion.div
+        className="relative bg-red-500 text-white p-4 rounded-full"
+        initial={{ scale: 0, y: 20 }}
+        animate={{ 
+          scale: [0, 1.2, 1],
+          y: [20, -10, 10, 0]
+        }}
+        transition={{ duration: 1, ease: "backOut" }}
+      >
+        <Bug className="h-8 w-8" />
+      </motion.div>
+      
+      {/* Flutter Effect */}
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-red-500 text-2xl"
+          initial={{ 
+            scale: 0,
+            x: 0,
+            y: 0,
+            opacity: 1,
+            rotate: 0
+          }}
+          animate={{
+            scale: [0, 1, 0.5],
+            x: Math.cos(i * 60 * Math.PI / 180) * 100,
+            y: Math.sin(i * 60 * Math.PI / 180) * 100 - 20,
+            opacity: [1, 0.8, 0],
+            rotate: [0, 180]
+          }}
+          transition={{
+            duration: 1.5,
+            delay: 0.3,
+            ease: "easeOut"
+          }}
+        >
+          🐛
+        </motion.div>
+      ))}
+    </div>
+  );
+
+  const renderFeatureRequest = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Lightbulb Icon */}
+      <motion.div
+        className="relative bg-yellow-400 text-gray-800 p-4 rounded-full"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ 
+          scale: [0, 1.3, 1],
+          opacity: [0, 1, 1]
+        }}
+        transition={{ duration: 0.8, ease: "backOut" }}
+      >
+        <motion.div
+          animate={{
+            filter: [
+              "brightness(1) drop-shadow(0 0 0px rgba(255, 255, 0, 0.7))",
+              "brightness(1.3) drop-shadow(0 0 20px rgba(255, 255, 0, 0.9))",
+              "brightness(1) drop-shadow(0 0 10px rgba(255, 255, 0, 0.7))"
+            ]
+          }}
+          transition={{ duration: 1.5, repeat: 1 }}
+        >
+          <Lightbulb className="h-8 w-8" />
+        </motion.div>
+      </motion.div>
+      
+      {/* Idea Sparks */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-yellow-400 text-xl"
+          initial={{ 
+            scale: 0,
+            x: 0,
+            y: 0,
+            opacity: 1
+          }}
+          animate={{
+            scale: [0, 1, 0.7],
+            x: Math.cos(i * 45 * Math.PI / 180) * 120,
+            y: Math.sin(i * 45 * Math.PI / 180) * 120,
+            opacity: [1, 1, 0]
+          }}
+          transition={{
+            duration: 1.2,
+            delay: 0.4,
+            ease: "easeOut"
+          }}
+        >
+          💡
+        </motion.div>
+      ))}
+    </div>
+  );
+
+  const renderGeneralFeedback = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Speech Bubble */}
+      <motion.div
+        className="relative bg-blue-500 text-white p-4 rounded-full"
+        initial={{ scale: 0, y: 0 }}
+        animate={{ 
+          scale: [0, 1.2, 1],
+          y: [0, -20, 0]
+        }}
+        transition={{ duration: 1, ease: "backOut" }}
+      >
+        <MessageCircle className="h-8 w-8" />
+      </motion.div>
+      
+      {/* Floating Comments */}
+      {[...Array(4)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-blue-400 text-3xl"
+          initial={{ 
+            scale: 0,
+            x: Math.random() * 200 - 100,
+            y: 20,
+            opacity: 1
+          }}
+          animate={{
+            scale: [0, 1, 0.8],
+            y: [20, -120],
+            opacity: [1, 1, 0]
+          }}
+          transition={{
+            duration: 2,
+            delay: 0.3 + i * 0.2,
+            ease: "easeOut"
+          }}
+        >
+          💬
+        </motion.div>
       ))}
     </div>
   );
@@ -393,6 +638,9 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
           {type === "hot-topics" && renderHotTopics()}
           {type === "daily-debate" && renderDailyDebate()}
           {type === "tea-experiments" && renderTeaExperiments()}
+          {type === "bug-report" && renderBugReport()}
+          {type === "feature-request" && renderFeatureRequest()}
+          {type === "general-feedback" && renderGeneralFeedback()}
         </>
       )}
     </AnimatePresence>

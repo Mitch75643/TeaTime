@@ -32,6 +32,7 @@ interface Suggestion {
 interface SuggestionsFeaturesProps {
   onSubmitSuggestion: (suggestion: Omit<Suggestion, 'id' | 'upvotes' | 'createdAt' | 'hasVoted'>) => void;
   onVote: (suggestionId: string, voteType: "up") => void;
+  onCelebrationTrigger?: (type: "bug-report" | "feature-request" | "general-feedback") => void;
 }
 
 const suggestionCategories = [
@@ -102,7 +103,7 @@ const sampleSuggestions: Suggestion[] = [
   }
 ];
 
-export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsFeaturesProps) {
+export function SuggestionsFeatures({ onSubmitSuggestion, onVote, onCelebrationTrigger }: SuggestionsFeaturesProps) {
   const [selectedCategory, setSelectedCategory] = useState<SuggestionCategory | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -130,6 +131,21 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
     };
     
     onSubmitSuggestion(newSuggestion);
+    
+    // Trigger celebration based on category
+    if (onCelebrationTrigger) {
+      switch (selectedCategory) {
+        case "bug":
+          onCelebrationTrigger("bug-report");
+          break;
+        case "feature":
+          onCelebrationTrigger("feature-request");
+          break;
+        case "feedback":
+          onCelebrationTrigger("general-feedback");
+          break;
+      }
+    }
     
     // Reset form
     setTitle("");
