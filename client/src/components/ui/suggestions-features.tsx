@@ -195,24 +195,25 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
 
       {/* Selected Category Form */}
       {selectedCategory && selectedCategoryData && (
-        <Card className={cn("border-2", selectedCategoryData.color)}>
-          <CardHeader className={cn("pb-3", selectedCategoryData.bgColor)}>
-            <div className="flex items-center justify-between">
-              <CardTitle className={cn("text-sm font-medium flex items-center gap-2", selectedCategoryData.textColor)}>
-                <span className="text-base">{selectedCategoryData.emoji}</span>
-                {selectedCategoryData.name}
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedCategory(null)}
-                className="text-xs"
-              >
-                ← Back
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="mt-4">
+          <Card className={cn("border-2", selectedCategoryData.color)}>
+            <CardHeader className={cn("pb-3", selectedCategoryData.bgColor)}>
+              <div className="flex items-center justify-between">
+                <CardTitle className={cn("text-sm font-medium flex items-center gap-2", selectedCategoryData.textColor)}>
+                  <span className="text-base">{selectedCategoryData.emoji}</span>
+                  {selectedCategoryData.name}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedCategory(null)}
+                  className="text-xs"
+                >
+                  ← Back
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
             {/* Title Input */}
             <div>
               <Input
@@ -273,6 +274,7 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
             </Button>
           </CardContent>
         </Card>
+        </div>
       )}
 
       {/* Community Suggestions Feed */}
