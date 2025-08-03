@@ -11,7 +11,7 @@ import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
 import { JustForFunFeatures } from "@/components/ui/just-for-fun-features";
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
-import { ArrowLeft, Plus, Filter } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -98,7 +98,6 @@ export default function TopicFeed() {
   const [, setLocation] = useLocation();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("new");
-  const [showFilters, setShowFilters] = useState(false);
   const [storyCategory, setStoryCategory] = useState("all");
   const [funCategory, setFunCategory] = useState("meme");
   
@@ -196,16 +195,6 @@ export default function TopicFeed() {
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Community
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className={cn("hover:bg-white/10", topic.textColor)}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
             </Button>
           </div>
 

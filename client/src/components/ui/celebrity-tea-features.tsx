@@ -3,7 +3,7 @@ import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Badge } from "./badge";
 import { Progress } from "./progress";
-import { Mic, Eye, Star, Flame, Camera } from "lucide-react";
+import { Mic, Eye, Star, Flame, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CelebData {
@@ -47,12 +47,12 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
       {/* Top Celebs List */}
       <Card className="border-pink-200 dark:border-pink-800">
         <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20">
-          <CardTitle className="flex items-center gap-2 text-pink-700 dark:text-pink-300">
-            <Star className="h-5 w-5" />
-            📊 This Week's Trending Celebs
+          <CardTitle className="flex items-center gap-2 text-pink-700 dark:text-pink-300 text-base font-medium">
+            <Star className="h-4 w-4" />
+            This Week's Trending Celebs
           </CardTitle>
-          <p className="text-sm text-pink-600 dark:text-pink-400">
-            The hottest names everyone's talking about
+          <p className="text-xs text-pink-600 dark:text-pink-400">
+            Based on recent posts & reactions
           </p>
         </CardHeader>
         <CardContent className="p-4">
@@ -84,10 +84,9 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
                       <span className="font-semibold text-gray-900 dark:text-gray-100">
                         {celeb.name}
                       </span>
-                      <div className="flex items-center gap-1">
-                        <Camera className="h-3 w-3 text-pink-500" />
-                        <Eye className="h-3 w-3 text-pink-500" />
-                      </div>
+                      {celeb.trending && (
+                        <span className="text-xs">⬆️</span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-500">
@@ -133,6 +132,17 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
         </CardContent>
       </Card>
 
+      {/* Create Post for Celebrity Tea */}
+      <div className="text-center">
+        <Button
+          onClick={() => onSpillAbout("")}
+          className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Post
+        </Button>
+      </div>
+
       {/* Red Carpet Icons Flair */}
       <div className="flex justify-center gap-4 py-2">
         <div className="flex items-center gap-2 text-pink-500">
@@ -144,7 +154,7 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
           <span className="text-xs font-medium">BEHIND SCENES</span>
         </div>
         <div className="flex items-center gap-2 text-red-500">
-          <Camera className="h-4 w-4" />
+          <Star className="h-4 w-4" />
           <span className="text-xs font-medium">CANDID MOMENTS</span>
         </div>
       </div>
