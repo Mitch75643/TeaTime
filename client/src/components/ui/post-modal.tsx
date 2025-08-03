@@ -240,7 +240,7 @@ export function PostModal({
               maxLength={500}
             />
             <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
-              <span>Your alias: <span className="font-medium text-purple-600 dark:text-purple-400">{userAlias}</span></span>
+              <span>Your username: <span className="font-medium text-purple-600 dark:text-purple-400">{userAlias}</span></span>
               <span className={content.length > 450 ? "text-red-500" : ""}>{content.length}/500</span>
             </div>
           </div>

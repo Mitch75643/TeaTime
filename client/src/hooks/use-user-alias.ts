@@ -1,31 +1,38 @@
 import { useState, useEffect } from 'react';
-import { getUserAlias, refreshUserAlias, type UserAlias } from '@/lib/alias-generator';
+import { getUserUsername, refreshUserUsername, setUserUsername, type UserAlias } from '@/lib/alias-generator';
 
 export function useUserAlias() {
-  const [userAlias, setUserAlias] = useState<UserAlias>(() => getUserAlias());
+  const [userUsername, setUserUsernameState] = useState<UserAlias>(() => getUserUsername());
 
   useEffect(() => {
-    const handleAliasChange = (event: CustomEvent<UserAlias>) => {
-      setUserAlias(event.detail);
+    const handleUsernameChange = (event: CustomEvent<UserAlias>) => {
+      setUserUsernameState(event.detail);
     };
 
-    // Listen for alias changes from other components
-    window.addEventListener('userAliasChanged', handleAliasChange as EventListener);
+    // Listen for username changes from other components
+    window.addEventListener('userUsernameChanged', handleUsernameChange as EventListener);
 
     return () => {
-      window.removeEventListener('userAliasChanged', handleAliasChange as EventListener);
+      window.removeEventListener('userUsernameChanged', handleUsernameChange as EventListener);
     };
   }, []);
 
-  const generateNewAlias = () => {
-    const newAlias = refreshUserAlias();
-    setUserAlias(newAlias);
-    return newAlias;
+  const generateNewUsername = () => {
+    const newUsername = refreshUserUsername();
+    setUserUsernameState(newUsername);
+    return newUsername;
+  };
+
+  const keepCurrentUsername = (username: UserAlias) => {
+    setUserUsername(username);
+    setUserUsernameState(username);
   };
 
   return {
-    userAlias: userAlias.alias,
-    fullAlias: userAlias,
-    generateNewAlias
+    userAlias: userUsername.alias, // Keep this name for backwards compatibility
+    fullAlias: userUsername,
+    generateNewAlias: generateNewUsername, // Keep this name for backwards compatibility
+    generateNewUsername,
+    keepCurrentUsername
   };
 }

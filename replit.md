@@ -74,11 +74,12 @@ The architecture prioritizes anonymous user interaction, real-time-feeling updat
 
 All avatars maintain user anonymity while allowing personality expression through gossip-themed, copyright-free SVG designs.
 
-### Random Fun Alias System (January 2025)
-- **Auto-Generated Aliases**: Implemented comprehensive random alias generator with gossip-themed names like "TiredIntern42", "SpillQueen89", "💅DramaDiva13"
-- **Alias Categories**: Drama, Chill, Funny, Mysterious, Emotional themes with personality-based combinations
+### Random Fun Username System (January 2025)
+- **Auto-Generated Usernames**: Implemented comprehensive random username generator with gossip-themed names like "TiredIntern42", "SpillQueen89", "💅DramaDiva13"
+- **Username Categories**: Drama, Chill, Funny, Mysterious, Emotional themes with personality-based combinations
 - **Format Variations**: Emoji-style (e.g. 💅DramaDiva13), Combined words + numbers (e.g. TeaSpiller99), Personality-based (e.g. PettyPrince, ChaoticNeutral)
-- **Alias Persistence**: Uses localStorage with custom event system for real-time updates across all app components
-- **Alias Refresh**: Users can generate new aliases anytime through profile settings with interactive AliasSelector component
-- **Global Integration**: User aliases appear on posts, comments, profile page, and all user interactions, replacing "Anonymous User"
-- **Session Sync**: Alias system integrates with session management to show user's current alias for their own content while preserving stored aliases for others
+- **Username Persistence**: Uses localStorage with custom event system for real-time updates across all app components
+- **Username Selection**: Users can generate new usernames anytime through profile settings with interactive username selector
+- **Keep This Fix**: Fixed "Keep This" functionality to properly save selected usernames without generating new ones
+- **Global Integration**: User usernames appear on posts, comments, profile page, and all user interactions, replacing "Anonymous User"
+- **Session Sync**: Username system integrates with session management to show user's current username for their own content while preserving stored usernames for others

@@ -2,52 +2,52 @@ import { useState } from "react";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Shuffle, Check } from "lucide-react";
-import { generateRandomAlias, type UserAlias } from "@/lib/alias-generator";
+import { generateRandomUsername, type UserAlias } from "@/lib/alias-generator";
 import { cn } from "@/lib/utils";
 
 interface AliasSelectorProps {
   currentAlias: UserAlias;
-  onSelect: (alias: UserAlias) => void;
+  onSelect: (username: UserAlias) => void;
   className?: string;
 }
 
 export function AliasSelector({ currentAlias, onSelect, className }: AliasSelectorProps) {
-  const [previewAlias, setPreviewAlias] = useState<UserAlias>(currentAlias);
+  const [previewUsername, setPreviewUsername] = useState<UserAlias>(currentAlias);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateNew = () => {
     setIsGenerating(true);
     // Add small delay for better UX
     setTimeout(() => {
-      const newAlias = generateRandomAlias();
-      setPreviewAlias(newAlias);
+      const newUsername = generateRandomUsername();
+      setPreviewUsername(newUsername);
       setIsGenerating(false);
     }, 200);
   };
 
-  const keepAlias = () => {
-    onSelect(previewAlias);
+  const keepUsername = () => {
+    onSelect(previewUsername);
   };
 
-  const isCurrentAlias = previewAlias.alias === currentAlias.alias;
+  const isCurrentUsername = previewUsername.alias === currentAlias.alias;
 
   return (
     <Card className={cn("w-full max-w-md", className)}>
       <CardHeader className="text-center">
-        <CardTitle className="text-lg">Your TeaSpill Alias</CardTitle>
+        <CardTitle className="text-lg">Your TeaSpill Username</CardTitle>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           This is how you'll appear to others (your identity stays anonymous)
         </p>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Current/Preview Alias Display */}
+        {/* Current/Preview Username Display */}
         <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
           <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-            {previewAlias.alias}
+            {previewUsername.alias}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            {previewAlias.hasEmoji ? "With emoji style" : "Clean style"}
+            {previewUsername.hasEmoji ? "With emoji style" : "Clean style"}
           </div>
         </div>
 
@@ -64,18 +64,18 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
           </Button>
           
           <Button
-            onClick={keepAlias}
-            disabled={isCurrentAlias}
+            onClick={keepUsername}
+            disabled={isCurrentUsername}
             className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
           >
             <Check className="h-4 w-4 mr-2" />
-            {isCurrentAlias ? "Current" : "Keep This"}
+            {isCurrentUsername ? "Current" : "Keep This"}
           </Button>
         </div>
 
         {/* Helper Text */}
         <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-          You can change your alias anytime from your profile settings
+          You can change your username anytime from your profile settings
         </p>
       </CardContent>
     </Card>

@@ -37,7 +37,7 @@ export default function Profile() {
   const [notifications, setNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
   const { userAvatarId, updateAvatar } = useUserAvatar();
-  const { userAlias, fullAlias, generateNewAlias } = useUserAlias();
+  const { userAlias, fullAlias, generateNewAlias, keepCurrentUsername } = useUserAlias();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -159,7 +159,7 @@ export default function Profile() {
               <div>
                 <CardTitle className="text-xl">{userAlias}</CardTitle>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Your anonymous TeaSpill identity
+                  Your anonymous TeaSpill username
                 </p>
               </div>
             </div>
@@ -259,22 +259,22 @@ export default function Profile() {
         {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="space-y-6">
-            {/* Alias Settings */}
+            {/* Username Settings */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <User className="h-5 w-5 mr-2" />
-                  Alias Settings
+                  Username Settings
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <AliasSelector
                   currentAlias={fullAlias}
-                  onSelect={(newAlias) => {
-                    generateNewAlias();
+                  onSelect={(newUsername) => {
+                    keepCurrentUsername(newUsername);
                     toast({
-                      title: "Alias updated!",
-                      description: `You're now known as ${newAlias.alias}`,
+                      title: "Username updated!",
+                      description: `You're now known as ${newUsername.alias}`,
                     });
                   }}
                 />

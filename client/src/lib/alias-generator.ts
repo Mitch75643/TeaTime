@@ -1,4 +1,4 @@
-// Fun alias generator for TeaSpill users
+// Fun username generator for TeaSpill users
 const adjectives = [
   // Drama & Gossip themed
   "Spicy", "Petty", "Chaotic", "Dramatic", "Messy", "Salty", "Shady", "Sneaky",
@@ -41,27 +41,27 @@ export interface UserAlias {
   generated: number; // timestamp
 }
 
-export function generateRandomAlias(useEmoji: boolean = Math.random() > 0.5): UserAlias {
+export function generateRandomUsername(useEmoji: boolean = Math.random() > 0.5): UserAlias {
   const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
   const noun = nouns[Math.floor(Math.random() * nouns.length)];
   const number = Math.floor(Math.random() * 99) + 1;
   
-  let alias = `${adjective}${noun}${number}`;
+  let username = `${adjective}${noun}${number}`;
   
   if (useEmoji) {
     const emoji = emojiPrefixes[Math.floor(Math.random() * emojiPrefixes.length)];
-    alias = `${emoji}${alias}`;
+    username = `${emoji}${username}`;
   }
   
   return {
-    alias,
+    alias: username,
     hasEmoji: useEmoji,
     generated: Date.now()
   };
 }
 
-export function getUserAlias(): UserAlias {
-  const saved = localStorage.getItem('userAlias');
+export function getUserUsername(): UserAlias {
+  const saved = localStorage.getItem('userUsername');
   if (saved) {
     try {
       return JSON.parse(saved);
@@ -70,29 +70,29 @@ export function getUserAlias(): UserAlias {
     }
   }
   
-  // Generate new alias
-  const newAlias = generateRandomAlias();
-  localStorage.setItem('userAlias', JSON.stringify(newAlias));
-  return newAlias;
+  // Generate new username
+  const newUsername = generateRandomUsername();
+  localStorage.setItem('userUsername', JSON.stringify(newUsername));
+  return newUsername;
 }
 
-export function refreshUserAlias(): UserAlias {
-  const newAlias = generateRandomAlias();
-  localStorage.setItem('userAlias', JSON.stringify(newAlias));
+export function refreshUserUsername(): UserAlias {
+  const newUsername = generateRandomUsername();
+  localStorage.setItem('userUsername', JSON.stringify(newUsername));
   
   // Dispatch custom event to notify components
-  window.dispatchEvent(new CustomEvent('userAliasChanged', { 
-    detail: newAlias 
+  window.dispatchEvent(new CustomEvent('userUsernameChanged', { 
+    detail: newUsername 
   }));
   
-  return newAlias;
+  return newUsername;
 }
 
-export function setUserAlias(alias: UserAlias): void {
-  localStorage.setItem('userAlias', JSON.stringify(alias));
+export function setUserUsername(username: UserAlias): void {
+  localStorage.setItem('userUsername', JSON.stringify(username));
   
   // Dispatch custom event to notify components
-  window.dispatchEvent(new CustomEvent('userAliasChanged', { 
-    detail: alias 
+  window.dispatchEvent(new CustomEvent('userUsernameChanged', { 
+    detail: username 
   }));
 }
