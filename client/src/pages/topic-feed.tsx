@@ -12,7 +12,7 @@ import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
-import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
+import { ArrowLeft, Plus, RefreshCw, Users, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -121,68 +121,44 @@ export default function TopicFeed() {
     };
   }, [topicId]);
 
-  const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ['/api/posts', topicId, sortBy, storyCategory],
-    select: (posts) => {
-      // Filter posts by topic and sort them
-      let filteredPosts = posts.filter(post => {
-        // Match by category or custom fields based on topic
-        switch (topicId) {
-          case "celebrity-tea":
-            return post.category === "gossip" || post.celebrityName;
-          case "story-time": 
-            const isStoryPost = post.category === "story" || post.storyType;
-            if (!isStoryPost) return false;
-            // Additional filtering by story category
-            if (storyCategory !== "all") {
-              return post.storyType === storyCategory;
-            }
-            return true;
-          case "hot-topics":
-            return post.topicTitle || post.category === "other";
-          case "daily-debate":
-            return post.category === "debate";
-          case "tea-experiments":
-            return post.category === "poll" || post.pollOptions;
-          case "suggestions":
-            return post.tags?.includes("#suggestions");
-          default:
-            return false;
-        }
+  // Community Feed - All posts from this topic
+  const { data: communityPosts = [], isLoading: isLoadingCommunity } = useQuery<Post[]>({
+    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        sortBy,
+        postContext: 'community',
+        section: topicId
       });
-
-      // Sort posts based on selected option
-      switch (sortBy) {
-        case "trending":
-          return filteredPosts.sort((a, b) => {
-            const aFireReactions = (a.reactions && typeof a.reactions === 'object' && 'fire' in a.reactions) ? (a.reactions.fire || 0) : 0;
-            const bFireReactions = (b.reactions && typeof b.reactions === 'object' && 'fire' in b.reactions) ? (b.reactions.fire || 0) : 0;
-            const aScore = (aFireReactions as number) * 2 + Object.values(a.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
-            const bScore = (bFireReactions as number) * 2 + Object.values(b.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
-            return bScore - aScore;
-          });
-        case "top":
-          return filteredPosts.sort((a, b) => {
-            const aTotal = Object.values(a.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
-            const bTotal = Object.values(b.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
-            return bTotal - aTotal;
-          });
-        case "most-reacted":
-          return filteredPosts.sort((a, b) => {
-            const aReactions = Object.values(a.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
-            const bReactions = Object.values(b.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
-            return bReactions - aReactions;
-          });
-        case "new":
-        default:
-          return filteredPosts.sort((a, b) => {
-            const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return bDate - aDate;
-          });
+      if (storyCategory !== "all") {
+        params.append('storyCategory', storyCategory);
       }
+      const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch community posts");
+      return response.json();
     }
   });
+
+  // Your Posts - Only posts by current user for this topic
+  const { data: userPosts = [], isLoading: isLoadingUser } = useQuery<Post[]>({
+    queryKey: ['/api/posts/user', topicId, sortBy, storyCategory],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        sortBy,
+        userOnly: 'true',
+        postContext: 'community',
+        section: topicId
+      });
+      if (storyCategory !== "all") {
+        params.append('storyCategory', storyCategory);
+      }
+      const response = await fetch(`/api/posts/${topicId}/${sortBy}/user?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch user posts");
+      return response.json();
+    }
+  });
+
+  const isLoading = isLoadingCommunity || isLoadingUser;
 
   if (!topic) {
     setLocation('/community');
@@ -247,7 +223,7 @@ export default function TopicFeed() {
             </p>
             <div className="flex items-center justify-center space-x-4">
               <div className={cn("text-sm opacity-75", topic.textColor)}>
-                {topic.count} posts • {posts.length} showing
+                {topic.count} posts • {communityPosts.length} showing
               </div>
               <Button
                 variant="ghost"
@@ -346,9 +322,21 @@ export default function TopicFeed() {
         )}
       </div>
 
-      {/* Posts Feed */}
-      <div className="container mx-auto px-4 py-6 pb-20">
-        {isLoading ? (
+      {/* Community Feed Section */}
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-purple-500" />
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              Community Feed
+            </h2>
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {communityPosts.length} posts
+          </div>
+        </div>
+
+        {isLoadingCommunity ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
@@ -357,48 +345,104 @@ export default function TopicFeed() {
               </div>
             ))}
           </div>
+        ) : communityPosts.length === 0 ? (
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="text-4xl mb-4">{topic.emoji}</div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              No posts yet in {topic.name}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Be the first to share something in this topic!
+            </p>
+            <Button
+              onClick={() => setIsPostModalOpen(true)}
+              className={cn("shadow-lg", topic.gradient, topic.textColor)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create First Post
+            </Button>
+          </div>
         ) : (
-          <div className="space-y-4">
-            {posts.map((post) => (
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {communityPosts.map((post: Post) => (
               <PostCard 
                 key={post.id} 
                 post={post}
               />
             ))}
-            
-            {/* Celebrity Tea specific Create Post button under posts */}
-            {topicId === "celebrity-tea" && posts.length > 0 && (
-              <div className="text-center pt-6 pb-4 border-t border-gray-200 dark:border-gray-700">
-                <Button
-                  onClick={() => setIsPostModalOpen(true)}
-                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full max-w-md"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Share More Celebrity Tea
-                </Button>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Got more gossip to spill? Keep the conversation going!
-                </p>
+          </div>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="container mx-auto px-4">
+        <div className="border-t border-gray-200 dark:border-gray-700"></div>
+      </div>
+
+      {/* Your Posts Section */}
+      <div className="container mx-auto px-4 py-6 pb-20 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <User className="h-5 w-5 text-blue-500" />
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              Your Posts
+            </h2>
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {userPosts.length} posts
+          </div>
+        </div>
+
+        {isLoadingUser ? (
+          <div className="space-y-4">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
               </div>
-            )}
+            ))}
+          </div>
+        ) : userPosts.length === 0 ? (
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="text-4xl mb-4">✍️</div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              You haven't posted here yet
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Share your thoughts about {topic.name.toLowerCase()} with the community!
+            </p>
+            <Button
+              onClick={() => setIsPostModalOpen(true)}
+              className={cn("shadow-lg", topic.gradient, topic.textColor)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First Post
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {userPosts.map((post: Post) => (
+              <PostCard 
+                key={post.id} 
+                post={post}
+              />
+            ))}
           </div>
         )}
       </div>
 
       {/* Floating Add Button */}
-      {posts.length > 0 && (
-        <Button
-          onClick={() => setIsPostModalOpen(true)}
-          className={cn(
-            "fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-50",
-            topic.gradient,
-            "hover:scale-105 transition-transform"
-          )}
-          size="icon"
-        >
-          <Plus className="h-6 w-6 text-white" />
-        </Button>
-      )}
+      <Button
+        onClick={() => setIsPostModalOpen(true)}
+        className={cn(
+          "fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-50",
+          topic.gradient,
+          "hover:scale-105 transition-transform"
+        )}
+        size="icon"
+      >
+        <Plus className="h-6 w-6 text-white" />
+      </Button>
 
       {/* Section-specific Post Modal */}
       <SectionPostModal

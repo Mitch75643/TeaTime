@@ -74,13 +74,13 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
       postContext: insertPost.postContext || 'home',
-      communitySection: insertPost.communitySection,
+      communitySection: insertPost.communitySection || null,
       reportCount: 0,
       isRemoved: false,
       postType: insertPost.postType || 'standard',
-      celebrityName: insertPost.celebrityName,
-      storyType: insertPost.storyType,
-      topicTitle: insertPost.topicTitle,
+      celebrityName: insertPost.celebrityName || null,
+      storyType: insertPost.storyType || null,
+      topicTitle: insertPost.topicTitle || null,
       pollOptions: insertPost.pollOptions,
       pollVotes: insertPost.postType === 'poll' ? {optionA: 0, optionB: 0} : undefined,
       debateVotes: insertPost.postType === 'debate' ? {up: 0, down: 0} : undefined,
@@ -162,6 +162,7 @@ export class MemStorage implements IStorage {
       ...insertComment,
       id,
       alias,
+      avatarId: insertComment.avatarId || 'happy-face',
       parentCommentId: insertComment.parentCommentId || null,
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
       createdAt: new Date(),
@@ -485,7 +486,7 @@ export class MemStorage implements IStorage {
   }
 
   async markAllNotificationsAsRead(sessionId: string): Promise<void> {
-    for (const [id, notification] of this.notifications.entries()) {
+    for (const [id, notification] of Array.from(this.notifications.entries())) {
       if (notification.recipientSessionId === sessionId && !notification.isRead) {
         notification.isRead = true;
         this.notifications.set(id, notification);

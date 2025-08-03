@@ -57,6 +57,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Community topic posts - all posts for a specific topic
+  app.get("/api/posts/:topicId/:sortBy/all", async (req, res) => {
+    try {
+      const { topicId, sortBy } = req.params;
+      const { postContext = 'community', section, storyCategory } = req.query;
+      
+      const posts = await storage.getPosts(
+        undefined, // category
+        sortBy as 'trending' | 'new',
+        undefined, // tags
+        undefined, // userSessionId - not filtering by user
+        postContext as string,
+        topicId // section
+      );
+      res.json(posts);
+    } catch (error) {
+      console.error("Failed to fetch community posts:", error);
+      res.status(500).json({ message: "Failed to fetch community posts" });
+    }
+  });
+
+  // User topic posts - only posts by current user for a specific topic
+  app.get("/api/posts/:topicId/:sortBy/user", async (req, res) => {
+    try {
+      const { topicId, sortBy } = req.params;
+      const { postContext = 'community', section, storyCategory } = req.query;
+      const sessionId = req.session.id!;
+      
+      const posts = await storage.getPosts(
+        undefined, // category
+        sortBy as 'trending' | 'new',
+        undefined, // tags
+        sessionId, // userSessionId - filter by current user
+        postContext as string,
+        topicId // section
+      );
+      res.json(posts);
+    } catch (error) {
+      console.error("Failed to fetch user posts:", error);
+      res.status(500).json({ message: "Failed to fetch user posts" });
+    }
+  });
+
   // Create post
   app.post("/api/posts", async (req, res) => {
     try {

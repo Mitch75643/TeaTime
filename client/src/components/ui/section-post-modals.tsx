@@ -83,7 +83,10 @@ export function SectionPostModal({
       return apiRequest("POST", "/api/posts", data);
     },
     onSuccess: () => {
+      // Invalidate all post-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
       
       // Trigger celebration animation
       triggerCelebration(section as any);
