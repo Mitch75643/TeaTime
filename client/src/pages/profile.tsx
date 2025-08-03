@@ -157,7 +157,7 @@ export default function Profile() {
               </div>
               
               <div>
-                <CardTitle className="text-xl">{userAlias}</CardTitle>
+                <CardTitle className="text-xl mb-2">{userAlias}</CardTitle>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Your anonymous TeaSpill username
                 </p>

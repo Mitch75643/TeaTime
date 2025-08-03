@@ -30,9 +30,15 @@ export function Header() {
             className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-10 h-10"
           >
             {currentAvatar ? (
-              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30">
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center bg-white">
                 <div 
-                  className="w-full h-full"
+                  className="w-full h-full object-cover flex items-center justify-center"
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    transform: 'scale(1.1)'
+                  }}
                   dangerouslySetInnerHTML={{ __html: currentAvatar.svg }}
                 />
               </div>

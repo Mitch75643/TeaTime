@@ -43,11 +43,11 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
         <Button
           variant="outline"
           className={cn(
-            "relative group overflow-hidden rounded-full border-2 border-dashed border-purple-300 hover:border-purple-500 transition-all duration-200",
+            "relative group overflow-hidden rounded-full border-2 border-dashed border-purple-300 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-400/30 transition-all duration-200",
             className
           )}
         >
-          <div className="w-16 h-16 relative">
+          <div className="w-8 h-8 relative">
             {currentAvatar ? (
               <div 
                 className="w-full h-full"
@@ -55,11 +55,11 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                <Palette className="h-8 w-8 text-white" />
+                <Palette className="h-4 w-4 text-white" />
               </div>
             )}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-full flex items-center justify-center">
-              <Palette className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-full flex items-center justify-center">
+              <Palette className="h-3 w-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
         </Button>
