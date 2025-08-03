@@ -12,6 +12,8 @@ import TopicFeed from "@/pages/topic-feed";
 import DailySpill from "@/pages/daily-spill";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
+import { AuthPage } from "@/pages/AuthPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 function Router() {
   return (
@@ -22,6 +24,8 @@ function Router() {
       <Route path="/topic/:topicId" component={TopicFeed} />
       <Route path="/daily-spill" component={DailySpill} />
       <Route path="/profile" component={Profile} />
+      <Route path="/auth" component={AuthPage} />
+      <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,0 +1,36 @@
+Help me build an anonymous login, sync, and biometric authentication system for my app. The experience must remain fully anonymous — no names, no profile photos, and no personal data.
+
+Here’s what I need:
+
+1. Login Page:
+- Create a login screen with two clear options:
+  a. “Log In to Sync Your Anonymous Account” — where the user can enter a secure passphrase or (optionally) email to access their saved anonymous data.
+  b. “Stay Anonymous” — this button skips login and generates a new anonymous ID stored locally.
+- No personal information should ever be required.
+- Use a clean and modern UI design.
+
+2. Settings Page:
+- Add a button labeled “Set Up Cross-Device Sync.”
+- When clicked, allow the anonymous user to create a passphrase or (optionally) provide an email to enable account syncing across devices.
+- Store their anonymous ID securely for syncing.
+- Do not make this mandatory — it’s optional unless the user wants to log in on another device.
+
+3. Biometric Login (Face ID / Fingerprint):
+- After a user sets up sync, offer an option to enable biometric login.
+- When enabled:
+  - Store their login token or anonymous ID securely using platform-secure storage (Keychain for iOS, EncryptedSharedPreferences or Keystore for Android).
+  - Use biometric authentication (Face ID or fingerprint) on future app launches to unlock that stored ID and log the user in.
+  - If Face ID fails or is unavailable, show fallback options: manual login or “Stay Anonymous.”
+- Ensure no biometric data is ever stored or sent to a server — only used for local unlock.
+
+4. Behavior:
+- If a user logs in with passphrase or email, load their synced data tied to their anonymous ID.
+- If they skip login, generate a new anonymous ID and start fresh on that device.
+- All authentication and sync methods must preserve anonymity.
+
+5. Privacy & Security:
+- Never request or store real names, phone numbers, or other personal identifiers.
+- All data should be kept local or securely stored server-side using anonymous IDs only.
+- No analytics, tracking, or fingerprinting — just anonymous interaction and data protection.
+
+The goal is: complete anonymity with optional secure syncing and convenient biometric access — all without compromising user privacy.

@@ -66,6 +66,16 @@ The architecture prioritizes anonymous user interaction, real-time-feeling updat
 - **Header Navigation**: Top-right profile icon now displays user's selected avatar and provides clickable navigation to profile page
 - **Cross-Component Sync**: Created useUserAvatar hook for consistent avatar state management across all components
 
+### Biometric Authentication System (January 2025)
+- **WebAuthn Integration**: Full biometric authentication using Web Authentication API for Face ID, Touch ID, and fingerprint support
+- **Privacy-First Design**: Biometric data never leaves user's device - only encrypted tokens stored locally for secure unlock
+- **Cross-Device Sync**: Optional account upgrade system with passphrase or email for accessing anonymous data across devices
+- **Authentication Flow**: Users can stay completely anonymous or upgrade for sync with biometric convenience login
+- **Security Features**: Device-specific credential storage, automatic fallback to manual login, and encrypted token management
+- **UI Components**: Comprehensive setup flows for sync configuration and biometric enrollment with clear privacy explanations
+- **Settings Integration**: Dedicated settings page accessible via header for managing authentication preferences and biometric options
+- **Anonymous Preservation**: All features maintain complete user anonymity with no personal data collection or tracking
+
 ### Avatar Categories
 - **Moods** (😊): Happy Vibes, Wink Queen, Sassy Energy, Sleepy Mood, Tea Shocked
 - **Animals** (🐱): Tea Cat, Gossip Bird, Drama Frog  

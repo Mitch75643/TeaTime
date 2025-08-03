@@ -112,6 +112,11 @@ export const anonymousUsers = pgTable("anonymous_users", {
   email: varchar("email"), // Optional email for simple login
   emailVerified: boolean("email_verified").default(false),
   
+  // Biometric authentication fields
+  biometricEnabled: boolean("biometric_enabled").default(false),
+  secureTokenHash: varchar("secure_token_hash"), // For storing encrypted device tokens
+  biometricDevices: jsonb("biometric_devices").default([]), // List of authorized devices
+  
   // User preferences and stats
   preferences: jsonb("preferences").default({}), // Theme, notifications, etc.
   postCount: integer("post_count").default(0),
