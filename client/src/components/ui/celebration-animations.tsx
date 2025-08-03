@@ -129,33 +129,8 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
     if (isVisible) {
       setShowAnimation(true);
       
-      // Play sound effect
-      switch (type) {
-        case "celebrity-tea":
-          playSound("twinkle");
-          break;
-        case "story-time":
-          playSound("whoosh");
-          break;
-        case "hot-topics":
-          playSound("flame-whoosh");
-          break;
-        case "daily-debate":
-          playSound("clash");
-          break;
-        case "tea-experiments":
-          playSound("bubbling");
-          break;
-        case "bug-report":
-          playSound("ping");
-          break;
-        case "feature-request":
-          playSound("ding");
-          break;
-        case "general-feedback":
-          playSound("whoosh");
-          break;
-      }
+      // Play sound effect - using same pleasant twinkle sound for all topics
+      playSound("twinkle");
       
       // Auto-hide after animation
       const timer = setTimeout(() => {
