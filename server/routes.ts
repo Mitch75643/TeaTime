@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postContext = req.body.postContext || 'home';
       const communitySection = req.body.communitySection;
       
-      const post = await storage.createPost(validatedData, alias, sessionId, postContext, communitySection);
+      const post = await storage.createPost(validatedData, alias, sessionId);
       res.json(post);
     } catch (error) {
       if (error instanceof Error) {

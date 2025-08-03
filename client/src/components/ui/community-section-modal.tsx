@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogDescription, DialogTitle } 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PostModal } from "./post-modal";
+import { SectionPostModal } from "./section-post-modals";
 import { Star, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +31,19 @@ interface CommunitySection {
 interface CommunityModalProps {
   section: CommunitySection;
   children: React.ReactNode;
+}
+
+function getSectionId(id: string): string {
+  const sectionMap: Record<string, string> = {
+    "celebrity": "celebrity-tea",
+    "stories": "story-time", 
+    "hot": "hot-topics",
+    "debate": "daily-debate",
+    "experiments": "tea-experiments",
+    "fun": "just-for-fun",
+    "suggestions": "suggestions"
+  };
+  return sectionMap[id] || id;
 }
 
 export function CommunityModal({ section, children }: CommunityModalProps) {
@@ -132,12 +145,11 @@ export function CommunityModal({ section, children }: CommunityModalProps) {
         </DialogContent>
       </Dialog>
 
-      <PostModal
-        isOpen={isPostModalOpen}
+      <SectionPostModal 
+        isOpen={isPostModalOpen} 
         onClose={() => setIsPostModalOpen(false)}
-        defaultCategory={section.postConfig?.category}
-        defaultTags={section.postConfig?.tags || []}
-        sectionTheme={section.id}
+        section={getSectionId(section.id)}
+        sectionTitle={`${section.emoji} ${section.name}`}
       />
     </>
   );

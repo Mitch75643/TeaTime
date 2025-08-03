@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { PostCard } from "@/components/ui/post-card";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { PostModal } from "@/components/ui/post-modal";
+import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coffee, Plus, Calendar, Users, MessageCircle } from "lucide-react";
@@ -165,13 +165,12 @@ export default function DailySpill() {
         ))}
       </main>
 
-      <PostModal 
+      <SectionPostModal 
         isOpen={isPostModalOpen} 
         onClose={() => setIsPostModalOpen(false)}
-        defaultCategory="daily"
-        defaultTags={["#dailyspill"]}
+        section="daily-tea"
+        sectionTitle="☕ Daily Spill"
         promptText={todayPrompt}
-        postContext={{ page: 'daily' }}
       />
       
       <BottomNav />

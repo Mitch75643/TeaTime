@@ -48,7 +48,7 @@ export class MemStorage implements IStorage {
     this.userFlags = new Map();
   }
 
-  async createPost(insertPost: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post> {
+  async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
     const id = randomUUID();
     const post: Post = {
       ...insertPost,
@@ -59,10 +59,18 @@ export class MemStorage implements IStorage {
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
-      postContext: postContext || 'home',
-      communitySection: communitySection || null,
+      postContext: insertPost.postContext || 'home',
+      communitySection: insertPost.communitySection || null,
       reportCount: 0,
       isRemoved: false,
+      postType: insertPost.postType || 'standard',
+      celebrityName: insertPost.celebrityName || null,
+      storyType: insertPost.storyType || null,
+      topicTitle: insertPost.topicTitle || null,
+      pollOptions: insertPost.pollOptions || null,
+      pollVotes: insertPost.postType === 'poll' ? {optionA: 0, optionB: 0} : null,
+      debateVotes: insertPost.postType === 'debate' ? {up: 0, down: 0} : null,
+      allowComments: insertPost.allowComments !== false,
     };
     this.posts.set(id, post);
     return post;

@@ -19,9 +19,19 @@ export const posts = pgTable("posts", {
   isDrama: boolean("is_drama").default(false),
   sessionId: varchar("session_id"),
   postContext: varchar("post_context").default("home"),
+  communitySection: varchar("community_section"),
   reportCount: integer("report_count").default(0),
   isRemoved: boolean("is_removed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
+  // Section-specific fields
+  postType: varchar("post_type").default("standard"), // standard, poll, debate
+  celebrityName: varchar("celebrity_name"), // for Celebrity Tea
+  storyType: varchar("story_type"), // for Story Time
+  topicTitle: varchar("topic_title"), // for Hot Topics
+  pollOptions: jsonb("poll_options"), // for Tea Experiments {optionA: string, optionB: string}
+  pollVotes: jsonb("poll_votes").default({optionA: 0, optionB: 0}), // for Tea Experiments
+  debateVotes: jsonb("debate_votes").default({up: 0, down: 0}), // for Daily Debate
+  allowComments: boolean("allow_comments").default(true), // false for Daily Debate
 });
 
 export const userFlags = pgTable("user_flags", {
@@ -76,10 +86,29 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
   tags: true,
+  postContext: true,
+  communitySection: true,
+  postType: true,
+  celebrityName: true,
+  storyType: true,
+  topicTitle: true,
+  pollOptions: true,
+  allowComments: true,
 }).extend({
   content: z.string().min(1).max(500),
-  category: z.enum(["college", "work", "relationships", "family", "money", "politics", "drama"]),
+  category: z.enum(["college", "work", "relationships", "family", "money", "politics", "drama", "gossip", "story", "debate", "poll", "daily", "other"]),
   tags: z.array(z.string()).optional().default([]),
+  postContext: z.string().optional().default("home"),
+  communitySection: z.string().optional(),
+  postType: z.enum(["standard", "poll", "debate"]).optional().default("standard"),
+  celebrityName: z.string().optional(),
+  storyType: z.enum(["horror", "funny", "weird", "romantic", "embarrassing"]).optional(),
+  topicTitle: z.string().optional(),
+  pollOptions: z.object({
+    optionA: z.string(),
+    optionB: z.string()
+  }).optional(),
+  allowComments: z.boolean().optional().default(true),
 });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({

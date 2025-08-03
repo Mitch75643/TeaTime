@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
-import { PostModal } from "@/components/ui/post-modal";
+import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { CommunityModal } from "@/components/ui/community-section-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
