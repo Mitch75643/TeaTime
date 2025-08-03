@@ -125,26 +125,6 @@ const communitySections = [
     }
   },
   {
-    id: "fun",
-    name: "Just for Fun",
-    emoji: "🎉", 
-    icon: Sparkles,
-    description: "Memes, jokes, weird thoughts, and random rants",
-    tags: [
-      { tag: "#Meme", count: 25 },
-      { tag: "#Random", count: 18 },
-      { tag: "#Funny", count: 31 },
-      { tag: "#Relatable", count: 14 }
-    ],
-    gradient: "bg-gradient-to-br from-yellow-500 to-amber-500",
-    textColor: "text-white",
-    buttonText: "Post Something Fun",
-    postConfig: {
-      category: "fun",
-      tags: ["#fun", "#random"]
-    }
-  },
-  {
     id: "suggestions",
     name: "Suggest Something",
     emoji: "💡",
@@ -177,7 +157,6 @@ export default function Community() {
       "hot": "hot-topics",
       "debate": "daily-debate",
       "experiments": "tea-experiments",
-      "fun": "just-for-fun",
       "suggestions": "suggestions"
     };
     

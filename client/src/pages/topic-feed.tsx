@@ -9,7 +9,7 @@ import { StoryTimeFeatures } from "@/components/ui/story-time-features";
 import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
 import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
-import { JustForFunFeatures } from "@/components/ui/just-for-fun-features";
+
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { ArrowLeft, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -71,15 +71,7 @@ const topicConfig: Record<string, TopicInfo> = {
     textColor: "text-white",
     count: 78
   },
-  "just-for-fun": {
-    id: "just-for-fun",
-    name: "Just for Fun",
-    emoji: "🎉",
-    description: "Light-hearted content and random thoughts",
-    gradient: "bg-gradient-to-br from-yellow-500 to-amber-500", // Match Community card exactly
-    textColor: "text-white",
-    count: 432
-  },
+
   "suggestions": {
     id: "suggestions",
     name: "Suggestions",
@@ -99,7 +91,7 @@ export default function TopicFeed() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("new");
   const [storyCategory, setStoryCategory] = useState("all");
-  const [funCategory, setFunCategory] = useState("meme");
+
   const [selectedTopic, setSelectedTopic] = useState("");
   
   // Get topic ID from URL params
@@ -123,8 +115,6 @@ export default function TopicFeed() {
             return post.category === "debate";
           case "tea-experiments":
             return post.category === "poll" || post.pollOptions;
-          case "just-for-fun":
-            return post.category === "other" && post.tags?.includes("#fun");
           case "suggestions":
             return post.tags?.includes("#suggestions");
           default:
@@ -288,15 +278,7 @@ export default function TopicFeed() {
           />
         )}
         
-        {topicId === "just-for-fun" && (
-          <JustForFunFeatures 
-            onCreatePost={(content, category, gif) => {
-              setIsPostModalOpen(true);
-            }}
-            selectedCategory={funCategory}
-            onCategoryChange={setFunCategory}
-          />
-        )}
+
         
         {topicId === "suggestions" && (
           <SuggestionsFeatures 
