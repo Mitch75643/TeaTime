@@ -112,24 +112,7 @@ export default function Home() {
       <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
         <div className="space-y-6">
 
-        {/* Category filter indicator */}
-        {activeCategory !== "all" && (
-          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-purple-700 dark:text-purple-300">
-                Showing posts in: <span className="font-semibold">{categories.find(c => c.id === activeCategory)?.label}</span>
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setActiveCategory("all")}
-                className="text-purple-600 hover:text-purple-800 dark:text-purple-400"
-              >
-                Clear filter
-              </Button>
-            </div>
-          </div>
-        )}
+
 
         {feedType === "new" && (
           <div className="flex items-center justify-between mb-4">
