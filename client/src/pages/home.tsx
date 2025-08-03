@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "@/components/ui/header";
-import { CategoryTabs } from "@/components/ui/category-tabs";
-import { FeedToggle } from "@/components/ui/feed-toggle";
-import { PostCard } from "@/components/ui/post-card";
-import { PostModal } from "@/components/ui/post-modal";
-import { BottomNav } from "@/components/ui/bottom-nav";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Header } from "../components/ui/header";
+import { CategoryTabs } from "../components/ui/category-tabs";
+import { FeedToggle } from "../components/ui/feed-toggle";
+import { PostCard } from "../components/ui/post-card";
+import { PostModal } from "../components/ui/post-modal";
+import { BottomNav } from "../components/ui/bottom-nav";
+import { Button } from "../components/ui/button";
+import { Sparkles, Plus } from "lucide-react";
 import type { Post } from "@shared/schema";
 
 export default function Home() {
@@ -31,10 +31,10 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Header />
       
-      <div className="sticky top-16 z-40 bg-white">
+      <div className="sticky top-20 z-40">
         <CategoryTabs
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
@@ -45,18 +45,18 @@ export default function Home() {
         />
       </div>
 
-      <main className="pb-20 px-4 space-y-4 pt-4">
+      <main className="pb-24 px-6 space-y-6 pt-6">
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 animate-pulse">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div key={i} className="bg-white/60 rounded-3xl shadow-lg border-2 border-pink-100/50 p-6 animate-pulse">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-pink-200/50 rounded-full"></div>
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-pink-200/50 rounded-full w-1/3"></div>
                     <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-pink-200/50 rounded-full"></div>
+                      <div className="h-4 bg-pink-200/50 rounded-full w-2/3"></div>
                     </div>
                   </div>
                 </div>
@@ -64,34 +64,36 @@ export default function Home() {
             ))}
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🤷‍♀️</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No posts yet</h3>
-            <p className="text-gray-600 mb-6">Be the first to spill some tea!</p>
+          <div className="text-center py-16 animate-fade-in">
+            <div className="w-24 h-24 gradient-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <span className="text-4xl">☕</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">No tea to spill yet!</h3>
+            <p className="text-gray-600 mb-8 font-medium">Be the first to share your story anonymously</p>
             <Button 
               onClick={() => setIsPostModalOpen(true)}
-              className="gradient-primary text-white"
+              className="gradient-primary text-white px-8 py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 button-hover-lift"
             >
-              Create Post
+              <Sparkles className="w-5 h-5 mr-2" />
+              Spill Some Tea
             </Button>
           </div>
         ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
+          <div className="space-y-6">
+            {posts.map((post, index) => (
+              <div
+                key={post.id}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="animate-slide-up"
+              >
+                <PostCard post={post} />
+              </div>
+            ))}
+          </div>
         )}
       </main>
 
-      {/* Floating Action Button */}
-      <Button
-        onClick={() => setIsPostModalOpen(true)}
-        className="fixed bottom-20 right-4 w-14 h-14 gradient-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-110 z-30"
-        size="icon"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
-
-      <BottomNav />
+      <BottomNav onCreatePost={() => setIsPostModalOpen(true)} />
 
       <PostModal
         isOpen={isPostModalOpen}

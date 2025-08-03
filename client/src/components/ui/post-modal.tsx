@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Input } from "./input";
 import { Label } from "./label";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { InsertPost } from "@shared/schema";
@@ -17,13 +18,13 @@ interface PostModalProps {
 }
 
 const categories = [
-  { value: "college", label: "🎓 College" },
-  { value: "work", label: "💼 Work" },
-  { value: "relationships", label: "💕 Relationships" },
-  { value: "family", label: "👨‍👩‍👧‍👦 Family" },
-  { value: "money", label: "💰 Money" },
-  { value: "politics", label: "🗳️ Politics" },
-  { value: "drama", label: "🎭 Am I the Drama?" },
+  { value: "college", label: "🎓 College", gradient: "gradient-secondary" },
+  { value: "work", label: "💼 Work", gradient: "gradient-primary" },
+  { value: "relationships", label: "💕 Love", gradient: "gradient-drama" },
+  { value: "family", label: "👨‍👩‍👧‍👦 Family", gradient: "gradient-soft" },
+  { value: "money", label: "💰 Money", gradient: "gradient-secondary" },
+  { value: "politics", label: "🗳️ Politics", gradient: "gradient-primary" },
+  { value: "drama", label: "🎭 Am I the Drama?", gradient: "gradient-drama" },
 ];
 
 export function PostModal({ isOpen, onClose }: PostModalProps) {
@@ -95,68 +96,85 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md mx-4">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Spill the Tea ☕</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+      <DialogContent className="sm:max-w-lg mx-4 rounded-3xl border-2 border-pink-100/50 glass animate-slide-up">
+        <DialogHeader className="text-center pb-4 border-b border-pink-100/50">
+          <DialogTitle className="flex items-center justify-center space-x-3">
+            <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center">
+              <span className="text-lg">☕</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">Spill the Tea</h2>
+              <p className="text-xs text-gray-500 font-medium">Share your story anonymously</p>
+            </div>
           </DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClose}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-gray-100"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-6 py-4">
           {/* Category Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="category">Choose a category</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category..." />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-gray-700">Pick your vibe ✨</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {categories.map((cat) => (
+                <Button
+                  key={cat.value}
+                  variant="ghost"
+                  className={cn(
+                    "p-4 rounded-2xl text-left transition-all duration-300 border-2 border-transparent button-hover-lift",
+                    category === cat.value 
+                      ? `${cat.gradient} text-white shadow-lg transform scale-105 border-white/20`
+                      : "bg-white/60 text-gray-700 hover:bg-white/80 hover:shadow-md border-pink-100/30"
+                  )}
+                  onClick={() => setCategory(cat.value)}
+                >
+                  <div className="text-sm font-semibold">{cat.label}</div>
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Post Content */}
-          <div className="space-y-2">
-            <Label htmlFor="content">What's on your mind?</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-gray-700">What's the tea? 🍵</Label>
             <Textarea
-              id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your thoughts anonymously..."
-              className="h-32 resize-none"
+              placeholder="Share your thoughts, vent, confess, or spill some drama... Stay anonymous!"
+              className="h-32 resize-none rounded-2xl border-2 border-pink-100/50 bg-white/60 backdrop-blur-sm focus:border-pink-300 focus:bg-white/80 transition-all duration-200"
               maxLength={500}
             />
-            <div className="flex justify-between items-center text-xs text-gray-500">
-              <span>Your alias: <span className="font-medium text-purple-600">Anonymous User</span></span>
-              <span className={content.length > 450 ? "text-red-500" : ""}>{content.length}/500</span>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-500">
+                Your alias: <span className="font-semibold gradient-primary bg-clip-text text-transparent">Anonymous User</span>
+              </span>
+              <span className={cn(
+                "font-semibold",
+                content.length > 450 ? "text-red-500" : "text-gray-500"
+              )}>
+                {content.length}/500
+              </span>
             </div>
           </div>
 
           {/* Tags */}
-          <div className="space-y-2">
-            <Label htmlFor="tags">Add tags (optional)</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-gray-700">Add some tags 🏷️</Label>
             <Input
-              id="tags"
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="#helpme #funny #advice"
+              placeholder="#helpme #funny #advice #drama"
+              className="rounded-2xl border-2 border-pink-100/50 bg-white/60 backdrop-blur-sm focus:border-pink-300 focus:bg-white/80 transition-all duration-200"
               maxLength={100}
             />
             <p className="text-xs text-gray-500">
-              Separate multiple tags with spaces or commas. Max 5 tags.
+              Separate with spaces or commas. Max 5 tags.
             </p>
           </div>
 
@@ -164,9 +182,20 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
           <Button
             onClick={handleSubmit}
             disabled={createPostMutation.isPending || !content.trim() || !category}
-            className="w-full gradient-primary text-white"
+            className="w-full py-4 rounded-2xl gradient-primary text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 button-hover-lift"
           >
-            {createPostMutation.isPending ? "Posting..." : "Post Anonymously"}
+            {createPostMutation.isPending ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Posting...</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <span>☕</span>
+                <span>Post Anonymously</span>
+                <span>✨</span>
+              </div>
+            )}
           </Button>
         </div>
       </DialogContent>

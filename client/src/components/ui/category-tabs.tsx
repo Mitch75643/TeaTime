@@ -7,35 +7,33 @@ interface CategoryTabsProps {
 }
 
 const categories = [
-  { id: "all", label: "All", emoji: "" },
-  { id: "college", label: "College", emoji: "🎓" },
-  { id: "work", label: "Work", emoji: "💼" },
-  { id: "relationships", label: "Relationships", emoji: "💕" },
-  { id: "family", label: "Family", emoji: "👨‍👩‍👧‍👦" },
-  { id: "money", label: "Money", emoji: "💰" },
-  { id: "politics", label: "Politics", emoji: "🗳️" },
-  { id: "drama", label: "Am I the Drama?", emoji: "🎭" },
+  { id: "all", label: "All", emoji: "✨", gradient: "gradient-soft" },
+  { id: "college", label: "College", emoji: "🎓", gradient: "gradient-secondary" },
+  { id: "work", label: "Work", emoji: "💼", gradient: "gradient-primary" },
+  { id: "relationships", label: "Love", emoji: "💕", gradient: "gradient-drama" },
+  { id: "family", label: "Family", emoji: "👨‍👩‍👧‍👦", gradient: "gradient-soft" },
+  { id: "money", label: "Money", emoji: "💰", gradient: "gradient-secondary" },
+  { id: "politics", label: "Politics", emoji: "🗳️", gradient: "gradient-primary" },
+  { id: "drama", label: "Am I the Drama?", emoji: "🎭", gradient: "gradient-drama" },
 ];
 
 export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsProps) {
   return (
-    <div className="bg-white px-4 py-3 border-b border-gray-200">
-      <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+    <div className="glass px-6 py-4 border-b border-pink-100/50 animate-fade-in">
+      <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
         {categories.map((category) => (
           <Button
             key={category.id}
             variant="ghost"
             className={cn(
-              "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+              "flex-shrink-0 px-5 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 border-2 border-transparent button-hover-lift whitespace-nowrap",
               activeCategory === category.id
-                ? category.id === "drama"
-                  ? "gradient-drama text-white"
-                  : "bg-purple-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? `${category.gradient} text-white shadow-lg transform scale-105 border-white/20`
+                : "bg-white/60 text-gray-700 hover:bg-white/80 hover:shadow-md border-pink-100/30"
             )}
             onClick={() => onCategoryChange(category.id)}
           >
-            {category.emoji && <span className="mr-1">{category.emoji}</span>}
+            <span className="emoji-lg mr-2">{category.emoji}</span>
             {category.label}
           </Button>
         ))}
