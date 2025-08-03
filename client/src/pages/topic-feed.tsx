@@ -183,20 +183,25 @@ export default function TopicFeed() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Fixed Back Arrow - Always visible in top left */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBackClick}
+          className="bg-white dark:bg-gray-800 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
       {/* Header with topic branding */}
       <div className={cn("relative", topic.gradient)}>
         <div className="px-4 py-6">
-          {/* Navigation */}
+          {/* Navigation - Hidden since we have fixed back button */}
           <div className="flex items-center justify-between mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackClick}
-              className={cn("hover:bg-white/10", topic.textColor)}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Community
-            </Button>
+            <div></div> {/* Spacer */}
           </div>
 
           {/* Topic Header */}
