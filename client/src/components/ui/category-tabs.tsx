@@ -56,18 +56,20 @@ const categoryStyles = {
 export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsProps) {
   return (
     <div className="bg-white dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+      <div className="flex space-x-2 overflow-x-auto scrollbar-hide pb-1">
         {categories.map((category) => (
           <Button
             key={category.id}
             variant="ghost"
             className={cn(
-              "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors border-2",
+              "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2 hover:scale-105 active:scale-95",
               activeCategory === category.id
                 ? categoryStyles[category.id as keyof typeof categoryStyles]?.active || "bg-purple-500 text-white border-purple-300"
-                : categoryStyles[category.id as keyof typeof categoryStyles]?.inactive || "bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200"
+                : categoryStyles[category.id as keyof typeof categoryStyles]?.inactive || "bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200",
+              activeCategory === category.id && "ring-2 ring-purple-200 dark:ring-purple-800"
             )}
             onClick={() => onCategoryChange(category.id)}
+            disabled={activeCategory === category.id}
           >
             {category.emoji && <span className="mr-1">{category.emoji}</span>}
             {category.label}

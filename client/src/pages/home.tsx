@@ -11,6 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
 import type { Post } from "@shared/schema";
 
+const categories = [
+  { id: "all", label: "All", emoji: "" },
+  { id: "school", label: "School", emoji: "🏫" },
+  { id: "work", label: "Work", emoji: "💼" },
+  { id: "relationships", label: "Relationships", emoji: "💕" },
+  { id: "family", label: "Family", emoji: "👨‍👩‍👧" },
+  { id: "money", label: "Money", emoji: "💸" },
+  { id: "hot-takes", label: "Hot Takes", emoji: "🌍" },
+  { id: "drama", label: "Am I the Drama?", emoji: "🎭" },
+];
+
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [feedType, setFeedType] = useState<"new" | "trending">("new");
@@ -98,7 +109,26 @@ export default function Home() {
         />
       </div>
 
-      <main className="pb-20 px-4 space-y-4 pt-4">
+      <main className="pb-20 px-4 md:px-8 space-y-6 pt-4 max-w-screen-sm lg:max-w-2xl mx-auto">
+        {/* Category filter indicator */}
+        {activeCategory !== "all" && (
+          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3 mb-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-purple-700 dark:text-purple-300">
+                Showing posts in: <span className="font-semibold">{categories.find(c => c.id === activeCategory)?.label}</span>
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveCategory("all")}
+                className="text-purple-600 hover:text-purple-800 dark:text-purple-400"
+              >
+                Clear filter
+              </Button>
+            </div>
+          </div>
+        )}
+
         {feedType === "new" && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -140,19 +170,25 @@ export default function Home() {
         ) : posts.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🤷‍♀️</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No posts yet</h3>
-            <p className="text-gray-600 mb-6">Be the first to spill some tea!</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              {activeCategory === "all" ? "No posts yet" : `No posts in ${categories.find(c => c.id === activeCategory)?.label}`}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {activeCategory === "all" ? "Be the first to spill some tea!" : "Be the first to post in this category!"}
+            </p>
             <Button 
               onClick={() => setIsPostModalOpen(true)}
-              className="gradient-primary text-white"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
             >
               Create Post
             </Button>
           </div>
         ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
         )}
       </main>
 
