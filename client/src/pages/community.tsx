@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
@@ -166,6 +167,24 @@ const communitySections = [
 ];
 
 export default function Community() {
+  const [, setLocation] = useLocation();
+  
+  const handleSectionClick = (sectionId: string) => {
+    // Map section IDs to topic IDs for navigation
+    const topicMap: Record<string, string> = {
+      "celebrity": "celebrity-tea",
+      "stories": "story-time", 
+      "hot": "hot-topics",
+      "debate": "daily-debate",
+      "experiments": "tea-experiments",
+      "fun": "just-for-fun",
+      "suggestions": "suggestions"
+    };
+    
+    const topicId = topicMap[sectionId] || sectionId;
+    setLocation(`/topic/${topicId}`);
+  };
+
   const { data: posts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", "community"],
     queryFn: async () => {
@@ -190,8 +209,11 @@ export default function Community() {
           {communitySections.map((section) => {
             const Icon = section.icon;
             return (
-              <CommunityModal key={section.id} section={section}>
-                <Card className={cn("cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] overflow-hidden border-0", section.gradient)}>
+              <div key={section.id}>
+                <Card 
+                  className={cn("cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] overflow-hidden border-0", section.gradient)}
+                  onClick={() => handleSectionClick(section.id)}
+                >
                   <div className="p-4">
                     <div className="flex items-center space-x-3 mb-3">
                       <span className="text-2xl">{section.emoji}</span>
@@ -219,7 +241,7 @@ export default function Community() {
                     </div>
                   </div>
                 </Card>
-              </CommunityModal>
+              </div>
             );
           })}
         </div>
