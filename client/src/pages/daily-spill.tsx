@@ -288,7 +288,7 @@ export default function DailySpill() {
 
       {/* Daily Prompt Card */}
       <div className="px-4 pt-4 pb-4">
-        <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-0 relative overflow-hidden">
+        <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 relative overflow-hidden">
           {spillOfTheDay && (
             <div className="absolute top-2 right-2">
               <Badge className="bg-yellow-400 text-yellow-900 border-0 text-xs font-bold">
@@ -315,7 +315,7 @@ export default function DailySpill() {
             </p>
             <Button
               onClick={() => setIsPostModalOpen(true)}
-              className="w-full bg-white text-purple-600 hover:bg-gray-100 font-semibold shadow-sm"
+              className="w-full bg-white text-red-600 hover:bg-gray-100 font-semibold shadow-sm"
             >
               <Plus className="h-4 w-4 mr-2" />
               Spill Your Tea

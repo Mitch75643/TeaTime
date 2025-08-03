@@ -1,0 +1,62 @@
+Update the app’s color theme from pink/purple to an orange palette, but follow these specific rules:
+
+---
+
+🎨 New Orange Theme Base:
+
+- Primary Orange: `#FF7A00`
+- Soft Orange Background: `#FFE5D1`
+- Darker Orange for shadows or active: `#CC6200`
+- Accent/Highlight: `#FFD8B2`
+- Text (dark): `#3C2E20`
+
+---
+
+✅ Areas to Change:
+
+1. **Global UI (Nav, Buttons, Page Transitions, Bottom of Pages):**
+   - Change all pink/purple accents, hover states, and transitions to use the orange theme.
+   - The bottom gradient or highlight color at the base of pages should now be orange (`#FF7A00` or gradient).
+   - When switching pages (clicking a tab or route), use orange glow or animation instead of pink.
+
+2. **Daily Spill Page:**
+   - **Keep the Weekly Prompt Box Header Red** as originally designed.
+   - **Only change the background and supporting UI colors** on the Daily Spill page (submit button, post area, icons) to the orange theme.
+   - Use a clean contrast between the red prompt box and the new orange post area.
+
+3. **All Buttons and Modals Across App:**
+   - Replace pink/purple styles with the orange palette above.
+   - Hover states should use lighter orange.
+   - Modal headers and footers should match the new theme.
+
+---
+
+🚫 Do NOT Change:
+
+1. **Community Page Tiles (Celebrity Tea, Story Time, etc.):**
+   - Keep their **original colors** (each tile has its own theme).
+   - Do not apply any orange theme to the tiles or their borders.
+   - Keep individual topic colors intact for branding and variety.
+
+2. **Weekly Prompt Header in Daily Spill:**
+   - Leave it as the **original red** — this is intentional and should **not** match the orange theme.
+
+3. **Icons inside Category Tiles:**
+   - Do not recolor any icons inside the Community or Daily Spill tiles unless they were pink before — revert those to their original.
+
+---
+
+📱 Mobile & Visual Tips:
+
+- Make sure the new orange color has strong visibility on mobile without hurting contrast.
+- Don’t oversaturate; use a warm, inviting orange, not neon.
+- All transitions (like swiping or switching tabs) should use orange highlights now instead of purple.
+
+---
+
+🧩 Summary:
+- Orange is the new global theme
+- Keep Community and Daily Spill tile colors the same
+- Restore original red for the Daily Spill prompt header
+- Convert all navigation, page switching, and modals to orange
+- Orange color should feel bold and expressive, not harsh

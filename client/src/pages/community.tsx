@@ -38,7 +38,7 @@ const communitySections = [
       { tag: "#Viral", count: 15 },
       { tag: "#Drama", count: 22 }
     ],
-    gradient: "bg-gradient-to-br from-orange-500 to-orange-600",
+    gradient: "bg-gradient-to-br from-pink-500 to-rose-500",
     textColor: "text-white",
     buttonText: "Share Celebrity Tea",
     postConfig: {
@@ -118,7 +118,7 @@ const communitySections = [
       { tag: "#Experiment", count: 7 },
       { tag: "#Choose", count: 13 }
     ],
-    gradient: "bg-gradient-to-br from-orange-600 to-orange-700",
+    gradient: "bg-gradient-to-br from-purple-500 to-violet-500",
     textColor: "text-white",
     buttonText: "Start Experiment",
     postConfig: {

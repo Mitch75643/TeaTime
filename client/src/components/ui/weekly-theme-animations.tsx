@@ -19,7 +19,7 @@ const THEME_CONFIG = {
     sound: "grumble"
   },
   "Cringe/Funny Week": {
-    colors: ["#ffd700", "#ffff00", "#ff69b4"],
+    colors: ["#ffd700", "#ffff00", "#FF7A00"],
     sound: "giggle"
   },
   "Secrets Week": {
@@ -31,11 +31,11 @@ const THEME_CONFIG = {
     sound: "gasp"
   },
   "Drama Week": {
-    colors: ["#ff0000", "#dc143c", "#b22222"],
+    colors: ["#FF7A00", "#CC6200", "#FFD8B2"],
     sound: "dramatic-sting"
   },
   "Self-Care Week": {
-    colors: ["#98fb98", "#90ee90", "#87ceeb"],
+    colors: ["#FF7A00", "#FFD8B2", "#FFE5D1"],
     sound: "spa-chime"
   },
   // Existing themes
