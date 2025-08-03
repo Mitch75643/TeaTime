@@ -16,6 +16,9 @@ import type { InsertPost } from "@shared/schema";
 interface PostModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultCategory?: string;
+  defaultTags?: string[];
+  promptText?: string;
 }
 
 const categories = [
@@ -35,7 +38,7 @@ const popularTags = [
   "#nsfw", "#serious", "#update", "#urgent", "#anonymous", "#story"
 ];
 
-export function PostModal({ isOpen, onClose }: PostModalProps) {
+export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags = [], promptText }: PostModalProps) {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [tagsInput, setTagsInput] = useState("");
@@ -51,15 +54,25 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
     if (isOpen) {
       setCurrentAlias(generateAlias());
       
-      // Load saved draft if exists
-      const draft = loadDraft();
-      if (draft) {
-        setContent(draft.content);
-        setCategory(draft.category);
-        setSelectedTags(draft.tags);
+      // Set default values if provided
+      if (defaultCategory) {
+        setCategory(defaultCategory);
+      }
+      if (defaultTags.length > 0) {
+        setSelectedTags(defaultTags);
+      }
+      
+      // Load saved draft if exists (only if no defaults provided)
+      if (!defaultCategory && defaultTags.length === 0) {
+        const draft = loadDraft();
+        if (draft) {
+          setContent(draft.content);
+          setCategory(draft.category);
+          setSelectedTags(draft.tags);
+        }
       }
     }
-  }, [isOpen]);
+  }, [isOpen, defaultCategory, defaultTags]);
 
   // Auto-save draft as user types
   useEffect(() => {
@@ -206,7 +219,7 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your thoughts anonymously..."
+              placeholder={promptText ? `Responding to: "${promptText}"` : "Share your thoughts anonymously..."}
               className="h-32 resize-none"
               maxLength={500}
             />

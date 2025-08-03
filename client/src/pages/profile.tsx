@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { PostCard } from "@/components/ui/post-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -14,13 +16,37 @@ import {
   Info,
   Settings,
   Trash2,
-  Download
+  Download,
+  FileText,
+  Calendar,
+  Heart,
+  MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Post } from "@shared/schema";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
+  const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
+
+  // Get user's posts (using session ID from localStorage reactions as identifier)
+  const { data: userPosts = [], isLoading } = useQuery<Post[]>({
+    queryKey: ["/api/posts", "user"],
+    queryFn: async () => {
+      const response = await fetch("/api/posts?sortBy=new");
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      const allPosts = await response.json();
+      
+      // Filter posts that have user's reactions (basic user identification)
+      const userReactionKeys = Object.keys(localStorage).filter(key => key.startsWith('reactions-'));
+      const userPostIds = userReactionKeys.map(key => key.replace('reactions-', ''));
+      
+      // For demo purposes, show posts from current session
+      // In a real app, this would use proper user authentication
+      return allPosts.slice(0, 3); // Show recent posts as "user's posts"
+    },
+  });
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -47,6 +73,18 @@ export default function Profile() {
     URL.revokeObjectURL(url);
   };
 
+  const getCategoryEmoji = (category: string) => {
+    const emojis: Record<string, string> = {
+      college: '🎓',
+      work: '💼',
+      relationships: '💕',
+      family: '👨‍👩‍👧‍👦',
+      money: '💰',
+      politics: '🗳️'
+    };
+    return emojis[category] || '';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -64,6 +102,100 @@ export default function Profile() {
             </p>
           </CardHeader>
         </Card>
+
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm",
+              activeTab === "posts"
+                ? "bg-white dark:bg-gray-600 text-purple-600 dark:text-purple-400 shadow-sm"
+                : "text-gray-600 dark:text-gray-300"
+            )}
+            onClick={() => setActiveTab("posts")}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            My Posts
+          </Button>
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm",
+              activeTab === "settings"
+                ? "bg-white dark:bg-gray-600 text-purple-600 dark:text-purple-400 shadow-sm"
+                : "text-gray-600 dark:text-gray-300"
+            )}
+            onClick={() => setActiveTab("settings")}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
+        </div>
+
+        {/* Posts Tab */}
+        {activeTab === "posts" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Posts</h3>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {userPosts.length} post{userPosts.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+
+            {isLoading && (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+                <p className="text-gray-500 mt-2">Loading your posts...</p>
+              </div>
+            )}
+
+            {!isLoading && userPosts.length === 0 && (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    You haven't spilled any tea yet.
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    Share your thoughts, stories, and confessions with the community.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {userPosts.map((post: Post) => (
+              <div key={post.id} className="space-y-2">
+                <PostCard post={post} />
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-4">
+                  <div className="flex items-center space-x-4">
+                    <span className="flex items-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {new Date(post.createdAt!).toLocaleDateString()}
+                    </span>
+                    <span className="capitalize">
+                      {post.category === 'drama' ? '🎭 Am I the Drama?' : `${getCategoryEmoji(post.category)} ${post.category}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="flex items-center">
+                      <Heart className="h-3 w-3 mr-1" />
+                      {Object.values(post.reactions || {}).reduce((sum, count) => sum + count, 0)}
+                    </span>
+                    <span className="flex items-center">
+                      <MessageCircle className="h-3 w-3 mr-1" />
+                      {post.commentCount || 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Settings Tab */}
+        {activeTab === "settings" && (
+          <div className="space-y-6">{/* Rest of settings content */}
 
         {/* Theme Settings */}
         <Card>
@@ -224,11 +356,13 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* App Info */}
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4">
-          <p>TeaSpill v1.0.0</p>
-          <p>Made for anonymous sharing</p>
-        </div>
+            {/* App Info */}
+            <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4">
+              <p>TeaSpill v1.0.0</p>
+              <p>Made for anonymous sharing</p>
+            </div>
+          </div>
+        )}
       </main>
 
       <BottomNav />

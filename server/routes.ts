@@ -36,7 +36,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const category = req.query.category as string;
       const sortBy = req.query.sortBy as 'trending' | 'new' || 'new';
-      const posts = await storage.getPosts(category, sortBy);
+      const tags = req.query.tags as string;
+      const posts = await storage.getPosts(category, sortBy, tags);
       res.json(posts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch posts" });

@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 export interface IStorage {
   // Posts
   createPost(post: InsertPost, alias: string): Promise<Post>;
-  getPosts(category?: string, sortBy?: 'trending' | 'new'): Promise<Post[]>;
+  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string): Promise<Post[]>;
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
@@ -54,11 +54,17 @@ export class MemStorage implements IStorage {
     return post;
   }
 
-  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new'): Promise<Post[]> {
+  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string): Promise<Post[]> {
     let posts = Array.from(this.posts.values());
     
     if (category && category !== 'all') {
       posts = posts.filter(post => post.category === category);
+    }
+    
+    if (tags) {
+      posts = posts.filter(post => 
+        post.tags && post.tags.some(tag => tag === tags)
+      );
     }
     
     if (sortBy === 'trending') {
