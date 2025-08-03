@@ -205,26 +205,26 @@ export default function Community() {
         </div>
 
         {/* Community Sections Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 auto-rows-fr">
           {communitySections.map((section) => {
             const Icon = section.icon;
             return (
-              <div key={section.id}>
+              <div key={section.id} className="h-full">
                 <Card 
-                  className={cn("cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] overflow-hidden border-0", section.gradient)}
+                  className={cn("cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] overflow-hidden border-0 h-full flex flex-col", section.gradient)}
                   onClick={() => handleSectionClick(section.id)}
                 >
-                  <div className="p-4">
+                  <div className="p-4 flex flex-col h-full">
                     <div className="flex items-center space-x-3 mb-3">
                       <span className="text-2xl">{section.emoji}</span>
                       <h3 className={cn("font-bold text-lg", section.textColor)}>
                         {section.name}
                       </h3>
                     </div>
-                    <p className={cn("text-sm mb-4 opacity-90", section.textColor)}>
+                    <p className={cn("text-sm mb-4 opacity-90 flex-grow", section.textColor)}>
                       {section.description}
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mt-auto">
                       {section.tags.slice(0, 2).map(({ tag, count }) => (
                         <Badge
                           key={tag}
