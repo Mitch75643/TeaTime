@@ -23,9 +23,10 @@ const trendingCelebs: CelebData[] = [
 
 interface CelebrityTeaFeaturesProps {
   onSpillAbout: (celebName: string) => void;
+  onCreatePost: () => void;
 }
 
-export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps) {
+export function CelebrityTeaFeatures({ onSpillAbout, onCreatePost }: CelebrityTeaFeaturesProps) {
   const [selectedCeleb, setSelectedCeleb] = useState<string | null>(null);
 
   const getDramaMeterColor = (level: number) => {
@@ -55,76 +56,42 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
             Based on recent posts & reactions
           </p>
         </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-3">
+        <CardContent className="p-3 max-h-48 overflow-y-auto">
+          <div className="space-y-2">
             {trendingCelebs.map((celeb, index) => (
               <div
                 key={celeb.name}
                 className={cn(
-                  "flex items-center justify-between p-3 rounded-lg border transition-all hover:shadow-md cursor-pointer",
+                  "flex items-center justify-between p-2 rounded-lg border transition-all hover:shadow-sm cursor-pointer",
                   selectedCeleb === celeb.name 
                     ? "border-pink-300 bg-pink-50 dark:border-pink-700 dark:bg-pink-900/20" 
                     : "border-gray-200 dark:border-gray-700 hover:border-pink-200 dark:hover:border-pink-800"
                 )}
-                onClick={() => setSelectedCeleb(celeb.name)}
+                onClick={() => {
+                  setSelectedCeleb(celeb.name);
+                  onSpillAbout(celeb.name);
+                }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <span className="text-lg font-bold text-pink-600 dark:text-pink-400">
-                      #{index + 1}
-                    </span>
-                    {celeb.trending && (
-                      <Badge className="bg-red-100 text-red-700 text-xs">
-                        📈 TRENDING
-                      </Badge>
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900 dark:text-gray-100">
-                        {celeb.name}
-                      </span>
-                      {celeb.trending && (
-                        <span className="text-xs">⬆️</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-500">
-                        {celeb.postCount} posts this week
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Flame className="h-3 w-3 text-orange-500" />
-                        <span className="text-xs font-medium">
-                          {getDramaMeterText(celeb.dramaMeter)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-pink-600 dark:text-pink-400">
+                    #{index + 1}
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {celeb.name}
+                  </span>
+                  {celeb.trending && (
+                    <span className="text-xs">⬆️</span>
+                  )}
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  {/* Drama Meter */}
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div 
-                        className={cn("h-full transition-all", getDramaMeterColor(celeb.dramaMeter))}
-                        style={{ width: `${celeb.dramaMeter}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-500">{celeb.dramaMeter}%</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className={cn("h-full transition-all", getDramaMeterColor(celeb.dramaMeter))}
+                      style={{ width: `${celeb.dramaMeter}%` }}
+                    />
                   </div>
-                  
-                  <Button
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSpillAbout(celeb.name);
-                    }}
-                    className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs"
-                  >
-                    <Mic className="h-3 w-3 mr-1" />
-                    Spill Tea
-                  </Button>
+                  <span className="text-xs text-gray-500">{celeb.dramaMeter}%</span>
                 </div>
               </div>
             ))}
@@ -135,12 +102,15 @@ export function CelebrityTeaFeatures({ onSpillAbout }: CelebrityTeaFeaturesProps
       {/* Create Post for Celebrity Tea */}
       <div className="text-center">
         <Button
-          onClick={() => onSpillAbout("")}
-          className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white"
+          onClick={onCreatePost}
+          className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full"
         >
           <Plus className="h-4 w-4 mr-2" />
           Create Post
         </Button>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Click a celebrity name above to auto-fill your post
+        </p>
       </div>
 
       {/* Red Carpet Icons Flair */}

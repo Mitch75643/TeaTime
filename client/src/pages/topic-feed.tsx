@@ -223,6 +223,9 @@ export default function TopicFeed() {
             onSpillAbout={(celebName) => {
               setIsPostModalOpen(true);
             }}
+            onCreatePost={() => {
+              setIsPostModalOpen(true);
+            }}
           />
         )}
         
@@ -324,6 +327,22 @@ export default function TopicFeed() {
                 post={post}
               />
             ))}
+            
+            {/* Celebrity Tea specific Create Post button under posts */}
+            {topicId === "celebrity-tea" && posts.length > 0 && (
+              <div className="text-center pt-6 pb-4 border-t border-gray-200 dark:border-gray-700">
+                <Button
+                  onClick={() => setIsPostModalOpen(true)}
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white w-full max-w-md"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Share More Celebrity Tea
+                </Button>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Got more gossip to spill? Keep the conversation going!
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
