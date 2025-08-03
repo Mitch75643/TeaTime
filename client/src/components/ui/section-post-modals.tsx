@@ -27,6 +27,16 @@ const popularTags = [
   "#nsfw", "#serious", "#update", "#urgent", "#anonymous", "#story"
 ];
 
+const debateTags = [
+  "#ethics", "#school", "#dating", "#money", "#work", "#society", 
+  "#culture", "#technology", "#relationships", "#lifestyle"
+];
+
+const hotTopicsTags = [
+  "#trending", "#viral", "#controversial", "#breaking", "#popculture",
+  "#tech", "#politics", "#social", "#entertainment", "#news"
+];
+
 export function SectionPostModal({ 
   isOpen, 
   onClose, 
@@ -171,7 +181,16 @@ export function SectionPostModal({
     setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
   };
 
-  const filteredTagSuggestions = popularTags.filter(tag => 
+  // Get section-specific tag suggestions
+  const getSectionTags = () => {
+    switch (section) {
+      case "daily-debate": return [...debateTags, ...popularTags];
+      case "hot-topics": return [...hotTopicsTags, ...popularTags];
+      default: return popularTags;
+    }
+  };
+
+  const filteredTagSuggestions = getSectionTags().filter(tag => 
     tag.toLowerCase().includes(tagsInput.toLowerCase()) && 
     !selectedTags.includes(tag)
   );
@@ -231,22 +250,24 @@ export function SectionPostModal({
           {/* Hot Topics - Custom Topic Field */}
           {section === "hot-topics" && (
             <div>
-              <Label htmlFor="topic-title">Hot Topic (Optional)</Label>
+              <Label htmlFor="topic-title">What's the hot topic you want to spill tea about?</Label>
               <Input
                 id="topic-title"
                 value={topicTitle}
                 onChange={(e) => setTopicTitle(e.target.value)}
-                placeholder="What's the hot topic you want to discuss?"
+                placeholder="e.g., AI girlfriends, cancel culture, TikTok bans..."
                 className="mt-1"
               />
+              <p className="text-xs text-gray-500 mt-1">Share trending subjects that everyone's talking about</p>
             </div>
           )}
 
           {/* Daily Debate - Opinion Prompt */}
           {section === "daily-debate" && (
             <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
-              <p className="text-sm font-medium text-orange-700 dark:text-orange-300 mb-1">Share your controversial opinion or question:</p>
-              <p className="text-xs text-orange-600 dark:text-orange-400">Note: This post will only allow thumbs up/down voting, no comments.</p>
+              <p className="text-sm font-medium text-orange-700 dark:text-orange-300 mb-1">Drop a bold opinion or debate question</p>
+              <p className="text-xs text-orange-600 dark:text-orange-400 mb-2">Examples: "Is it wrong to check your partner's phone?" or "9-5 jobs are outdated — change my mind."</p>
+              <p className="text-xs text-orange-600 dark:text-orange-400">Note: This post will only allow 👍/👎 voting, no comments.</p>
             </div>
           )}
 
@@ -282,7 +303,8 @@ export function SectionPostModal({
           {/* Content Textarea */}
           <div>
             <Label htmlFor="content">
-              {section === "daily-debate" ? "Your Opinion" : "Your Post"}
+              {section === "daily-debate" ? "Your Bold Statement" : 
+               section === "hot-topics" ? "Your Take" : "Your Post"}
             </Label>
             <Textarea
               id="content"
@@ -397,9 +419,9 @@ function getContentPlaceholder(section: string): string {
     case "story-time":
       return "Tell us your story...";
     case "hot-topics":
-      return "What's your take on this hot topic?";
+      return "Share your take on this trending topic. What's your opinion? Why is everyone talking about it?";
     case "daily-debate":
-      return "Share your controversial opinion or thought-provoking question...";
+      return "State your bold opinion or pose a debate question that will get people thinking...";
     case "tea-experiments":
       return "Describe your poll and let the community decide...";
     default:
