@@ -159,7 +159,7 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-6 space-y-6">
+    <div className="space-y-6">
       {/* Category Selection - Always Visible */}
       <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
         <CardHeader className="pb-4">
@@ -215,7 +215,7 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-4 space-y-4">
               {/* Title Input */}
               <div>
                 <Input
