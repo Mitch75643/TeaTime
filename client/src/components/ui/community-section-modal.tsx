@@ -78,7 +78,7 @@ export function CommunityModal({ section, children }: CommunityModalProps) {
                   {section.name}
                 </h2>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -96,7 +96,7 @@ export function CommunityModal({ section, children }: CommunityModalProps) {
                   size="icon"
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    "h-8 w-8 rounded-full hover:bg-white/10 absolute top-4 right-4",
+                    "h-8 w-8 rounded-full hover:bg-white/10",
                     section.textColor
                   )}
                 >
