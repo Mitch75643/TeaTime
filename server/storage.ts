@@ -1,4 +1,4 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -54,7 +54,7 @@ export class MemStorage implements IStorage {
       ...insertPost,
       id,
       alias,
-      reactions: { fire: 0, cry: 0, eyes: 0, clown: 0 },
+      reactions: { laugh: 0, sad: 0, angry: 0, thumbsUp: 0, thumbsDown: 0 },
       commentCount: 0,
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
@@ -146,7 +146,7 @@ export class MemStorage implements IStorage {
       ...insertComment,
       id,
       alias,
-      reactions: { fire: 0, cry: 0, eyes: 0, clown: 0 },
+      reactions: { laugh: 0, sad: 0, angry: 0, thumbsUp: 0, thumbsDown: 0 },
       createdAt: new Date(),
     };
     this.comments.set(id, comment);
@@ -218,10 +218,11 @@ export class MemStorage implements IStorage {
     );
     
     const counts = {
-      fire: reactions.filter(r => r.type === 'fire').length,
-      cry: reactions.filter(r => r.type === 'cry').length,
-      eyes: reactions.filter(r => r.type === 'eyes').length,
-      clown: reactions.filter(r => r.type === 'clown').length,
+      laugh: reactions.filter(r => r.type === 'laugh').length,
+      sad: reactions.filter(r => r.type === 'sad').length,
+      angry: reactions.filter(r => r.type === 'angry').length,
+      thumbsUp: reactions.filter(r => r.type === 'thumbsUp').length,
+      thumbsDown: reactions.filter(r => r.type === 'thumbsDown').length,
     };
 
     if (type === 'post') {

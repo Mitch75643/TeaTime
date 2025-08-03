@@ -126,11 +126,12 @@ export function PostCard({ post }: PostCardProps) {
     post.category.charAt(0).toUpperCase() + post.category.slice(1);
 
   // Calculate trending score for visual indication
-  const reactions = post.reactions as Record<string, number> || { fire: 0, cry: 0, eyes: 0, clown: 0 };
-  const trendingScore = (reactions.fire || 0) * 3 + 
-                       (reactions.eyes || 0) * 2 + 
-                       (reactions.cry || 0) + 
-                       (reactions.clown || 0) + 
+  const reactions = post.reactions as Record<string, number> || { laugh: 0, sad: 0, angry: 0, thumbsUp: 0, thumbsDown: 0 };
+  const trendingScore = (reactions.laugh || 0) * 3 + 
+                       (reactions.thumbsUp || 0) * 2 + 
+                       (reactions.angry || 0) * 2 + 
+                       (reactions.sad || 0) + 
+                       (reactions.thumbsDown || 0) * 0.5 + 
                        (post.commentCount || 0) * 2;
   const isTrending = trendingScore > 20;
 
