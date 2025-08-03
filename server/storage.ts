@@ -240,6 +240,26 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserReactionForPost(postId: string, sessionId: string): Promise<string | null> {
+    const userReaction = Array.from(this.reactions.values()).find(r => 
+      r.sessionId === sessionId && r.postId === postId
+    );
+    return userReaction ? userReaction.type : null;
+  }
+
+  async removeAllUserReactionsForPost(postId: string, sessionId: string): Promise<void> {
+    const userReactions = Array.from(this.reactions.values()).filter(r => 
+      r.sessionId === sessionId && r.postId === postId
+    );
+    
+    userReactions.forEach(reaction => {
+      this.reactions.delete(reaction.id);
+    });
+
+    // Update reaction counts after removing all user reactions
+    await this.updateReactionCounts('post', postId);
+  }
+
   async addDramaVote(vote: DramaVoteInput, sessionId: string): Promise<void> {
     // Remove existing vote from this session for this post
     const existingVote = Array.from(this.dramaVotes.values()).find(v => 

@@ -53,20 +53,32 @@ export function PostCard({ post }: PostCardProps) {
       .catch(() => setSessionId(''));
   }, []);
 
-  // Load user reactions from localStorage
+  // Load user reactions from localStorage and ensure only one is active
   useEffect(() => {
     const savedReactions = localStorage.getItem(`reactions-${post.id}`);
     if (savedReactions) {
-      setUserReactions(JSON.parse(savedReactions));
+      const parsed = JSON.parse(savedReactions);
+      // Ensure only one reaction is true at a time
+      const activeReactions = Object.keys(parsed).filter(key => parsed[key]);
+      if (activeReactions.length > 1) {
+        // Fix corrupted state - keep only the first active reaction
+        const cleanReactions: Record<string, boolean> = {};
+        Object.keys(reactionEmojis).forEach(key => {
+          cleanReactions[key] = key === activeReactions[0];
+        });
+        setUserReactions(cleanReactions);
+        localStorage.setItem(`reactions-${post.id}`, JSON.stringify(cleanReactions));
+      } else {
+        setUserReactions(parsed);
+      }
     }
   }, [post.id]);
 
   const reactionMutation = useMutation({
-    mutationFn: async ({ type, previousType, remove }: { type: string; previousType?: string; remove?: boolean }) => {
+    mutationFn: async ({ type, remove }: { type: string; remove?: boolean }) => {
       return apiRequest("POST", "/api/reactions", {
         type,
         postId: post.id,
-        previousType,
         remove: remove || false
       });
     },
@@ -76,6 +88,9 @@ export function PostCard({ post }: PostCardProps) {
   });
 
   const handleReaction = (type: string) => {
+    // Prevent multiple rapid clicks
+    if (reactionMutation.isPending) return;
+    
     // Get the currently active reaction type (if any)
     const currentActiveType = Object.keys(userReactions).find(key => userReactions[key]);
     const isCurrentType = userReactions[type];
@@ -97,10 +112,9 @@ export function PostCard({ post }: PostCardProps) {
     setUserReactions(newUserReactions);
     localStorage.setItem(`reactions-${post.id}`, JSON.stringify(newUserReactions));
     
-    // Send to server with previous reaction info for proper counting
+    // Send to server - backend will handle "one reaction per user" logic
     reactionMutation.mutate({ 
       type, 
-      previousType: currentActiveType,
       remove: isCurrentType
     });
   };
