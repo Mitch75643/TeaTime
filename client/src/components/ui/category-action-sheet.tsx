@@ -16,7 +16,7 @@ const categories = [
   { id: "family", label: "Family", emoji: "👨‍👩‍👧", description: "Parents, siblings, relatives" },
   { id: "money", label: "Money", emoji: "💸", description: "Finances, spending, debt" },
   { id: "hot-takes", label: "Hot Takes", emoji: "🌍", description: "Trending topics, controversial opinions" },
-  { id: "drama", label: "Am I the Drama?", emoji: "🎭", description: "Let the community judge" },
+  { id: "drama", label: "Am I in the Wrong?", emoji: "🎭", description: "Let the community judge" },
 ];
 
 const getCategoryStyles = (categoryId: string) => {
