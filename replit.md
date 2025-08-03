@@ -2,7 +2,7 @@
 
 ## Overview
 
-TeaSpill is an anonymous social platform designed for sharing personal stories and gossip across different life categories. The application allows users to post anonymously about college, work, relationships, family, money, politics, and drama situations. It features a unique "Am I in the Wrong?" category where community members can vote on whether the poster was in the wrong, valid, or displaying iconic behavior. The platform emphasizes anonymous interaction through reaction systems (fire, cry, eyes, clown emojis) and community-driven content moderation.
+Fessr is an anonymous social platform designed for sharing personal stories and gossip across different life categories. The application allows users to post anonymously about college, work, relationships, family, money, politics, and drama situations. It features a unique "Am I in the Wrong?" category where community members can vote on whether the poster was in the wrong, valid, or displaying iconic behavior. The platform emphasizes anonymous interaction through reaction systems (fire, cry, eyes, clown emojis) and community-driven content moderation.
 
 ## User Preferences
 
@@ -16,7 +16,7 @@ The client is built with React 18 using TypeScript and Vite as the build tool. T
 - **UI Framework**: React with TypeScript for type safety
 - **Build System**: Vite for fast development and optimized production builds
 - **Component Library**: Custom components built on Radix UI primitives with shadcn/ui styling
-- **Styling**: Tailwind CSS with custom CSS variables for theming, including purple/pink gradient themes for the TeaSpill brand
+- **Styling**: Tailwind CSS with custom CSS variables for theming, including orange gradient themes for the Fessr brand
 - **State Management**: TanStack Query (React Query) for server state management and caching
 - **Routing**: Wouter for lightweight client-side routing
 - **Form Handling**: React Hook Form with Zod validation resolvers
@@ -104,7 +104,7 @@ All avatars maintain user anonymity while allowing personality expression throug
 - **Tea Experiments Features**: Lab-themed polling system with visual results, progress bars, and "This blew my mind" badges for close votes
 - **Just for Fun Features**: Category selector (Meme, Rant, Confession, Question), preloaded GIF picker, meme templates, and punchline-style cards
 - **Suggestions Features**: Bug reports, feature requests, and general ideas with upvote/downvote system, status badges (Planned, In Review, Completed), and admin feedback visibility
-- **Interactive Elements**: Each topic now has unique specialized components with topic-specific icons, animations, and themed styling that align with TeaSpill's gossip culture
+- **Interactive Elements**: Each topic now has unique specialized components with topic-specific icons, animations, and themed styling that align with Fessr's gossip culture
 
 ### Community Topic Celebration Animations (January 2025)
 - **Celebrity Tea**: Paparazzi camera flash with sparkles and gentle camera click + excited murmur sounds
@@ -113,7 +113,7 @@ All avatars maintain user anonymity while allowing personality expression throug
 - **Daily Debate**: Animated thought bubbles and question marks with soft "hmm" thinking sounds
 - **Tea Experiments**: Chemistry-themed bubbling beaker animation with playful fizz-pop sounds (triggers on "Launch Experiment")
 - **Feedback & Suggestions**: Pulsing lightbulb with spark animations and calm "ding" realization sounds
-- **Smart Animation System**: Each animation plays for 1-2 seconds after successful post submission, all sounds are gentle and natural (under 1 second), works perfectly on mobile and desktop, matches TeaSpill's fun expressive vibe
+- **Smart Animation System**: Each animation plays for 1-2 seconds after successful post submission, all sounds are gentle and natural (under 1 second), works perfectly on mobile and desktop, matches Fessr's fun expressive vibe
 - **Enhanced Daily Spill**: Prominent yellow-highlighted prompt display with clear user guidance above text area
 
 ### Home Page Category Animations (January 2025)
@@ -138,7 +138,7 @@ All avatars maintain user anonymity while allowing personality expression throug
 
 ### Home Page UI Polish (January 2025)
 - **Enhanced Modal UX**: Added prominent close button with circular background and hover effects for better mobile accessibility
-- **Page Branding**: Implemented gradient "Spill the Tea" header with tagline to establish page identity and brand personality
+- **Page Branding**: Implemented gradient "Share Your Truth" header with tagline to establish page identity and brand personality
 - **Mobile Responsiveness**: Complete layout optimization with proper text wrapping, modal sizing, and touch-friendly interactions
 - **Category Filtering**: Fully functional category filtering system with visual active states and clear filter indicators
 - **Layout Consistency**: Standardized spacing, padding, and responsive breakpoints across all components

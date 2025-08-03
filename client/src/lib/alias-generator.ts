@@ -1,4 +1,4 @@
-// Fun username generator for TeaSpill users
+// Fun username generator for Fessr users
 const adjectives = [
   // Drama & Gossip themed
   "Spicy", "Petty", "Chaotic", "Dramatic", "Messy", "Salty", "Shady", "Sneaky",
@@ -14,7 +14,7 @@ const adjectives = [
 
 const nouns = [
   // Gossip & Drama
-  "TeaSpiller", "DramaMama", "GossipGuru", "SecretKeeper", "TruthTeller", "Whistleblower",
+  "StoryTeller", "DramaMama", "GossipGuru", "SecretKeeper", "TruthTeller", "Whistleblower",
   "TalkShow", "Commentator", "Observer", "Witness", "Storyteller", "Narrator",
   
   // Characters & Roles

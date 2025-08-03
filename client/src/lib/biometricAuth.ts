@@ -1,5 +1,5 @@
 /**
- * Biometric Authentication Service for TeaSpill
+ * Biometric Authentication Service for Fessr
  * Handles Face ID, Touch ID, and other platform biometric authentication
  */
 
@@ -20,7 +20,7 @@ export interface BiometricAuthService {
 }
 
 class BiometricAuthServiceImpl implements BiometricAuthService {
-  private readonly STORAGE_PREFIX = 'teaspill_biometric_';
+  private readonly STORAGE_PREFIX = 'fessr_biometric_';
   
   /**
    * Check if biometric authentication is supported on this device
@@ -53,7 +53,7 @@ class BiometricAuthServiceImpl implements BiometricAuthService {
     const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
       challenge: challenge,
       rp: {
-        name: "TeaSpill",
+        name: "Fessr",
         id: window.location.hostname,
       },
       user: {

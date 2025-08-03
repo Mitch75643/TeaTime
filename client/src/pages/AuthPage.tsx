@@ -16,7 +16,7 @@ export function AuthPage() {
   };
 
   const handleStayAnonymous = () => {
-    localStorage.setItem('teaspill_auth_seen', 'true');
+    localStorage.setItem('fessr_auth_seen', 'true');
     setLocation('/');
   };
 
@@ -37,7 +37,7 @@ export function AuthPage() {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-            Welcome to TeaSpill
+            Welcome to Fessr
           </CardTitle>
           <CardDescription className="text-lg">
             Share your stories anonymously with complete privacy

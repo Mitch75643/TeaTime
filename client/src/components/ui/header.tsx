@@ -22,7 +22,7 @@ export function Header() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Flame className="h-6 w-6" />
-          <h1 className="text-xl font-bold">TeaSpill</h1>
+          <h1 className="text-xl font-bold">Fessr</h1>
         </div>
         <div className="flex items-center space-x-3">
           <NotificationsPanel />

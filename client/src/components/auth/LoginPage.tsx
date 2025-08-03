@@ -151,7 +151,7 @@ export function LoginPage({ onLoginSuccess, onStayAnonymous }: LoginPageProps) {
             <Shield className="w-6 h-6 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-            Welcome to TeaSpill
+            Welcome to Fessr
           </CardTitle>
           <CardDescription>
             Choose how you'd like to continue - completely anonymous or with secure sync

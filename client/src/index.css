@@ -24,7 +24,7 @@
   --ring: hsl(24, 100%, 39%); /* #CC6200 */
   --radius: 0.5rem;
   
-  /* Custom TeaSpill colors - Orange Theme */
+  /* Custom Fessr colors - Orange Theme */
   --primary-500: hsl(24, 100%, 50%); /* #FF7A00 main orange */
   --primary-600: hsl(24, 100%, 39%); /* #CC6200 darker orange */
   --primary-700: hsl(24, 100%, 30%); /* Even darker for active states */
@@ -75,7 +75,7 @@
   display: none;
 }
 
-/* Gradient backgrounds for TeaSpill theme - Orange Edition */
+/* Gradient backgrounds for Fessr theme - Orange Edition */
 .gradient-primary {
   background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
 }

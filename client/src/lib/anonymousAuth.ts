@@ -33,7 +33,7 @@ function generateFunUsername(): string {
 function generateDeviceFingerprint(): string {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  ctx?.fillText('TeaSpill', 10, 10);
+  ctx?.fillText('Fessr', 10, 10);
   
   const fingerprint = [
     navigator.userAgent,
@@ -56,10 +56,10 @@ function generateDeviceFingerprint(): string {
 
 // Local storage keys
 const STORAGE_KEYS = {
-  ANON_ID: 'teaspill_anon_id',
-  USER_DATA: 'teaspill_user_data',
-  DEVICE_FINGERPRINT: 'teaspill_device_fp',
-  IS_UPGRADED: 'teaspill_is_upgraded',
+  ANON_ID: 'fessr_anon_id',
+  USER_DATA: 'fessr_user_data',
+  DEVICE_FINGERPRINT: 'fessr_device_fp',
+  IS_UPGRADED: 'fessr_is_upgraded',
 } as const;
 
 export interface LocalUserData {
@@ -241,21 +241,21 @@ class AnonymousAuthService {
     if (!this.currentUser || this.currentUser.isUpgraded) return false;
     
     // Check if user has made posts or been active
-    const hasPosted = localStorage.getItem('teaspill_has_posted') === 'true';
-    const visitCount = parseInt(localStorage.getItem('teaspill_visit_count') || '0');
+    const hasPosted = localStorage.getItem('fessr_has_posted') === 'true';
+    const visitCount = parseInt(localStorage.getItem('fessr_visit_count') || '0');
     
     return hasPosted || visitCount > 2;
   }
 
   // Mark user as having posted (for upgrade prompting)
   markUserAsPosted() {
-    localStorage.setItem('teaspill_has_posted', 'true');
+    localStorage.setItem('fessr_has_posted', 'true');
   }
 
   // Increment visit count
   incrementVisitCount() {
-    const count = parseInt(localStorage.getItem('teaspill_visit_count') || '0');
-    localStorage.setItem('teaspill_visit_count', (count + 1).toString());
+    const count = parseInt(localStorage.getItem('fessr_visit_count') || '0');
+    localStorage.setItem('fessr_visit_count', (count + 1).toString());
   }
 
   // Upgrade account for cross-device sync
@@ -339,9 +339,9 @@ class AnonymousAuthService {
   // Clear user data (for testing or logout)
   clearUserData() {
     Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-    localStorage.removeItem('teaspill_has_posted');
-    localStorage.removeItem('teaspill_visit_count');
-    localStorage.removeItem('teaspill_auth_seen');
+    localStorage.removeItem('fessr_has_posted');
+    localStorage.removeItem('fessr_visit_count');
+    localStorage.removeItem('fessr_auth_seen');
     this.currentUser = null;
     this.notify();
   }
@@ -383,7 +383,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
   React.useEffect(() => {
     // Check if user has already made an authentication choice
     const existingUser = localStorage.getItem(STORAGE_KEYS.USER_DATA);
-    const hasSeenAuth = localStorage.getItem('teaspill_auth_seen') === 'true';
+    const hasSeenAuth = localStorage.getItem('fessr_auth_seen') === 'true';
     
     if (existingUser || hasSeenAuth) {
       // User has already authenticated or chosen to stay anonymous
@@ -441,7 +441,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
             color: 'transparent',
             marginBottom: '0.5rem'
           }
-        }, 'Welcome to TeaSpill'),
+        }, 'Welcome to Fessr'),
         React.createElement('p', {
           key: 'subtitle',
           style: {
@@ -465,7 +465,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
             transition: 'border-color 0.2s'
           },
           onClick: () => {
-            localStorage.setItem('teaspill_auth_seen', 'true');
+            localStorage.setItem('fessr_auth_seen', 'true');
             anonymousAuth.createOrGetUser();
             setHasChosenAuth(true);
           }
@@ -522,7 +522,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
             cursor: 'pointer'
           },
           onClick: () => {
-            localStorage.setItem('teaspill_auth_seen', 'true');
+            localStorage.setItem('fessr_auth_seen', 'true');
             window.location.href = '/auth';
           }
         }, [
