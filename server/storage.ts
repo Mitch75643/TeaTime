@@ -54,7 +54,7 @@ export class MemStorage implements IStorage {
       ...insertPost,
       id,
       alias,
-      reactions: { laugh: 0, sad: 0, angry: 0, thumbsUp: 0, thumbsDown: 0 },
+      reactions: { laugh: 0, sad: 0, thumbsUp: 0, thumbsDown: 0 },
       commentCount: 0,
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
@@ -146,7 +146,7 @@ export class MemStorage implements IStorage {
       ...insertComment,
       id,
       alias,
-      reactions: { laugh: 0, sad: 0, angry: 0, thumbsUp: 0, thumbsDown: 0 },
+      reactions: { laugh: 0, sad: 0, thumbsUp: 0, thumbsDown: 0 },
       createdAt: new Date(),
     };
     this.comments.set(id, comment);
@@ -220,7 +220,6 @@ export class MemStorage implements IStorage {
     const counts = {
       laugh: reactions.filter(r => r.type === 'laugh').length,
       sad: reactions.filter(r => r.type === 'sad').length,
-      angry: reactions.filter(r => r.type === 'angry').length,
       thumbsUp: reactions.filter(r => r.type === 'thumbsUp').length,
       thumbsDown: reactions.filter(r => r.type === 'thumbsDown').length,
     };

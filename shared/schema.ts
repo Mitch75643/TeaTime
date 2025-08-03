@@ -12,7 +12,6 @@ export const posts = pgTable("posts", {
   reactions: jsonb("reactions").default({
     laugh: 0,
     sad: 0,
-    angry: 0,
     thumbsUp: 0,
     thumbsDown: 0
   }),
@@ -60,7 +59,6 @@ export const comments = pgTable("comments", {
   reactions: jsonb("reactions").default({
     laugh: 0,
     sad: 0,
-    angry: 0,
     thumbsUp: 0,
     thumbsDown: 0
   }),
@@ -71,7 +69,7 @@ export const reactions = pgTable("reactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   postId: varchar("post_id").references(() => posts.id),
   commentId: varchar("comment_id").references(() => comments.id),
-  type: varchar("type").notNull(), // laugh, sad, angry, thumbsUp, thumbsDown
+  type: varchar("type").notNull(), // laugh, sad, thumbsUp, thumbsDown
   sessionId: varchar("session_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -122,10 +120,10 @@ export const insertCommentSchema = createInsertSchema(comments).pick({
 });
 
 export const reactionSchema = z.object({
-  type: z.enum(["laugh", "sad", "angry", "thumbsUp", "thumbsDown"]),
+  type: z.enum(["laugh", "sad", "thumbsUp", "thumbsDown"]),
   postId: z.string().optional(),
   commentId: z.string().optional(),
-  previousType: z.enum(["laugh", "sad", "angry", "thumbsUp", "thumbsDown"]).optional(),
+  previousType: z.enum(["laugh", "sad", "thumbsUp", "thumbsDown"]).optional(),
   remove: z.boolean().optional(),
 });
 
