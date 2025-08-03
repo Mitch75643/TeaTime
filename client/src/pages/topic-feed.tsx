@@ -236,6 +236,9 @@ export default function TopicFeed() {
             }}
             selectedCategory={storyCategory}
             onCategoryChange={setStoryCategory}
+            onCreatePost={() => {
+              setIsPostModalOpen(true);
+            }}
           />
         )}
         
