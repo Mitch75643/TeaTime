@@ -65,12 +65,23 @@ export default function Home() {
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
         />
-        <div className="flex items-center justify-between px-4 py-2">
-          <FeedToggle
-            feedType={feedType}
-            onFeedTypeChange={setFeedType}
-          />
-          {feedType === "new" && (
+        <FeedToggle
+          feedType={feedType}
+          onFeedTypeChange={setFeedType}
+        />
+      </div>
+
+      <main className="pb-20 px-4 space-y-4 pt-4">
+        {feedType === "new" && (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              New Posts
+              {posts.length !== allPosts.length && (
+                <span className="ml-2 text-sm text-gray-500">
+                  ({posts.length} new)
+                </span>
+              )}
+            </h2>
             <Button
               variant="ghost"
               size="sm"
@@ -78,14 +89,10 @@ export default function Home() {
               disabled={isRefreshing}
               className="flex items-center space-x-1"
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
-          )}
-        </div>
-      </div>
-
-      <main className="pb-20 px-4 space-y-4 pt-4">
+          </div>
+        )}
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (

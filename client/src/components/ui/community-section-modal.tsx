@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +50,9 @@ export function CommunityModal({ section, children }: CommunityModalProps) {
           {children}
         </DialogTrigger>
         <DialogContent className="sm:max-w-md w-full max-h-[90vh] overflow-y-auto p-0 border-0">
+          <DialogTitle className="sr-only">
+            {section.name}
+          </DialogTitle>
           <DialogDescription className="sr-only">
             {section.description}
           </DialogDescription>
@@ -74,17 +77,6 @@ export function CommunityModal({ section, children }: CommunityModalProps) {
                   )}
                 >
                   <Star className={cn("h-4 w-4", isFavorited && "fill-current")} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "h-8 w-8 rounded-full hover:bg-white/10",
-                    section.textColor
-                  )}
-                >
-                  <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>

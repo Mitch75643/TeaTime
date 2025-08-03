@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { 
   Star, 
   BookOpen, 
@@ -190,34 +191,33 @@ export default function Community() {
             const Icon = section.icon;
             return (
               <CommunityModal key={section.id} section={section}>
-                <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <span className="text-xl">{section.emoji}</span>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] overflow-hidden">
+                  <div className={cn("p-4", section.gradient)}>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-2xl">{section.emoji}</span>
+                      <h3 className={cn("font-bold text-lg", section.textColor)}>
                         {section.name}
                       </h3>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    <p className={cn("text-sm mb-4 opacity-90", section.textColor)}>
                       {section.description}
                     </p>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {section.tags.slice(0, 2).map(({ tag, count }) => (
                         <Badge
                           key={tag}
-                          variant="secondary"
-                          className="text-xs"
+                          className="bg-white/20 text-white border-0 hover:bg-white/30 text-xs"
                         >
                           {tag} ({count})
                         </Badge>
                       ))}
                       {section.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge className="bg-white/20 text-white border-0 text-xs">
                           +{section.tags.length - 2} more
                         </Badge>
                       )}
                     </div>
-                  </CardContent>
+                  </div>
                 </Card>
               </CommunityModal>
             );
