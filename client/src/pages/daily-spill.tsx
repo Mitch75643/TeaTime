@@ -4,6 +4,7 @@ import { Header } from "@/components/ui/header";
 import { PostCard } from "@/components/ui/post-card";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
+import { WeeklyThemeAnimation, useWeeklyThemeAnimation } from "@/components/ui/weekly-theme-animations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -209,6 +210,9 @@ export default function DailySpill() {
   const todayPrompt = getDailyPrompt();
   const dateString = getDateString();
   const currentTheme = getCurrentWeekTheme();
+  
+  // Weekly theme animation hook
+  const { animation, triggerAnimation, completeAnimation } = useWeeklyThemeAnimation();
 
   // Get posts with daily spill tag
   const { data: posts = [], isLoading } = useQuery<Post[]>({
@@ -224,6 +228,10 @@ export default function DailySpill() {
   const handlePostSuccess = () => {
     setHasSpilledToday(true);
     setShowSuccessMessage(true);
+    
+    // Trigger weekly theme animation
+    triggerAnimation(currentTheme.name);
+    
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };
 
@@ -391,6 +399,13 @@ export default function DailySpill() {
           textColor: "text-purple-700 dark:text-purple-300",
           emoji: "☕"
         }}
+      />
+      
+      {/* Weekly Theme Animation */}
+      <WeeklyThemeAnimation 
+        isVisible={animation.isVisible}
+        theme={animation.theme}
+        onComplete={completeAnimation}
       />
       
       <BottomNav />
