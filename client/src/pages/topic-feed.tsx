@@ -135,22 +135,22 @@ export default function TopicFeed() {
       switch (sortBy) {
         case "trending":
           return filteredPosts.sort((a, b) => {
-            const aFireReactions = (a.reactions && 'fire' in a.reactions) ? (a.reactions.fire || 0) : 0;
-            const bFireReactions = (b.reactions && 'fire' in b.reactions) ? (b.reactions.fire || 0) : 0;
-            const aScore = aFireReactions * 2 + Object.values(a.reactions || {}).reduce((sum, count) => sum + count, 0);
-            const bScore = bFireReactions * 2 + Object.values(b.reactions || {}).reduce((sum, count) => sum + count, 0);
+            const aFireReactions = (a.reactions && typeof a.reactions === 'object' && 'fire' in a.reactions) ? (a.reactions.fire || 0) : 0;
+            const bFireReactions = (b.reactions && typeof b.reactions === 'object' && 'fire' in b.reactions) ? (b.reactions.fire || 0) : 0;
+            const aScore = (aFireReactions as number) * 2 + Object.values(a.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
+            const bScore = (bFireReactions as number) * 2 + Object.values(b.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
             return bScore - aScore;
           });
         case "top":
           return filteredPosts.sort((a, b) => {
-            const aTotal = Object.values(a.reactions || {}).reduce((sum, count) => sum + count, 0);
-            const bTotal = Object.values(b.reactions || {}).reduce((sum, count) => sum + count, 0);
+            const aTotal = Object.values(a.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
+            const bTotal = Object.values(b.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
             return bTotal - aTotal;
           });
         case "most-reacted":
           return filteredPosts.sort((a, b) => {
-            const aReactions = Object.values(a.reactions || {}).reduce((sum, count) => sum + count, 0);
-            const bReactions = Object.values(b.reactions || {}).reduce((sum, count) => sum + count, 0);
+            const aReactions = Object.values(a.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
+            const bReactions = Object.values(b.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
             return bReactions - aReactions;
           });
         case "new":
@@ -213,29 +213,7 @@ export default function TopicFeed() {
           </div>
         </div>
 
-        {/* Sort/Filter Bar */}
-        {showFilters && (
-          <div className="px-4 pb-4">
-            <div className="flex gap-2 overflow-x-auto">
-              {sortOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  variant={sortBy === option.value ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setSortBy(option.value)}
-                  className={cn(
-                    "whitespace-nowrap",
-                    sortBy === option.value 
-                      ? "bg-white/20 text-white" 
-                      : "hover:bg-white/10 text-white/80"
-                  )}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* Topic-Specific Features */}
