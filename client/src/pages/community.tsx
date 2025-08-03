@@ -191,8 +191,8 @@ export default function Community() {
             const Icon = section.icon;
             return (
               <CommunityModal key={section.id} section={section}>
-                <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] overflow-hidden">
-                  <div className={cn("p-4", section.gradient)}>
+                <Card className={cn("cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] overflow-hidden border-0", section.gradient)}>
+                  <div className="p-4">
                     <div className="flex items-center space-x-3 mb-3">
                       <span className="text-2xl">{section.emoji}</span>
                       <h3 className={cn("font-bold text-lg", section.textColor)}>

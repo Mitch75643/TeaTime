@@ -39,7 +39,20 @@ const popularTags = [
   "#nsfw", "#serious", "#update", "#urgent", "#anonymous", "#story"
 ];
 
-export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags = [], promptText = "", sectionTheme = "" }: PostModalProps) {
+interface PostModalContext {
+  page: 'home' | 'daily' | 'community';
+  section?: string;
+}
+
+export function PostModal({ 
+  isOpen, 
+  onClose, 
+  defaultCategory = "", 
+  defaultTags = [], 
+  promptText = "", 
+  sectionTheme = "",
+  postContext = { page: 'home' }
+}: PostModalProps & { postContext?: PostModalContext }) {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [tagsInput, setTagsInput] = useState("");
@@ -101,7 +114,14 @@ export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags =
       return apiRequest("POST", "/api/posts", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      // Invalidate specific page queries based on context
+      const queryKey = postContext.page === 'daily' 
+        ? ["/api/posts", "daily"]
+        : postContext.page === 'community'
+        ? ["/api/posts", "community", postContext.section]
+        : ["/api/posts"];
+      
+      queryClient.invalidateQueries({ queryKey });
       clearDraft(); // Clear draft after successful post
       toast({
         title: "Post created!",

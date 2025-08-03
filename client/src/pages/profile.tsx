@@ -34,21 +34,13 @@ export default function Profile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get user's posts (using session ID from localStorage reactions as identifier)
+  // Get user's posts (using session ID for identification)
   const { data: userPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", "user"],
     queryFn: async () => {
-      const response = await fetch("/api/posts?sortBy=new");
+      const response = await fetch("/api/posts?sortBy=new&userOnly=true");
       if (!response.ok) throw new Error("Failed to fetch posts");
-      const allPosts = await response.json();
-      
-      // Filter posts that have user's reactions (basic user identification)
-      const userReactionKeys = Object.keys(localStorage).filter(key => key.startsWith('reactions-'));
-      const userPostIds = userReactionKeys.map(key => key.replace('reactions-', ''));
-      
-      // For demo purposes, show posts from current session
-      // In a real app, this would use proper user authentication
-      return allPosts.slice(0, 3); // Show recent posts as "user's posts"
+      return response.json();
     },
   });
 

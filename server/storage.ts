@@ -3,12 +3,12 @@ import { randomUUID } from "crypto";
 
 export interface IStorage {
   // Posts
-  createPost(post: InsertPost, alias: string): Promise<Post>;
+  createPost(post: InsertPost, alias: string, sessionId?: string): Promise<Post>;
   getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string): Promise<Post[]>;
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
-  deletePost(postId: string): Promise<void>;
+  deletePost(postId: string, sessionId?: string): Promise<void>;
   
   // Comments
   createComment(comment: InsertComment, alias: string): Promise<Comment>;
@@ -39,7 +39,7 @@ export class MemStorage implements IStorage {
     this.dramaVotes = new Map();
   }
 
-  async createPost(insertPost: InsertPost, alias: string): Promise<Post> {
+  async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
     const id = randomUUID();
     const post: Post = {
       ...insertPost,
@@ -49,6 +49,7 @@ export class MemStorage implements IStorage {
       commentCount: 0,
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
+      sessionId: sessionId || 'anonymous',
     };
     this.posts.set(id, post);
     return post;
@@ -237,7 +238,17 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async deletePost(postId: string): Promise<void> {
+  async deletePost(postId: string, sessionId?: string): Promise<void> {
+    const post = this.posts.get(postId);
+    if (!post) {
+      throw new Error("Post not found");
+    }
+    
+    // Check if the session owns this post (for user posts only)
+    if (sessionId && post.sessionId !== sessionId) {
+      throw new Error("Not authorized to delete this post");
+    }
+    
     this.posts.delete(postId);
     // Also delete related comments and reactions
     const commentsToDelete = Array.from(this.comments.values()).filter(c => c.postId === postId);

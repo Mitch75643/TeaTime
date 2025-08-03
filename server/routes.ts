@@ -56,7 +56,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const alias = generateAlias();
-      const post = await storage.createPost(validatedData, alias);
+      const sessionId = req.session.id!;
+      const post = await storage.createPost(validatedData, alias, sessionId);
       res.json(post);
     } catch (error) {
       if (error instanceof Error) {
@@ -107,7 +108,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/posts/:postId", async (req, res) => {
     try {
       const postId = req.params.postId;
-      await storage.deletePost(postId);
+      const sessionId = req.session.id!;
+      await storage.deletePost(postId, sessionId);
       res.json({ success: true });
     } catch (error) {
       console.error("Failed to delete post:", error);
