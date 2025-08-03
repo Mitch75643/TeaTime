@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog";
 import { Button } from "./button";
 import { X } from "lucide-react";
 
@@ -9,12 +9,12 @@ interface CategoryActionSheetProps {
 }
 
 const categories = [
-  { id: "college", label: "College", emoji: "🎓", description: "Campus life, classes, dorms" },
+  { id: "school", label: "School", emoji: "🏫", description: "Campus life, classes, dorms" },
   { id: "work", label: "Work", emoji: "💼", description: "Office drama, coworkers, bosses" },
   { id: "relationships", label: "Relationships", emoji: "💕", description: "Dating, love, breakups" },
-  { id: "family", label: "Family", emoji: "👨‍👩‍👧‍👦", description: "Parents, siblings, relatives" },
-  { id: "money", label: "Money", emoji: "💰", description: "Finances, spending, debt" },
-  { id: "politics", label: "Politics", emoji: "🗳️", description: "Current events, opinions" },
+  { id: "family", label: "Family", emoji: "👨‍👩‍👧", description: "Parents, siblings, relatives" },
+  { id: "money", label: "Money", emoji: "💸", description: "Finances, spending, debt" },
+  { id: "hot-takes", label: "Hot Takes", emoji: "🌍", description: "Trending topics, controversial opinions" },
   { id: "drama", label: "Am I the Drama?", emoji: "🎭", description: "Let the community judge" },
 ];
 
@@ -34,6 +34,9 @@ export function CategoryActionSheet({ isOpen, onClose, onCategorySelect }: Categ
               <X className="h-4 w-4" />
             </Button>
           </DialogTitle>
+          <DialogDescription>
+            Choose a category that best fits your story
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 max-h-96 overflow-y-auto">
