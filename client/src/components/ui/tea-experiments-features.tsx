@@ -76,6 +76,16 @@ const pollTemplates = [
   { category: "Career Moves", options: ["Great opportunity", "Too risky", "Need more details"] }
 ];
 
+interface UserPoll {
+  id: string;
+  question: string;
+  options: PollOption[];
+  totalVotes: number;
+  userAvatar: string;
+  username: string;
+  createdAt: Date;
+}
+
 interface TeaExperimentsFeaturesProps {
   onCreatePoll: (question: string, options: string[]) => void;
   onVote: (optionId: string) => void;
@@ -88,20 +98,85 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
   const [newOptions, setNewOptions] = useState(["", ""]);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [showCommunityResults, setShowCommunityResults] = useState(false);
-  const [communityPosts, setCommunityPosts] = useState<any[]>([]);
+  const [communityPolls, setCommunityPolls] = useState<UserPoll[]>([]);
   const [isLiveExperimentExpanded, setIsLiveExperimentExpanded] = useState(true);
   const [isCreateExperimentExpanded, setIsCreateExperimentExpanded] = useState(false);
+  const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   
   const refreshCommunityResults = () => {
-    // Simulate loading random community posts for today's prompt
-    const mockPosts = [
-      { id: 1, content: "I voted yes because everyone deserves closure, even if it's messy.", reactions: 23 },
-      { id: 2, content: "No way! Moving on is the best decision you can make for your mental health.", reactions: 18 },
-      { id: 3, content: "I'm in the same situation and this poll is making me think twice...", reactions: 31 },
-      { id: 4, content: "Texted my ex last year and it was the worst decision ever. Don't do it!", reactions: 45 },
-      { id: 5, content: "Sometimes closure helps you move forward. Just be prepared for any outcome.", reactions: 12 }
+    // Simulate loading random community polls from "+ Create Your Experiment"
+    const mockPolls: UserPoll[] = [
+      {
+        id: "poll-1",
+        question: "Should I quit my job to travel the world for a year?",
+        options: [
+          { id: "yes", text: "Yes, YOLO!", votes: 234, percentage: 68 },
+          { id: "no", text: "No, too risky", votes: 110, percentage: 32 }
+        ],
+        totalVotes: 344,
+        userAvatar: "🌟",
+        username: "AdventureDreamer23",
+        createdAt: new Date()
+      },
+      {
+        id: "poll-2", 
+        question: "Is it weird to bring my own snacks to the movie theater?",
+        options: [
+          { id: "weird", text: "Yes, totally weird", votes: 89, percentage: 22 },
+          { id: "smart", text: "No, you're saving money!", votes: 201, percentage: 50 },
+          { id: "depends", text: "Depends on the snack", votes: 112, percentage: 28 }
+        ],
+        totalVotes: 402,
+        userAvatar: "🍿",
+        username: "MovieBudgetHack",
+        createdAt: new Date()
+      },
+      {
+        id: "poll-3",
+        question: "Should I tell my roommate they're a terrible cook?",
+        options: [
+          { id: "yes", text: "Yes, honesty is best", votes: 156, percentage: 41 },
+          { id: "no", text: "No, too harsh", votes: 98, percentage: 26 },
+          { id: "gentle", text: "Suggest cooking together", votes: 124, percentage: 33 }
+        ],
+        totalVotes: 378,
+        userAvatar: "👨‍🍳",
+        username: "DiplomaticFoodie",
+        createdAt: new Date()
+      }
     ];
-    setCommunityPosts(mockPosts.sort(() => 0.5 - Math.random()).slice(0, 3));
+    setCommunityPolls(mockPolls.sort(() => 0.5 - Math.random()).slice(0, 2));
+  };
+
+  const handlePollVote = (pollId: string, optionId: string) => {
+    if (userVotes[pollId]) return; // Already voted
+    
+    setUserVotes(prev => ({ ...prev, [pollId]: optionId }));
+    
+    // Update poll votes
+    setCommunityPolls(prev => prev.map(poll => {
+      if (poll.id === pollId) {
+        const updatedOptions = poll.options.map(option => {
+          if (option.id === optionId) {
+            return { ...option, votes: option.votes + 1 };
+          }
+          return option;
+        });
+        
+        const newTotalVotes = poll.totalVotes + 1;
+        const optionsWithPercentages = updatedOptions.map(option => ({
+          ...option,
+          percentage: Math.round((option.votes / newTotalVotes) * 100)
+        }));
+        
+        return {
+          ...poll,
+          options: optionsWithPercentages,
+          totalVotes: newTotalVotes
+        };
+      }
+      return poll;
+    }));
   };
 
   const handleVote = (optionId: string) => {
@@ -130,10 +205,30 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
 
   const createPoll = () => {
     if (newQuestion.trim() && newOptions.every(opt => opt.trim())) {
+      // Create new poll and add to community results
+      const newPoll: UserPoll = {
+        id: `poll-${Date.now()}`,
+        question: newQuestion.trim(),
+        options: newOptions.filter(opt => opt.trim()).map((text, index) => ({
+          id: `option-${index}`,
+          text: text.trim(),
+          votes: 0,
+          percentage: 0
+        })),
+        totalVotes: 0,
+        userAvatar: "🧪", // Could get from user context
+        username: "You",
+        createdAt: new Date()
+      };
+      
+      setCommunityPolls(prev => [newPoll, ...prev]);
       onCreatePoll(newQuestion, newOptions.filter(opt => opt.trim()));
+      
+      // Reset form
       setNewQuestion("");
       setNewOptions(["", ""]);
       setSelectedTemplate(null);
+      setIsCreateExperimentExpanded(false);
     }
   };
 
@@ -396,30 +491,86 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
         </CardHeader>
         
         <CardContent className="p-2 sm:p-3">
-          {communityPosts.length === 0 ? (
+          {communityPolls.length === 0 ? (
             <div className="text-center py-4 sm:py-6">
               <p className="text-gray-500 dark:text-gray-400 mb-3 text-xs sm:text-sm">
-                No community posts yet for today's experiment
+                No community experiments yet
               </p>
               <Button 
                 onClick={refreshCommunityResults}
                 className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white text-xs sm:text-sm"
               >
-                Load Random Results
+                Load Random Experiments
               </Button>
             </div>
           ) : (
-            <div className="space-y-2 sm:space-y-3">
-              {communityPosts.map((post) => (
-                <div key={post.id} className="p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <p className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 mb-2">
-                    {post.content}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Flame className="h-3 w-3 text-orange-500" />
-                    <span className="text-xs text-gray-500">{post.reactions} reactions</span>
-                  </div>
-                </div>
+            <div className="space-y-3 sm:space-y-4">
+              {communityPolls.map((poll) => (
+                <Card key={poll.id} className="border-purple-200 dark:border-purple-700 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                  <CardHeader className="pb-2 sm:pb-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="text-lg">{poll.userAvatar}</div>
+                      <div className="flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {poll.username}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {poll.totalVotes} votes
+                        </p>
+                      </div>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100">
+                      {poll.question}
+                    </h3>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-0 p-2 sm:p-3">
+                    <div className="space-y-2">
+                      {poll.options.map((option) => (
+                        <div key={option.id}>
+                          <Button
+                            onClick={() => handlePollVote(poll.id, option.id)}
+                            disabled={userVotes[poll.id] !== undefined}
+                            className={cn(
+                              "w-full justify-between h-auto p-2 sm:p-3 text-left text-xs sm:text-sm",
+                              userVotes[poll.id] === option.id && "ring-2 ring-purple-500 bg-purple-100 dark:bg-purple-900/30",
+                              userVotes[poll.id] && "cursor-default"
+                            )}
+                            variant={userVotes[poll.id] === option.id ? "default" : "outline"}
+                          >
+                            <div className="flex items-center gap-2">
+                              <TestTube className="h-3 w-3 text-purple-600 flex-shrink-0" />
+                              <span className="font-medium">{option.text}</span>
+                            </div>
+                            {userVotes[poll.id] && (
+                              <div className="flex items-center gap-1 sm:gap-2">
+                                <span className="text-xs sm:text-sm font-medium">{option.percentage}%</span>
+                                <span className="text-xs text-gray-500">({option.votes})</span>
+                              </div>
+                            )}
+                          </Button>
+                          
+                          {userVotes[poll.id] && (
+                            <div className="mt-1">
+                              <Progress 
+                                value={option.percentage} 
+                                className="h-2 bg-gray-200 dark:bg-gray-700"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {userVotes[poll.id] && (
+                      <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                          Thanks for voting! Results locked in.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
