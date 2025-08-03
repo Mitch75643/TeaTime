@@ -337,6 +337,7 @@ class AnonymousAuthService {
     Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
     localStorage.removeItem('teaspill_has_posted');
     localStorage.removeItem('teaspill_visit_count');
+    localStorage.removeItem('teaspill_auth_seen');
     this.currentUser = null;
     this.notify();
   }
