@@ -31,7 +31,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Celebrity Tea",
     emoji: "🎤",
     description: "Spill the hottest celebrity gossip and entertainment drama",
-    gradient: "bg-gradient-to-br from-purple-500 to-pink-500",
+    gradient: "bg-gradient-to-br from-pink-500 to-rose-500", // Match Community card - Red
     textColor: "text-white",
     count: 234
   },
@@ -40,7 +40,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Story Time",
     emoji: "📚",
     description: "Share your wildest, funniest, and most memorable life stories",
-    gradient: "bg-gradient-to-br from-emerald-500 to-teal-500",
+    gradient: "bg-gradient-to-br from-blue-500 to-indigo-500", // Match Community card exactly
     textColor: "text-white",
     count: 567
   },
@@ -49,7 +49,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Hot Topics", 
     emoji: "🔥",
     description: "Discuss trending subjects that everyone's talking about",
-    gradient: "bg-gradient-to-br from-red-500 to-orange-500",
+    gradient: "bg-gradient-to-br from-red-500 to-orange-500", // Match Community card exactly
     textColor: "text-white",
     count: 189
   },
@@ -58,7 +58,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Daily Debate",
     emoji: "⚔️", 
     description: "Drop bold opinions and thought-provoking questions",
-    gradient: "bg-gradient-to-br from-indigo-500 to-purple-500",
+    gradient: "bg-gradient-to-br from-green-500 to-teal-500", // Match Community card exactly
     textColor: "text-white",
     count: 345
   },
@@ -67,7 +67,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Tea Experiments",
     emoji: "🧪",
     description: "Create polls and let the community decide",
-    gradient: "bg-gradient-to-br from-cyan-500 to-blue-500", 
+    gradient: "bg-gradient-to-br from-purple-500 to-violet-500", // Match Community card exactly
     textColor: "text-white",
     count: 78
   },
@@ -76,7 +76,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Just for Fun",
     emoji: "🎉",
     description: "Light-hearted content and random thoughts",
-    gradient: "bg-gradient-to-br from-yellow-500 to-orange-500",
+    gradient: "bg-gradient-to-br from-yellow-500 to-amber-500", // Match Community card exactly
     textColor: "text-white",
     count: 432
   },
@@ -85,7 +85,7 @@ const topicConfig: Record<string, TopicInfo> = {
     name: "Suggestions",
     emoji: "💡",
     description: "Ideas and feedback for improving TeaSpill",
-    gradient: "bg-gradient-to-br from-gray-500 to-slate-500",
+    gradient: "bg-gradient-to-br from-cyan-500 to-blue-500", // Match Community card exactly
     textColor: "text-white", 
     count: 56
   }
