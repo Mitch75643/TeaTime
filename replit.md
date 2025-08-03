@@ -83,3 +83,13 @@ All avatars maintain user anonymity while allowing personality expression throug
 - **Keep This Fix**: Fixed "Keep This" functionality to properly save selected usernames without generating new ones
 - **Global Integration**: User usernames appear on posts, comments, profile page, and all user interactions, replacing "Anonymous User"
 - **Session Sync**: Username system integrates with session management to show user's current username for their own content while preserving stored usernames for others
+
+### Community Topic Features Enhancement (January 2025)
+- **Celebrity Tea Features**: Top celebs trending list with drama meters, "Spill This" buttons, and red carpet icons flair
+- **Story Time Features**: Category filters (Horror, Funny, Cringe, Sad, Feel-Good), random story prompts, and story type labels (Real, Fake, Undisclosed)
+- **Hot Topics Features**: Trending hashtags with vote counts, weekly leaderboard of most-reacted discussions, and topic idea submission system
+- **Daily Debate Features**: Big debate card with live voting, visual results with progress bars, and future debate prompt suggestions
+- **Tea Experiments Features**: Lab-themed polling system with visual results, progress bars, and "This blew my mind" badges for close votes
+- **Just for Fun Features**: Category selector (Meme, Rant, Confession, Question), preloaded GIF picker, meme templates, and punchline-style cards
+- **Suggestions Features**: Bug reports, feature requests, and general ideas with upvote/downvote system, status badges (Planned, In Review, Completed), and admin feedback visibility
+- **Interactive Elements**: Each topic now has unique specialized components with topic-specific icons, animations, and themed styling that align with TeaSpill's gossip culture

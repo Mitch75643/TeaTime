@@ -1,0 +1,71 @@
+Here are unique and fun features you can add to each Community Topic page to make them feel more interactive, less copy-paste, and more aligned with the vibe of TeaSpill:
+
+🎤 Celebrity Tea
+Top Celebs List (weekly): Show avatars/names trending the most.
+
+Add a "Spill This" button under celeb names to start a post about them.
+
+Mini "drama meter" 🔥 next to celeb names based on post counts.
+
+Use microphone, sunglasses, red carpet icons as flair.
+
+📚 Story Time
+Category filter: Horror, Funny, Cringe, Sad, Feel-Good
+
+Show random fun prompts like “That one time I got stuck in…”
+
+Let users mark their story as: ✨Real, 🤥Fake, 🤐Undisclosed.
+
+Give posts a "storybook" card look with animated page-turn effect.
+
+🔥 Hot Topics
+Show trending hashtags or phrases (auto pull from titles).
+
+Add a “🔥 This Week” leaderboard of most reacted threads.
+
+Let users submit their own hot topic ideas for the feed.
+
+⚖️ Daily Debate
+Add one big debate card per day, user votes on one side.
+
+Voting shows results after submitting (like a poll).
+
+Show emoji reactions just for agree/disagree (👍👎).
+
+Let users suggest future debate prompts.
+
+🧪 Tea Experiments
+Every post must be a poll (with two or more options).
+
+Display results visually with progress bars or pie chart.
+
+Theme the layout like a lab: 🧪 flasks, test tubes.
+
+Add “This blew my mind” badge when votes are close.
+
+😄 Just for Fun
+Let people post memes, fun facts, and confessions.
+
+Add a GIF picker (no uploads, only preloaded ones).
+
+Post format: punchline style cards with large text.
+
+Filter: Meme, Rant, Confession, Question.
+
+💡 Suggest Something
+Let users post feature requests or feedback.
+
+Add upvote/downvote system.
+
+Add tags like: [Bug], [Feature Request], [Idea]
+
+Show "Planned" / "In Review" badges for admin visibility.
+
+⭐ Bonus Features (apply across topics)
+Topic-specific icons (not just text)
+
+Weekly leaderboard per topic (most reacted posts)
+
+Add a quote or tagline per section header to match tone
+
+Small animations like sparkles ✨, tea drips ☕, or paper flips 📄

@@ -4,6 +4,13 @@ import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/ui/post-card";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
+import { CelebrityTeaFeatures } from "@/components/ui/celebrity-tea-features";
+import { StoryTimeFeatures } from "@/components/ui/story-time-features";
+import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
+import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
+import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
+import { JustForFunFeatures } from "@/components/ui/just-for-fun-features";
+import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { ArrowLeft, Plus, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
@@ -92,6 +99,8 @@ export default function TopicFeed() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("new");
   const [showFilters, setShowFilters] = useState(false);
+  const [storyCategory, setStoryCategory] = useState("all");
+  const [funCategory, setFunCategory] = useState("meme");
   
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
@@ -237,6 +246,78 @@ export default function TopicFeed() {
               ))}
             </div>
           </div>
+        )}
+      </div>
+
+      {/* Topic-Specific Features */}
+      <div className="px-4 pt-6 pb-6 space-y-6 max-w-2xl mx-auto">
+        {topicId === "celebrity-tea" && (
+          <CelebrityTeaFeatures 
+            onSpillAbout={(celebName) => {
+              setIsPostModalOpen(true);
+            }}
+          />
+        )}
+        
+        {topicId === "story-time" && (
+          <StoryTimeFeatures 
+            onWriteStory={(prompt, category) => {
+              setIsPostModalOpen(true);
+            }}
+            selectedCategory={storyCategory}
+            onCategoryChange={setStoryCategory}
+          />
+        )}
+        
+        {topicId === "hot-topics" && (
+          <HotTopicsFeatures 
+            onCreateTopic={(topic, hashtag) => {
+              setIsPostModalOpen(true);
+            }}
+          />
+        )}
+        
+        {topicId === "daily-debate" && (
+          <DailyDebateFeatures 
+            onVote={(optionId) => {
+              console.log(`Voted ${optionId} on daily debate`);
+            }}
+            onCreateDebate={(question) => {
+              setIsPostModalOpen(true);
+            }}
+          />
+        )}
+        
+        {topicId === "tea-experiments" && (
+          <TeaExperimentsFeatures 
+            onCreatePoll={(question, options) => {
+              setIsPostModalOpen(true);
+            }}
+            onVote={(optionId) => {
+              console.log(`Voted ${optionId} on experiment`);
+            }}
+          />
+        )}
+        
+        {topicId === "just-for-fun" && (
+          <JustForFunFeatures 
+            onCreatePost={(content, category, gif) => {
+              setIsPostModalOpen(true);
+            }}
+            selectedCategory={funCategory}
+            onCategoryChange={setFunCategory}
+          />
+        )}
+        
+        {topicId === "suggestions" && (
+          <SuggestionsFeatures 
+            onSubmitSuggestion={(suggestion) => {
+              console.log('New suggestion:', suggestion);
+            }}
+            onVote={(suggestionId, voteType) => {
+              console.log(`Voted ${voteType} on suggestion ${suggestionId}`);
+            }}
+          />
         )}
       </div>
 
