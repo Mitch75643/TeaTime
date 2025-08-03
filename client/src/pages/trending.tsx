@@ -47,6 +47,15 @@ export default function Trending() {
       </div>
 
       <main className="px-4 pt-4 pb-20 space-y-4 max-w-2xl mx-auto">
+        {/* Page Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            Spill the Tea ☕
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+            Share your anonymous stories and connect with the community
+          </p>
+        </div>
         {isLoading && (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>

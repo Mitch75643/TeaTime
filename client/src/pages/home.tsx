@@ -110,16 +110,6 @@ export default function Home() {
       </div>
 
       <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
-        {/* Page Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            Spill the Tea ☕
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
-            Share your anonymous stories and connect with the community
-          </p>
-        </div>
-
         <div className="space-y-6">
 
         {/* Category filter indicator */}
