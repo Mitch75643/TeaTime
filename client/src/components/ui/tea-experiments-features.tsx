@@ -6,6 +6,7 @@ import { Progress } from "./progress";
 import { Input } from "./input";
 import { FlaskConical, BarChart3, Zap, TestTube, Beaker, Plus, RefreshCw, Clock, Flame, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ChemistryAnimation, useChemistryAnimation } from "./chemistry-animation";
 
 interface PollOption {
   id: string;
@@ -101,6 +102,9 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
   const [communityPolls, setCommunityPolls] = useState<UserPoll[]>([]);
   const [isLiveExperimentExpanded, setIsLiveExperimentExpanded] = useState(true);
   const [isCreateExperimentExpanded, setIsCreateExperimentExpanded] = useState(false);
+  
+  // Chemistry animation hook
+  const { isVisible: isChemistryVisible, triggerAnimation, completeAnimation } = useChemistryAnimation();
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   
   const refreshCommunityResults = () => {
@@ -205,6 +209,9 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
 
   const createPoll = () => {
     if (newQuestion.trim() && newOptions.every(opt => opt.trim())) {
+      // Trigger chemistry animation first
+      triggerAnimation();
+      
       // Create new poll and add to community results
       const newPoll: UserPoll = {
         id: `poll-${Date.now()}`,
@@ -223,13 +230,15 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
       
       setCommunityPolls(prev => [newPoll, ...prev]);
       
-      // Reset form and collapse create section
-      setNewQuestion("");
-      setNewOptions(["", ""]);
-      setSelectedTemplate(null);
-      setIsCreateExperimentExpanded(false);
+      // Reset form and collapse create section after animation starts
+      setTimeout(() => {
+        setNewQuestion("");
+        setNewOptions(["", ""]);
+        setSelectedTemplate(null);
+        setIsCreateExperimentExpanded(false);
+      }, 500);
       
-      // Scroll to Community Results section
+      // Scroll to Community Results section after animation
       setTimeout(() => {
         const communityResultsElement = document.querySelector('[data-section="community-results"]');
         if (communityResultsElement) {
@@ -238,7 +247,7 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
             block: 'start' 
           });
         }
-      }, 100);
+      }, 2100); // After animation completes
       
       // Don't call onCreatePoll to avoid opening modal
       // onCreatePoll(newQuestion, newOptions.filter(opt => opt.trim()));
@@ -604,6 +613,12 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
           )}
         </CardContent>
       </Card>
+      
+      {/* Chemistry Animation */}
+      <ChemistryAnimation 
+        isVisible={isChemistryVisible}
+        onComplete={completeAnimation}
+      />
     </div>
   );
 }
