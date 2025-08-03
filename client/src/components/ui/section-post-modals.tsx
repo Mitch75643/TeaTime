@@ -19,6 +19,7 @@ interface SectionPostModalProps {
   section: string;
   sectionTitle: string;
   promptText?: string;
+  prefilledCelebrity?: string;
   onPostSuccess?: (section: string) => void;
 }
 
@@ -53,6 +54,7 @@ export function SectionPostModal({
   section, 
   sectionTitle,
   promptText = "",
+  prefilledCelebrity = "",
   onPostSuccess
 }: SectionPostModalProps) {
   const [content, setContent] = useState("");
@@ -77,6 +79,21 @@ export function SectionPostModal({
       setTopicTitle(promptText);
     }
   }, [isOpen, section, promptText]);
+
+  // Pre-fill celebrity name when provided for celebrity-tea
+  useEffect(() => {
+    if (isOpen && section === "celebrity-tea" && prefilledCelebrity) {
+      setCelebrityName(prefilledCelebrity);
+      // Focus on the celebrity input for better UX (after a short delay for modal to open)
+      setTimeout(() => {
+        const celebrityInput = document.getElementById('celebrity-name');
+        if (celebrityInput) {
+          celebrityInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          celebrityInput.focus();
+        }
+      }, 300);
+    }
+  }, [isOpen, section, prefilledCelebrity]);
 
   const createPostMutation = useMutation({
     mutationFn: async (data: InsertPost) => {

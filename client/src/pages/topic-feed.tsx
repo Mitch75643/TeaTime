@@ -95,6 +95,7 @@ export default function TopicFeed() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [activeTab, setActiveTab] = useState<'community' | 'user'>('community');
+  const [prefilledCelebrity, setPrefilledCelebrity] = useState("");
   
   // Celebration hook
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
@@ -252,9 +253,11 @@ export default function TopicFeed() {
         {topicId === "celebrity-tea" && (
           <CelebrityTeaFeatures 
             onSpillAbout={(celebName) => {
+              setPrefilledCelebrity(celebName);
               setIsPostModalOpen(true);
             }}
             onCreatePost={() => {
+              setPrefilledCelebrity("");
               setIsPostModalOpen(true);
             }}
           />
@@ -470,10 +473,12 @@ export default function TopicFeed() {
         onClose={() => {
           setIsPostModalOpen(false);
           setSelectedTopic("");
+          setPrefilledCelebrity("");
         }}
         section={topicId}
         sectionTitle={`${topic.emoji} ${topic.name}`}
         promptText={selectedTopic}
+        prefilledCelebrity={prefilledCelebrity}
         onPostSuccess={(section) => {
           // Trigger celebration for this topic
           triggerCelebration(section as any);
