@@ -177,14 +177,14 @@ export default function Profile() {
               {/* Avatar with selector */}
               <div className="relative">
                 {getAvatarById(userAvatarId) ? (
-                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-purple-200 dark:border-purple-400">
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white dark:border-white">
                     <div 
                       className="w-full h-full"
                       dangerouslySetInnerHTML={{ __html: getAvatarById(userAvatarId)?.svg || '' }}
                     />
                   </div>
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center border-4 border-purple-200 dark:border-purple-400">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center border-4 border-white dark:border-white">
                     <User className="h-10 w-10 text-white" />
                   </div>
                 )}
