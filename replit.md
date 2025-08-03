@@ -104,6 +104,26 @@ All avatars maintain user anonymity while allowing personality expression throug
 - **Smart Animation System**: Each animation plays for 1-2 seconds after successful post submission, all sounds are gentle and natural (under 1 second), works perfectly on mobile and desktop, matches TeaSpill's fun expressive vibe
 - **Enhanced Daily Spill**: Prominent yellow-highlighted prompt display with clear user guidance above text area
 
+### Home Page Category Animations (January 2025)
+- **School (🏫)**: Floating pencils/graduation caps with chalk dust effect + soft page flip sound
+- **Work (💼)**: Flying briefcase with paper documents + keyboard typing + email swoosh sounds
+- **Relationships (❤️)**: Floating hearts with central pulse + calm heartbeat sounds
+- **Family (👨‍👩‍👧‍👦)**: Cozy home with warm glow and sparkles + gentle lullaby chord
+- **Money (💸)**: Flying dollar signs with gold sparkles + soft coin jingle + gentle cha-ching
+- **Hot Takes (🔥)**: Flame effects with sparks and fire emojis + controlled flame burst sound
+- **Am I in the Wrong? (🤔)**: Question marks with scales of justice + light suspense swell
+- **Category-Specific System**: Each home page category has unique themed animation triggered after successful post submission, ~1.5 seconds duration, mobile-optimized, expandable for future categories
+
+### Weekly Theme Animations for Daily Spill (January 2025)
+- **Love Week**: Red/pink hearts floating upward + soft romantic chime/gentle heart "bloop"
+- **Pet Peeves Week**: Angry face emojis/scribbles + quiet grumble/eye-roll sound
+- **Cringe/Funny Week**: "😂" emojis/comic "LOL" bubbles + playful giggle/light cartoon boing
+- **Secrets Week**: Whisper bubbles/shushing face + whisper "shhh"/light wind noise
+- **Embarrassing Moments Week**: Blush emojis/sweat drops + soft gasp/light "oops" chime
+- **Drama Week**: Floating drama masks 🎭/explosive text bubbles + soft dramatic sting/rising suspense tone
+- **Self-Care Week**: Calm sparkles/glowing wellness icons + soft spa-like chime/gentle breath sound
+- **Theme Configuration System**: THEME_CONFIG object stores visual colors and sound mappings for easy future theme updates, expandable system with default fallback animation for unknown themes, 1.5-2 second duration animations triggered by current week's theme after Daily Spill post submission
+
 ### Home Page UI Polish (January 2025)
 - **Enhanced Modal UX**: Added prominent close button with circular background and hover effects for better mobile accessibility
 - **Page Branding**: Implemented gradient "Spill the Tea" header with tagline to establish page identity and brand personality

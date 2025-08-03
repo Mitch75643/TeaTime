@@ -238,8 +238,8 @@ export default function DailySpill() {
   // Get "Spill of the Day" - highest reacted post
   const spillOfTheDay = posts.length > 0 
     ? posts.reduce((best, current) => {
-        const currentReactions = (current.fireReactions || 0) + (current.cryReactions || 0) + (current.eyesReactions || 0) + (current.clownReactions || 0);
-        const bestReactions = (best.fireReactions || 0) + (best.cryReactions || 0) + (best.eyesReactions || 0) + (best.clownReactions || 0);
+        const currentReactions = Object.values(current.reactions || {}).reduce((sum, count) => sum + count, 0);
+        const bestReactions = Object.values(best.reactions || {}).reduce((sum, count) => sum + count, 0);
         return currentReactions > bestReactions ? current : best;
       })
     : null;
@@ -389,16 +389,11 @@ export default function DailySpill() {
       <SectionPostModal 
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
-        onSuccess={handlePostSuccess}
+        section="daily-spill"
+        sectionTitle="Daily Spill"
         category="daily"
-        title="Daily Spill"
-        prompt={todayPrompt}
-        sectionConfig={{
-          color: "border-purple-500",
-          bgColor: "bg-purple-50 dark:bg-purple-900/20",
-          textColor: "text-purple-700 dark:text-purple-300",
-          emoji: "☕"
-        }}
+        promptText={todayPrompt}
+        onPostSuccess={handlePostSuccess}
       />
       
       {/* Weekly Theme Animation */}

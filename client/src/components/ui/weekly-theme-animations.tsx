@@ -8,14 +8,65 @@ interface WeeklyThemeAnimationProps {
   theme: string;
 }
 
+// Weekly theme configuration for easy updates
+const THEME_CONFIG = {
+  "Love Week": {
+    colors: ["#ff69b4", "#ff1493", "#dc143c"],
+    sound: "romantic-chime"
+  },
+  "Pet Peeves Week": {
+    colors: ["#ff4500", "#ff6347", "#ffa500"],
+    sound: "grumble"
+  },
+  "Cringe/Funny Week": {
+    colors: ["#ffd700", "#ffff00", "#ff69b4"],
+    sound: "giggle"
+  },
+  "Secrets Week": {
+    colors: ["#9370db", "#8a2be2", "#6a5acd"],
+    sound: "whisper"
+  },
+  "Embarrassing Moments Week": {
+    colors: ["#ff69b4", "#ffc0cb", "#ffb6c1"],
+    sound: "gasp"
+  },
+  "Drama Week": {
+    colors: ["#ff0000", "#dc143c", "#b22222"],
+    sound: "dramatic-sting"
+  },
+  "Self-Care Week": {
+    colors: ["#98fb98", "#90ee90", "#87ceeb"],
+    sound: "spa-chime"
+  },
+  // Existing themes
+  "Rant Week": {
+    colors: ["#ff4500", "#ff6347", "#ffa500"],
+    sound: "grumble"
+  },
+  "Roast Week": {
+    colors: ["#ffd700", "#ffff00", "#ff69b4"],
+    sound: "giggle"
+  },
+  "Unpopular Opinions": {
+    colors: ["#9370db", "#8a2be2", "#6a5acd"],
+    sound: "bubble-pop"
+  },
+  "Chaos Week": {
+    colors: ["#32cd32", "#20b2aa", "#00ced1"],
+    sound: "chaos-swirl"
+  }
+};
+
 // Audio helper for theme-specific sounds
 const playThemeSound = (theme: string) => {
   try {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const config = THEME_CONFIG[theme as keyof typeof THEME_CONFIG];
+    const soundType = config?.sound || "default";
     
-    switch (theme.toLowerCase()) {
-      case "love week":
-        // Soft heart pop sound
+    switch (soundType) {
+      case "romantic-chime":
+        // Soft romantic chime for Love Week
         const heartOsc = audioContext.createOscillator();
         const heartGain = audioContext.createGain();
         heartOsc.connect(heartGain);
@@ -23,48 +74,121 @@ const playThemeSound = (theme: string) => {
         heartOsc.type = "sine";
         heartOsc.frequency.setValueAtTime(800, audioContext.currentTime);
         heartOsc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
-        heartGain.gain.setValueAtTime(0.1, audioContext.currentTime);
-        heartGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        heartGain.gain.setValueAtTime(0.08, audioContext.currentTime);
+        heartGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
         heartOsc.start(audioContext.currentTime);
-        heartOsc.stop(audioContext.currentTime + 0.3);
+        heartOsc.stop(audioContext.currentTime + 0.4);
         break;
         
-      case "rant week":
-        // Quick dramatic boom
-        const rantOsc = audioContext.createOscillator();
-        const rantGain = audioContext.createGain();
-        rantOsc.connect(rantGain);
-        rantGain.connect(audioContext.destination);
-        rantOsc.type = "triangle";
-        rantOsc.frequency.setValueAtTime(200, audioContext.currentTime);
-        rantOsc.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.2);
-        rantGain.gain.setValueAtTime(0.12, audioContext.currentTime);
-        rantGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-        rantOsc.start(audioContext.currentTime);
-        rantOsc.stop(audioContext.currentTime + 0.2);
+      case "grumble":
+        // Quiet grumble for Pet Peeves/Rant Week
+        const grumbleOsc = audioContext.createOscillator();
+        const grumbleGain = audioContext.createGain();
+        const grumbleFilter = audioContext.createBiquadFilter();
+        grumbleOsc.connect(grumbleFilter);
+        grumbleFilter.connect(grumbleGain);
+        grumbleGain.connect(audioContext.destination);
+        grumbleOsc.type = "sawtooth";
+        grumbleFilter.type = "lowpass";
+        grumbleFilter.frequency.setValueAtTime(200, audioContext.currentTime);
+        grumbleOsc.frequency.setValueAtTime(80, audioContext.currentTime);
+        grumbleOsc.frequency.linearRampToValueAtTime(60, audioContext.currentTime + 0.3);
+        grumbleGain.gain.setValueAtTime(0.06, audioContext.currentTime);
+        grumbleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        grumbleOsc.start(audioContext.currentTime);
+        grumbleOsc.stop(audioContext.currentTime + 0.3);
         break;
         
-      case "roast week":
-        // Tea pour sound
-        const teaOsc = audioContext.createOscillator();
-        const teaGain = audioContext.createGain();
-        const teaFilter = audioContext.createBiquadFilter();
-        teaOsc.connect(teaFilter);
-        teaFilter.connect(teaGain);
-        teaGain.connect(audioContext.destination);
-        teaOsc.type = "sine";
-        teaFilter.type = "lowpass";
-        teaFilter.frequency.setValueAtTime(600, audioContext.currentTime);
-        teaOsc.frequency.setValueAtTime(300, audioContext.currentTime);
-        teaOsc.frequency.linearRampToValueAtTime(250, audioContext.currentTime + 0.4);
-        teaGain.gain.setValueAtTime(0.08, audioContext.currentTime);
-        teaGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-        teaOsc.start(audioContext.currentTime);
-        teaOsc.stop(audioContext.currentTime + 0.4);
+      case "giggle":
+        // Playful light giggle for Cringe/Funny Week
+        const giggleOsc = audioContext.createOscillator();
+        const giggleGain = audioContext.createGain();
+        giggleOsc.connect(giggleGain);
+        giggleGain.connect(audioContext.destination);
+        giggleOsc.type = "triangle";
+        giggleOsc.frequency.setValueAtTime(600, audioContext.currentTime);
+        giggleOsc.frequency.exponentialRampToValueAtTime(900, audioContext.currentTime + 0.05);
+        giggleOsc.frequency.exponentialRampToValueAtTime(700, audioContext.currentTime + 0.1);
+        giggleOsc.frequency.exponentialRampToValueAtTime(850, audioContext.currentTime + 0.15);
+        giggleGain.gain.setValueAtTime(0.07, audioContext.currentTime);
+        giggleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        giggleOsc.start(audioContext.currentTime);
+        giggleOsc.stop(audioContext.currentTime + 0.2);
         break;
         
-      case "unpopular opinions":
-        // Speech bubble pop
+      case "whisper":
+        // Soft whisper "shh" for Secrets Week
+        const whisperOsc = audioContext.createOscillator();
+        const whisperGain = audioContext.createGain();
+        const whisperFilter = audioContext.createBiquadFilter();
+        whisperOsc.connect(whisperFilter);
+        whisperFilter.connect(whisperGain);
+        whisperGain.connect(audioContext.destination);
+        whisperOsc.type = "sine";
+        whisperFilter.type = "highpass";
+        whisperFilter.frequency.setValueAtTime(1000, audioContext.currentTime);
+        whisperOsc.frequency.setValueAtTime(2000, audioContext.currentTime);
+        whisperOsc.frequency.exponentialRampToValueAtTime(1500, audioContext.currentTime + 0.5);
+        whisperGain.gain.setValueAtTime(0.04, audioContext.currentTime);
+        whisperGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        whisperOsc.start(audioContext.currentTime);
+        whisperOsc.stop(audioContext.currentTime + 0.5);
+        break;
+        
+      case "gasp":
+        // Soft gasp for Embarrassing Moments Week
+        const gaspOsc = audioContext.createOscillator();
+        const gaspGain = audioContext.createGain();
+        gaspOsc.connect(gaspGain);
+        gaspGain.connect(audioContext.destination);
+        gaspOsc.type = "sine";
+        gaspOsc.frequency.setValueAtTime(400, audioContext.currentTime);
+        gaspOsc.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
+        gaspOsc.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.2);
+        gaspGain.gain.setValueAtTime(0.08, audioContext.currentTime);
+        gaspGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+        gaspOsc.start(audioContext.currentTime);
+        gaspOsc.stop(audioContext.currentTime + 0.25);
+        break;
+        
+      case "dramatic-sting":
+        // Soft dramatic sting for Drama Week
+        const dramOsc1 = audioContext.createOscillator();
+        const dramOsc2 = audioContext.createOscillator();
+        const dramGain = audioContext.createGain();
+        dramOsc1.connect(dramGain);
+        dramOsc2.connect(dramGain);
+        dramGain.connect(audioContext.destination);
+        dramOsc1.type = "triangle";
+        dramOsc2.type = "sine";
+        dramOsc1.frequency.setValueAtTime(300, audioContext.currentTime);
+        dramOsc2.frequency.setValueAtTime(450, audioContext.currentTime);
+        dramOsc1.frequency.linearRampToValueAtTime(280, audioContext.currentTime + 0.4);
+        dramOsc2.frequency.linearRampToValueAtTime(420, audioContext.currentTime + 0.4);
+        dramGain.gain.setValueAtTime(0.07, audioContext.currentTime);
+        dramGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        dramOsc1.start(audioContext.currentTime);
+        dramOsc2.start(audioContext.currentTime);
+        dramOsc1.stop(audioContext.currentTime + 0.4);
+        dramOsc2.stop(audioContext.currentTime + 0.4);
+        break;
+        
+      case "spa-chime":
+        // Gentle spa-like chime for Self-Care Week
+        const spaOsc = audioContext.createOscillator();
+        const spaGain = audioContext.createGain();
+        spaOsc.connect(spaGain);
+        spaGain.connect(audioContext.destination);
+        spaOsc.type = "sine";
+        spaOsc.frequency.setValueAtTime(528, audioContext.currentTime); // "Love frequency"
+        spaGain.gain.setValueAtTime(0.06, audioContext.currentTime);
+        spaGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+        spaOsc.start(audioContext.currentTime);
+        spaOsc.stop(audioContext.currentTime + 0.8);
+        break;
+        
+      case "bubble-pop":
+        // Speech bubble pop for Unpopular Opinions
         const bubbleOsc = audioContext.createOscillator();
         const bubbleGain = audioContext.createGain();
         bubbleOsc.connect(bubbleGain);
@@ -72,14 +196,14 @@ const playThemeSound = (theme: string) => {
         bubbleOsc.frequency.setValueAtTime(600, audioContext.currentTime);
         bubbleOsc.frequency.exponentialRampToValueAtTime(900, audioContext.currentTime + 0.05);
         bubbleOsc.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.15);
-        bubbleGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        bubbleGain.gain.setValueAtTime(0.08, audioContext.currentTime);
         bubbleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
         bubbleOsc.start(audioContext.currentTime);
         bubbleOsc.stop(audioContext.currentTime + 0.15);
         break;
         
-      case "chaos week":
-        // Lightning zap sound
+      case "chaos-swirl":
+        // Lightning zap sound for Chaos Week
         const zapOsc = audioContext.createOscillator();
         const zapGain = audioContext.createGain();
         zapOsc.connect(zapGain);
@@ -87,7 +211,7 @@ const playThemeSound = (theme: string) => {
         zapOsc.type = "sawtooth";
         zapOsc.frequency.setValueAtTime(1500, audioContext.currentTime);
         zapOsc.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1);
-        zapGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+        zapGain.gain.setValueAtTime(0.06, audioContext.currentTime);
         zapGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
         zapOsc.start(audioContext.currentTime);
         zapOsc.stop(audioContext.currentTime + 0.1);
