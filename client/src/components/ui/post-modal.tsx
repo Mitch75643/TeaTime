@@ -110,18 +110,12 @@ export function PostModal({
   }, [content, category, selectedTags, isOpen]);
 
   const createPostMutation = useMutation({
-    mutationFn: async (data: InsertPost) => {
+    mutationFn: async (data: InsertPost & { postContext?: string; communitySection?: string }) => {
       return apiRequest("POST", "/api/posts", data);
     },
     onSuccess: () => {
-      // Invalidate specific page queries based on context
-      const queryKey = postContext.page === 'daily' 
-        ? ["/api/posts", "daily"]
-        : postContext.page === 'community'
-        ? ["/api/posts", "community", postContext.section]
-        : ["/api/posts"];
-      
-      queryClient.invalidateQueries({ queryKey });
+      // Invalidate all post queries to ensure posts appear everywhere they should
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       clearDraft(); // Clear draft after successful post
       toast({
         title: "Post created!",
