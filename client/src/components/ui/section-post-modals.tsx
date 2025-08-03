@@ -262,11 +262,17 @@ export function SectionPostModal({
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* Daily Tea Prompt */}
-          {section === "daily-tea" && promptText && (
-            <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
-              <p className="text-sm font-medium text-purple-700 dark:text-purple-300 mb-1">Today's Prompt:</p>
-              <p className="text-purple-900 dark:text-purple-100">"{promptText}"</p>
+          {/* Daily Spill Prompt - Prominently displayed */}
+          {(category === "daily" || section === "daily-tea") && promptText && (
+            <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-700 shadow-sm">
+              <div className="flex items-center mb-2">
+                <span className="text-lg mr-2">☕</span>
+                <p className="text-sm font-bold text-yellow-800 dark:text-yellow-200">Today's Prompt:</p>
+              </div>
+              <p className="text-yellow-900 dark:text-yellow-100 font-medium text-sm leading-relaxed">"{promptText}"</p>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 italic">
+                Share your response to this prompt in your post below
+              </p>
             </div>
           )}
 
@@ -366,7 +372,8 @@ export function SectionPostModal({
             <Label htmlFor="content">
               {section === "daily-debate" ? "Your Bold Statement" : 
                section === "hot-topics" ? "Your Response" : 
-               section === "story-time" ? "Tell your story..." : "Your Post"}
+               section === "story-time" ? "Tell your story..." : 
+               category === "daily" ? "Your Response to Today's Prompt" : "Your Post"}
             </Label>
             <Textarea
               id="content"
