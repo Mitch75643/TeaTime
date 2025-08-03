@@ -23,12 +23,12 @@ interface PostModalProps {
 }
 
 const categories = [
-  { value: "college", label: "🎓 College" },
+  { value: "school", label: "🏫 School" },
   { value: "work", label: "💼 Work" },
   { value: "relationships", label: "💕 Relationships" },
-  { value: "family", label: "👨‍👩‍👧‍👦 Family" },
-  { value: "money", label: "💰 Money" },
-  { value: "politics", label: "🗳️ Politics" },
+  { value: "family", label: "👨‍👩‍👧 Family" },
+  { value: "money", label: "💸 Money" },
+  { value: "hot-takes", label: "🌍 Hot Takes" },
   { value: "drama", label: "🎭 Am I the Drama?" },
 ];
 
@@ -165,6 +165,8 @@ export function PostModal({
       tags: allTags,
       postContext: postContext.page,
       communitySection: postContext.section,
+      postType: "standard",
+      allowComments: true,
     });
   };
 

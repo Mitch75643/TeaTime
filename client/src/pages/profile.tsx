@@ -99,12 +99,12 @@ export default function Profile() {
 
   const getCategoryEmoji = (category: string) => {
     const emojis: Record<string, string> = {
-      college: '🎓',
+      school: '🏫',
       work: '💼',
       relationships: '💕',
-      family: '👨‍👩‍👧‍👦',
-      money: '💰',
-      politics: '🗳️'
+      family: '👨‍👩‍👧',
+      money: '💸',
+      'hot-takes': '🌍'
     };
     return emojis[category] || '';
   };

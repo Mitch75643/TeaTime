@@ -14,23 +14,23 @@ interface PostCardProps {
 }
 
 const categoryEmojis: Record<string, string> = {
-  college: "🎓",
+  school: "🏫",
   work: "💼",
   relationships: "💕",
-  family: "👨‍👩‍👧‍👦",
-  money: "💰",
-  politics: "🗳️",
+  family: "👨‍👩‍👧",
+  money: "💸",
+  "hot-takes": "🌍",
   drama: "🎭",
 };
 
 const categoryColors: Record<string, string> = {
-  college: "bg-green-100 text-green-800",
-  work: "bg-blue-100 text-blue-800",
-  relationships: "bg-pink-100 text-pink-800",
-  family: "bg-purple-100 text-purple-800",
-  money: "bg-yellow-100 text-yellow-800",
-  politics: "bg-red-100 text-red-800",
-  drama: "bg-orange-100 text-orange-800",
+  school: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+  work: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+  relationships: "bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300",
+  family: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+  money: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
+  "hot-takes": "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+  drama: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
 };
 
 const reactionEmojis = {
@@ -121,6 +121,7 @@ export function PostCard({ post }: PostCardProps) {
 
   const timeAgo = formatDistanceToNow(new Date(post.createdAt!), { addSuffix: true });
   const categoryLabel = post.category === "drama" ? "Am I the Drama?" : 
+    post.category === "hot-takes" ? "Hot Takes" :
     post.category.charAt(0).toUpperCase() + post.category.slice(1);
 
   // Calculate trending score for visual indication

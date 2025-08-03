@@ -8,12 +8,12 @@ interface CategoryTabsProps {
 
 const categories = [
   { id: "all", label: "All", emoji: "" },
-  { id: "college", label: "College", emoji: "🎓" },
+  { id: "school", label: "School", emoji: "🏫" },
   { id: "work", label: "Work", emoji: "💼" },
   { id: "relationships", label: "Relationships", emoji: "💕" },
-  { id: "family", label: "Family", emoji: "👨‍👩‍👧‍👦" },
-  { id: "money", label: "Money", emoji: "💰" },
-  { id: "politics", label: "Politics", emoji: "🗳️" },
+  { id: "family", label: "Family", emoji: "👨‍👩‍👧" },
+  { id: "money", label: "Money", emoji: "💸" },
+  { id: "hot-takes", label: "Hot Takes", emoji: "🌍" },
   { id: "drama", label: "Am I the Drama?", emoji: "🎭" },
 ];
 

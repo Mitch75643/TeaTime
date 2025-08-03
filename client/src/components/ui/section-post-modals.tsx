@@ -21,20 +21,20 @@ interface SectionPostModalProps {
 }
 
 const popularTags = [
-  "#helpme", "#funny", "#advice", "#drama", "#college", "#work", 
-  "#relationships", "#family", "#money", "#politics", "#fml", "#lol",
+  "#helpme", "#funny", "#advice", "#drama", "#school", "#work", 
+  "#relationships", "#family", "#money", "#hot-takes", "#fml", "#lol",
   "#rant", "#confession", "#tea", "#gossip", "#support", "#validation",
   "#nsfw", "#serious", "#update", "#urgent", "#anonymous", "#story"
 ];
 
 const debateTags = [
   "#ethics", "#school", "#dating", "#money", "#work", "#society", 
-  "#culture", "#technology", "#relationships", "#lifestyle"
+  "#culture", "#technology", "#relationships", "#lifestyle", "#hot-takes"
 ];
 
 const hotTopicsTags = [
   "#trending", "#viral", "#controversial", "#breaking", "#popculture",
-  "#tech", "#politics", "#social", "#entertainment", "#news"
+  "#tech", "#hot-takes", "#social", "#entertainment", "#news"
 ];
 
 export function SectionPostModal({ 
@@ -129,10 +129,10 @@ export function SectionPostModal({
     // Build the post data based on section
     const postData: InsertPost = {
       content: content.trim(),
-      category: getDefaultCategory(section),
+      category: getDefaultCategory(section) as any,
       tags: allTags,
       postContext: section === "daily-tea" ? "daily" : "community",
-      communitySection: section === "daily-tea" ? null : section,
+      communitySection: section === "daily-tea" ? undefined : section,
       postType: getPostType(section),
       allowComments: section !== "daily-debate",
     };
@@ -392,7 +392,7 @@ function getDefaultCategory(section: string): string {
   switch (section) {
     case "celebrity-tea": return "gossip";
     case "story-time": return "story";
-    case "hot-topics": return "other";
+    case "hot-topics": return "hot-takes";
     case "daily-debate": return "debate";
     case "tea-experiments": return "poll";
     case "daily-tea": return "daily";

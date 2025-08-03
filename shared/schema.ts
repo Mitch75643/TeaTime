@@ -96,7 +96,7 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   allowComments: true,
 }).extend({
   content: z.string().min(1).max(500),
-  category: z.enum(["college", "work", "relationships", "family", "money", "politics", "drama", "gossip", "story", "debate", "poll", "daily", "other"]),
+  category: z.enum(["school", "work", "relationships", "family", "money", "hot-takes", "drama", "gossip", "story", "debate", "poll", "daily", "other"]),
   tags: z.array(z.string()).optional().default([]),
   postContext: z.string().optional().default("home"),
   communitySection: z.string().optional(),
