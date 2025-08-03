@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "./button";
 import { SearchPage } from "./search-page";
 import { FloatingPostButton } from "./floating-post-button";
-import { Home, Coffee, User } from "lucide-react";
+import { Home, Coffee, User, Users } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ export function BottomNav() {
 
   const navItems = [
     { id: "home", label: "Home", icon: Home, path: "/" },
+    { id: "community", label: "Community", icon: Users, path: "/community" },
     { id: "daily", label: "Daily", icon: Coffee, path: "/daily-spill" },
     { id: "me", label: "Me", icon: User, path: "/profile" },
   ];
@@ -25,7 +26,7 @@ export function BottomNav() {
             const isActive = location === item.path;
             
             // Add spacer for the floating button in the middle
-            if (index === 1) {
+            if (index === 2) {
               return (
                 <div key={`spacer-${index}`} className="flex-1 flex justify-center">
                   <Link href={item.path!}>
@@ -64,7 +65,7 @@ export function BottomNav() {
         </div>
       </nav>
       
-      <FloatingPostButton />
+
       
       <SearchPage 
         isOpen={isSearchOpen} 

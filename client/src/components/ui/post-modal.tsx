@@ -52,7 +52,10 @@ export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags =
   // Generate a new alias and load draft when modal opens
   useEffect(() => {
     if (isOpen) {
-      setCurrentAlias(generateAlias());
+      // Only generate new alias if we don't have one
+      if (!currentAlias) {
+        setCurrentAlias(generateAlias());
+      }
       
       // Set default values if provided
       if (defaultCategory) {
@@ -71,8 +74,11 @@ export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags =
           setSelectedTags(draft.tags);
         }
       }
+    } else {
+      // Reset alias when modal closes
+      setCurrentAlias("");
     }
-  }, [isOpen, defaultCategory, defaultTags]);
+  }, [isOpen, defaultCategory, defaultTags, currentAlias]);
 
   // Auto-save draft as user types
   useEffect(() => {

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { FeedToggle } from "@/components/ui/feed-toggle";
+import { FloatingPostButton } from "@/components/ui/floating-post-button";
 import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -82,15 +83,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* Floating Action Button */}
-      <Button
-        onClick={() => setIsPostModalOpen(true)}
-        className="fixed bottom-20 right-4 w-14 h-14 gradient-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-110 z-30"
-        size="icon"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
-
+      <FloatingPostButton />
       <BottomNav />
 
       <PostModal
