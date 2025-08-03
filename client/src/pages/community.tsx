@@ -20,7 +20,8 @@ import {
   FlaskConical,
   Sparkles,
   Lightbulb,
-  Users
+  Users,
+  RefreshCw
 } from "lucide-react";
 import type { Post } from "@shared/schema";
 
@@ -149,6 +150,7 @@ const communitySections = [
 
 export default function Community() {
   const [, setLocation] = useLocation();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
   
   const handleSectionClick = (sectionId: string) => {
@@ -166,7 +168,7 @@ export default function Community() {
     setLocation(`/topic/${topicId}`);
   };
 
-  const { data: posts = [], isLoading } = useQuery<Post[]>({
+  const { data: posts = [], isLoading, refetch } = useQuery<Post[]>({
     queryKey: ["/api/posts", "community"],
     queryFn: async () => {
       const response = await fetch("/api/posts?sortBy=new&postContext=community");
@@ -174,6 +176,15 @@ export default function Community() {
       return response.json();
     },
   });
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -229,9 +240,20 @@ export default function Community() {
 
         {/* Recent Community Posts */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Recent Community Posts
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Recent Community Posts
+            </h2>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              variant="outline"
+              size="sm"
+              className="text-xs p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
           {isLoading ? (
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
