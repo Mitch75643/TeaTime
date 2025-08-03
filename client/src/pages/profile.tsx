@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
+import { AvatarSelector } from "@/components/ui/avatar-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -25,12 +26,16 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { getAvatarById } from "@/lib/avatars";
 import type { Post } from "@shared/schema";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
+  const [selectedAvatarId, setSelectedAvatarId] = useState<string>(() => {
+    return localStorage.getItem('userAvatarId') || 'happy-face';
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -46,6 +51,15 @@ export default function Profile() {
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
+  };
+
+  const handleAvatarSelect = (avatarId: string) => {
+    setSelectedAvatarId(avatarId);
+    localStorage.setItem('userAvatarId', avatarId);
+    toast({
+      title: "Avatar updated!",
+      description: "Your new profile picture has been saved.",
+    });
   };
 
   const handleClearData = () => {
@@ -117,13 +131,39 @@ export default function Profile() {
         {/* Profile Header */}
         <Card>
           <CardHeader className="text-center">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center mx-auto mb-4">
-              <User className="h-10 w-10 text-white" />
+            <div className="flex flex-col items-center space-y-4">
+              {/* Avatar with selector */}
+              <div className="relative">
+                {getAvatarById(selectedAvatarId) ? (
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-purple-200 dark:border-purple-400">
+                    <div 
+                      className="w-full h-full"
+                      dangerouslySetInnerHTML={{ __html: getAvatarById(selectedAvatarId)?.svg || '' }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center border-4 border-purple-200 dark:border-purple-400">
+                    <User className="h-10 w-10 text-white" />
+                  </div>
+                )}
+                
+                {/* Avatar Selector Button */}
+                <div className="absolute -bottom-2 -right-2">
+                  <AvatarSelector
+                    currentAvatarId={selectedAvatarId}
+                    onSelect={handleAvatarSelect}
+                    className="w-8 h-8 border border-white dark:border-gray-800 shadow-lg"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <CardTitle className="text-xl">Anonymous User</CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Your identity is always protected on TeaSpill
+                </p>
+              </div>
             </div>
-            <CardTitle className="text-xl">Anonymous User</CardTitle>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Your identity is always protected on TeaSpill
-            </p>
           </CardHeader>
         </Card>
 

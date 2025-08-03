@@ -8,6 +8,7 @@ export const posts = pgTable("posts", {
   content: text("content").notNull(),
   category: varchar("category").notNull(),
   alias: varchar("alias").notNull(),
+  avatarId: varchar("avatar_id").default("happy-face"),
   tags: text("tags").array().default([]),
   reactions: jsonb("reactions").default({
     thumbsUp: 0,
@@ -100,6 +101,7 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   category: true,
   tags: true,
   postContext: true,
+  avatarId: true,
   communitySection: true,
   postType: true,
   celebrityName: true,
@@ -112,6 +114,7 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   category: z.enum(["school", "work", "relationships", "family", "money", "hot-takes", "drama", "gossip", "story", "debate", "poll", "daily", "other"]),
   tags: z.array(z.string()).optional().default([]),
   postContext: z.string().optional().default("home"),
+  avatarId: z.string().optional(),
   communitySection: z.string().optional(),
   postType: z.enum(["standard", "poll", "debate"]).optional().default("standard"),
   celebrityName: z.string().optional(),

@@ -73,7 +73,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postContext = req.body.postContext || 'home';
       const communitySection = req.body.communitySection;
       
-      const post = await storage.createPost(validatedData, alias, sessionId);
+      // Get user's avatar from request body or session  
+      const avatarId = req.body.avatarId || req.session.avatarId || 'happy-face';
+      
+      const postData = {
+        ...validatedData,
+        avatarId
+      };
+      
+      const post = await storage.createPost(postData, alias, sessionId);
       res.json(post);
     } catch (error) {
       if (error instanceof Error) {

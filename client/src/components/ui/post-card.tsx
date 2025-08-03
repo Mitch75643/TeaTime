@@ -6,6 +6,7 @@ import { CommentsDrawer } from "./comments-drawer";
 import { PostMenu } from "./post-menu";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
+import { getAvatarById } from "@/lib/avatars";
 import type { Post } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
@@ -152,14 +153,21 @@ export function PostCard({ post }: PostCardProps) {
       <div className={cn("flex items-start justify-between", isTrending && !post.isDrama && "pt-2")}>
         <div className="flex items-center space-x-2">
           <div className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center",
+            "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden",
             post.isDrama 
               ? "bg-gradient-to-br from-orange-400 to-red-500"
               : "bg-gradient-to-br from-purple-400 to-pink-400"
           )}>
-            <span className="text-white text-xs font-bold">
-              {post.alias.charAt(0)}
-            </span>
+            {post.avatarId && post.avatarId !== 'default' ? (
+              <div 
+                className="w-full h-full"
+                dangerouslySetInnerHTML={{ __html: getAvatarById(post.avatarId)?.svg || '' }}
+              />
+            ) : (
+              <span className="text-white text-xs font-bold">
+                {post.alias.charAt(0)}
+              </span>
+            )}
           </div>
           <div>
             <p className="text-sm font-medium text-gray-900">{post.alias}</p>

@@ -67,6 +67,7 @@ export class MemStorage implements IStorage {
       ...insertPost,
       id,
       alias,
+      avatarId: insertPost.avatarId || 'happy-face',
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
       commentCount: 0,
       isDrama: insertPost.category === 'drama',
