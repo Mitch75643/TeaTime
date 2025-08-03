@@ -8,6 +8,7 @@ export interface IStorage {
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
+  deletePost(postId: string): Promise<void>;
   
   // Comments
   createComment(comment: InsertComment, alias: string): Promise<Comment>;
@@ -228,6 +229,19 @@ export class MemStorage implements IStorage {
     return Array.from(this.dramaVotes.values()).some(v => 
       v.postId === postId && v.sessionId === sessionId
     );
+  }
+
+  async deletePost(postId: string): Promise<void> {
+    this.posts.delete(postId);
+    // Also delete related comments and reactions
+    const commentsToDelete = Array.from(this.comments.values()).filter(c => c.postId === postId);
+    commentsToDelete.forEach(comment => this.comments.delete(comment.id));
+    
+    const reactionsToDelete = Array.from(this.reactions.values()).filter(r => r.postId === postId);
+    reactionsToDelete.forEach(reaction => this.reactions.delete(reaction.id));
+    
+    const votesToDelete = Array.from(this.dramaVotes.values()).filter(v => v.postId === postId);
+    votesToDelete.forEach(vote => this.dramaVotes.delete(vote.id));
   }
 }
 

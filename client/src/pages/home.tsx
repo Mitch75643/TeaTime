@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-import { FeedToggle } from "@/components/ui/feed-toggle";
+
 import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -12,17 +12,17 @@ import type { Post } from "@shared/schema";
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [feedType, setFeedType] = useState<"trending" | "new">("new");
+
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
   const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
+    queryKey: ["/api/posts", { category: activeCategory, sortBy: "new" }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (activeCategory !== "all") {
         params.append("category", activeCategory);
       }
-      params.append("sortBy", feedType);
+      params.append("sortBy", "new");
       
       const response = await fetch(`/api/posts?${params}`);
       if (!response.ok) throw new Error("Failed to fetch posts");
@@ -38,10 +38,6 @@ export default function Home() {
         <CategoryTabs
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
-        />
-        <FeedToggle
-          feedType={feedType}
-          onFeedTypeChange={setFeedType}
         />
       </div>
 

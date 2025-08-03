@@ -3,7 +3,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "./button";
 import { DramaVoting } from "./drama-voting";
 import { CommentsDrawer } from "./comments-drawer";
-import { MoreHorizontal } from "lucide-react";
+import { PostMenu } from "./post-menu";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import type { Post } from "@shared/schema";
@@ -65,12 +65,27 @@ export function PostCard({ post }: PostCardProps) {
   });
 
   const handleReaction = (type: string) => {
-    // Update local state immediately for better UX
-    const newUserReactions = { ...userReactions, [type]: !userReactions[type] };
+    // Only allow one reaction per user - clear others when selecting new one
+    const hasCurrentReaction = Object.values(userReactions).some(Boolean);
+    const isCurrentType = userReactions[type];
+    
+    let newUserReactions: Record<string, boolean>;
+    if (isCurrentType) {
+      // Remove current reaction if clicking the same type
+      newUserReactions = { ...userReactions, [type]: false };
+    } else {
+      // Clear all reactions and set new one
+      newUserReactions = Object.keys(userReactions).reduce((acc, key) => {
+        acc[key] = key === type;
+        return acc;
+      }, {} as Record<string, boolean>);
+      newUserReactions[type] = true;
+    }
+    
     setUserReactions(newUserReactions);
     localStorage.setItem(`reactions-${post.id}`, JSON.stringify(newUserReactions));
     
-    reactionMutation.mutate({ type });
+    reactionMutation.mutate({ type, postId: post.id });
   };
 
   const timeAgo = formatDistanceToNow(new Date(post.createdAt!), { addSuffix: true });
@@ -126,9 +141,7 @@ export function PostCard({ post }: PostCardProps) {
           )}>
             {categoryEmojis[post.category]} {categoryLabel}
           </span>
-          <Button variant="ghost" size="icon" className="p-1 text-gray-400 hover:text-gray-600">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          <PostMenu postId={post.id} isOwner={false} />
         </div>
       </div>
 
