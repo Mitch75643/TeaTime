@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
@@ -23,12 +23,16 @@ import {
   MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { Post } from "@shared/schema";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Get user's posts (using session ID from localStorage reactions as identifier)
   const { data: userPosts = [], isLoading } = useQuery<Post[]>({
@@ -71,6 +75,34 @@ export default function Profile() {
     a.download = 'teaspill-data.json';
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: string) => {
+      return apiRequest(`/api/posts/${postId}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      toast({
+        title: "Post deleted",
+        description: "Your post has been removed successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeletePost = (postId: string) => {
+    if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+      deletePostMutation.mutate(postId);
+    }
   };
 
   const getCategoryEmoji = (category: string) => {
@@ -166,7 +198,18 @@ export default function Profile() {
 
             {userPosts.map((post: Post) => (
               <div key={post.id} className="space-y-2">
-                <PostCard post={post} />
+                <div className="relative">
+                  <PostCard post={post} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeletePost(post.id)}
+                    disabled={deletePostMutation.isPending}
+                    className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-4">
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center">

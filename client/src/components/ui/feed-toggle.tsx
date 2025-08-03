@@ -14,28 +14,26 @@ export function FeedToggle({ feedType, onFeedTypeChange }: FeedToggleProps) {
         <Button
           variant="ghost"
           className={cn(
-            "flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md transition-all font-medium text-sm",
+            "flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md transition-all font-medium text-base",
             feedType === "new"
               ? "bg-white dark:bg-gray-600 text-purple-600 dark:text-purple-400 shadow-sm"
               : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
           )}
           onClick={() => onFeedTypeChange("new")}
         >
-          <Clock className="h-4 w-4" />
           <span>🆕 New</span>
         </Button>
         
         <Button
           variant="ghost"
           className={cn(
-            "flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md transition-all font-medium text-sm",
+            "flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md transition-all font-medium text-base",
             feedType === "trending"
               ? "bg-white dark:bg-gray-600 text-red-600 dark:text-red-400 shadow-sm"
               : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
           )}
           onClick={() => onFeedTypeChange("trending")}
         >
-          <TrendingUp className="h-4 w-4" />
           <span>🔥 Trending</span>
         </Button>
       </div>

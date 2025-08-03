@@ -65,7 +65,7 @@ export function CommunityModal({ section, children }: CommunityModalProps) {
                   {section.name}
                 </h2>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -77,6 +77,17 @@ export function CommunityModal({ section, children }: CommunityModalProps) {
                   )}
                 >
                   <Star className={cn("h-4 w-4", isFavorited && "fill-current")} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "h-8 w-8 rounded-full hover:bg-white/10 absolute top-4 right-4",
+                    section.textColor
+                  )}
+                >
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>

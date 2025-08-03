@@ -181,7 +181,7 @@ export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags =
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md mx-4">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle>
             <div className="flex items-center space-x-2">
               <span>Spill the Tea ☕</span>
               {hasDraft() && (
@@ -190,14 +190,6 @@ export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags =
                 </span>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </DialogTitle>
         </DialogHeader>
 
