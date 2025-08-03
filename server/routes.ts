@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const sessionId = req.session.id!;
       const alias = generateAlias();
-      const comment = await storage.createComment(validatedData, alias);
+      const comment = await storage.createComment(validatedData, alias, sessionId);
       
       // Create notification for post owner or parent comment owner
       try {
@@ -162,6 +162,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to create comment" });
       }
+    }
+  });
+
+  // Get user replies for a specific topic
+  app.get("/api/comments/user-replies", async (req, res) => {
+    try {
+      const { topic } = req.query;
+      const sessionId = req.session.id!;
+      
+      // Get all comments by this user
+      const userComments = await storage.getUserComments(sessionId);
+      
+      // Filter comments by topic if specified
+      let filteredComments = userComments;
+      if (topic && typeof topic === 'string') {
+        // Get posts for the topic to filter comments
+        const topicPosts = await storage.getPosts(undefined, 'new', undefined, undefined, undefined, topic);
+        const topicPostIds = topicPosts.map(post => post.id);
+        filteredComments = userComments.filter(comment => topicPostIds.includes(comment.postId));
+      }
+      
+      // Get parent post data for each comment
+      const repliesWithPosts = await Promise.all(
+        filteredComments.map(async (comment) => {
+          const parentPost = await storage.getPost(comment.postId);
+          return {
+            ...comment,
+            parentPost: parentPost ? {
+              id: parentPost.id,
+              content: parentPost.content,
+              author: parentPost.alias,
+              createdAt: parentPost.createdAt
+            } : null
+          };
+        })
+      );
+      
+      res.json(repliesWithPosts);
+    } catch (error) {
+      console.error("Failed to fetch user replies:", error);
+      res.status(500).json({ message: "Failed to fetch user replies" });
     }
   });
 
