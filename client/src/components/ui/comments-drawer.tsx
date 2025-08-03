@@ -131,14 +131,14 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
           <span className="text-sm font-medium">{commentCount}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="h-[80vh]">
-        <SheetHeader>
+      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] flex flex-col">
+        <SheetHeader className="flex-shrink-0">
           <SheetTitle>Comments ({commentCount})</SheetTitle>
         </SheetHeader>
         
-        <div className="flex flex-col h-full mt-4">
+        <div className="flex flex-col flex-1 mt-4 min-h-0">
           {/* Comments List */}
-          <ScrollArea className="flex-1 pr-4">
+          <ScrollArea className="flex-1 pr-2 -mr-2">
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
@@ -193,9 +193,9 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                       </div>
                       
                       {/* Comment Actions */}
-                      <div className="flex items-center justify-between ml-11">
+                      <div className="flex flex-col space-y-2 ml-11 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                         {/* Reactions */}
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2 flex-wrap">
                           {Object.entries(reactionEmojis).map(([type, emoji]) => {
                             const count = comment.reactions?.[type as keyof typeof comment.reactions] || 0;
                             
@@ -203,7 +203,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                               <Button
                                 key={type}
                                 variant="ghost"
-                                className="flex items-center space-x-1 text-gray-600 hover:text-red-500 transition-colors p-1 h-auto"
+                                className="flex items-center space-x-1 text-gray-600 hover:text-red-500 transition-colors p-1 h-auto min-w-0"
                                 onClick={() => handleReaction(type, comment.id)}
                                 disabled={reactionMutation.isPending}
                               >
@@ -218,7 +218,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-gray-500 hover:text-gray-700 p-1 h-auto"
+                          className="text-gray-500 hover:text-gray-700 p-1 h-auto flex-shrink-0 self-start sm:self-center"
                           onClick={() => handleReply(comment.id)}
                         >
                           <Reply className="h-3 w-3 mr-1" />
@@ -228,25 +228,25 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                       {/* Reply Input (if replying to this comment) */}
                       {replyingTo === comment.id && (
-                        <div className="ml-11 mt-3 space-y-2">
+                        <div className="ml-4 sm:ml-11 mt-3 space-y-3">
                           <Textarea
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
                             placeholder={`Reply to ${comment.alias}...`}
-                            className="resize-none text-sm bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-500"
+                            className="resize-none text-sm bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-500 w-full"
                             maxLength={300}
                             rows={2}
                           />
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-500">
+                          <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                            <span className="text-xs text-gray-500 order-2 sm:order-1">
                               {replyText.length}/300
                             </span>
-                            <div className="flex space-x-2">
+                            <div className="flex space-x-2 order-1 sm:order-2">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={cancelReply}
-                                className="text-xs"
+                                className="text-xs flex-1 sm:flex-none"
                               >
                                 Cancel
                               </Button>
@@ -254,7 +254,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                                 onClick={handleSubmit}
                                 disabled={createCommentMutation.isPending || !replyText.trim()}
                                 className={cn(
-                                  "text-white text-xs",
+                                  "text-white text-xs flex-1 sm:flex-none",
                                   isDrama ? "gradient-drama" : "gradient-primary"
                                 )}
                                 size="sm"
@@ -269,7 +269,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                     {/* Replies */}
                     {(comment as any).replies && (comment as any).replies.length > 0 && (
-                      <div className="ml-8 space-y-2">
+                      <div className="ml-4 sm:ml-8 space-y-2">
                         {(comment as any).replies.map((reply: any) => (
                           <div key={reply.id} className={cn(
                             "rounded-lg p-3 space-y-2",
@@ -300,7 +300,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                             </div>
                             
                             {/* Reply Reactions */}
-                            <div className="flex items-center space-x-3 ml-9">
+                            <div className="flex items-center space-x-2 ml-6 sm:ml-9 flex-wrap">
                               {Object.entries(reactionEmojis).map(([type, emoji]) => {
                                 const count = reply.reactions?.[type as keyof typeof reply.reactions] || 0;
                                 
@@ -330,24 +330,24 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
           {/* Comment Input */}
           {!replyingTo && (
-            <div className="border-t pt-4 space-y-3">
+            <div className="flex-shrink-0 border-t pt-4 pb-2 space-y-3 bg-white">
               <Textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Add a comment..."
-                className="resize-none"
+                className="resize-none w-full"
                 maxLength={300}
                 rows={3}
               />
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-gray-500">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                <span className="text-xs text-gray-500 order-2 sm:order-1">
                   {comment.length}/300
                 </span>
                 <Button
                   onClick={handleSubmit}
                   disabled={createCommentMutation.isPending || !comment.trim()}
                   className={cn(
-                    "text-white",
+                    "text-white w-full sm:w-auto order-1 sm:order-2",
                     isDrama ? "gradient-drama" : "gradient-primary"
                   )}
                   size="sm"
