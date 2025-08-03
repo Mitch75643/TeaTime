@@ -122,6 +122,25 @@ export default function Home() {
 
         <div className="space-y-6">
 
+        {/* Category filter indicator */}
+        {activeCategory !== "all" && (
+          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-purple-700 dark:text-purple-300">
+                Showing posts in: <span className="font-semibold">{categories.find(c => c.id === activeCategory)?.label}</span>
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveCategory("all")}
+                className="text-purple-600 hover:text-purple-800 dark:text-purple-400"
+              >
+                Clear filter
+              </Button>
+            </div>
+          </div>
+        )}
+
         {feedType === "new" && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -164,10 +183,10 @@ export default function Home() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🤷‍♀️</div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {activeCategory === "all" ? "No posts yet" : `No posts in ${categories.find(c => c.id === activeCategory)?.label}`}
+              {activeCategory === "all" ? "No posts yet" : `No posts in ${categories.find(c => c.id === activeCategory)?.label} yet`}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {activeCategory === "all" ? "Be the first to spill some tea!" : "Be the first to post in this category!"}
+              {activeCategory === "all" ? "Be the first to spill some tea!" : "Be the first to spill the tea in this category!"}
             </p>
             <Button 
               onClick={() => setIsPostModalOpen(true)}
