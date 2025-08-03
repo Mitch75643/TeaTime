@@ -2,7 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
-import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema } from "@shared/schema";
+import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema } from "@shared/schema";
 
 declare module 'express-session' {
   interface SessionData {
@@ -197,6 +197,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ hasVoted });
     } catch (error) {
       res.status(500).json({ message: "Failed to check vote status" });
+    }
+  });
+
+  // Report post
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const reportData = reportSchema.parse(req.body);
+      const reporterSessionId = req.session.id;
+      
+      const result = await storage.reportPost(reportData.postId, reporterSessionId, reportData.reason);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: result.postRemoved ? "Post has been removed due to multiple reports" : "Report submitted successfully",
+        postRemoved: result.postRemoved,
+        userFlagged: result.userFlagged
+      });
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      res.status(500).json({ error: "Failed to submit report" });
     }
   });
 

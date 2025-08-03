@@ -17,6 +17,27 @@ export const posts = pgTable("posts", {
   }),
   commentCount: integer("comment_count").default(0),
   isDrama: boolean("is_drama").default(false),
+  sessionId: varchar("session_id"),
+  postContext: varchar("post_context").default("home"),
+  reportCount: integer("report_count").default(0),
+  isRemoved: boolean("is_removed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userFlags = pgTable("user_flags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull(),
+  flagCount: integer("flag_count").default(0),
+  isBanned: boolean("is_banned").default(false),
+  lastFlaggedAt: timestamp("last_flagged_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const reports = pgTable("reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").notNull().references(() => posts.id),
+  reporterSessionId: varchar("reporter_session_id").notNull(),
+  reason: varchar("reason").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -80,6 +101,11 @@ export const dramaVoteSchema = z.object({
   voteType: z.enum(["wrong", "valid", "both_wild", "iconic"]),
 });
 
+export const reportSchema = z.object({
+  postId: z.string(),
+  reason: z.enum(["spam", "harassment", "inappropriate", "misinformation", "other"]),
+});
+
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 
   sessionId?: string;
@@ -90,5 +116,8 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof comments.$inferSelect;
 export type Reaction = typeof reactions.$inferSelect;
 export type DramaVote = typeof dramaVotes.$inferSelect;
+export type UserFlag = typeof userFlags.$inferSelect;
+export type Report = typeof reports.$inferSelect;
 export type ReactionInput = z.infer<typeof reactionSchema>;
 export type DramaVoteInput = z.infer<typeof dramaVoteSchema>;
+export type ReportInput = z.infer<typeof reportSchema>;

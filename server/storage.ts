@@ -24,6 +24,11 @@ export interface IStorage {
   addDramaVote(vote: DramaVoteInput, sessionId: string): Promise<void>;
   getDramaVotes(postId: string): Promise<Record<string, number>>;
   hasUserVoted(postId: string, sessionId: string): Promise<boolean>;
+  
+  // Reports and Moderation
+  reportPost(postId: string, reporterSessionId: string, reason: string): Promise<{ success: boolean; error?: string; postRemoved?: boolean; userFlagged?: boolean }>;
+  getUserFlags(sessionId: string): Promise<UserFlag | undefined>;
+  flagUser(sessionId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -31,12 +36,16 @@ export class MemStorage implements IStorage {
   private comments: Map<string, Comment>;
   private reactions: Map<string, Reaction>;
   private dramaVotes: Map<string, DramaVote>;
+  private reports: Map<string, Report>;
+  private userFlags: Map<string, UserFlag>;
 
   constructor() {
     this.posts = new Map();
     this.comments = new Map();
     this.reactions = new Map();
     this.dramaVotes = new Map();
+    this.reports = new Map();
+    this.userFlags = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post> {
@@ -52,6 +61,8 @@ export class MemStorage implements IStorage {
       sessionId: sessionId || 'anonymous',
       postContext: postContext || 'home',
       communitySection: communitySection || null,
+      reportCount: 0,
+      isRemoved: false,
     };
     this.posts.set(id, post);
     return post;
@@ -59,6 +70,9 @@ export class MemStorage implements IStorage {
 
   async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<Post[]> {
     let posts = Array.from(this.posts.values());
+    
+    // Filter out removed posts
+    posts = posts.filter(post => !post.isRemoved);
     
     // Filter by user session if requested
     if (userSessionId) {
@@ -276,6 +290,89 @@ export class MemStorage implements IStorage {
     
     const votesToDelete = Array.from(this.dramaVotes.values()).filter(v => v.postId === postId);
     votesToDelete.forEach(vote => this.dramaVotes.delete(vote.id));
+  }
+
+  async reportPost(postId: string, reporterSessionId: string, reason: string): Promise<{ success: boolean; error?: string; postRemoved?: boolean; userFlagged?: boolean }> {
+    const post = this.posts.get(postId);
+    if (!post) {
+      return { success: false, error: "Post not found" };
+    }
+
+    // Check if user already reported this post
+    const existingReport = Array.from(this.reports.values()).find(r => 
+      r.postId === postId && r.reporterSessionId === reporterSessionId
+    );
+    if (existingReport) {
+      return { success: false, error: "You have already reported this post" };
+    }
+
+    // Create new report
+    const reportId = randomUUID();
+    const report: Report = {
+      id: reportId,
+      postId,
+      reporterSessionId,
+      reason,
+      createdAt: new Date(),
+    };
+    this.reports.set(reportId, report);
+
+    // Increment report count on post
+    const updatedPost = { ...post, reportCount: (post.reportCount || 0) + 1 };
+    this.posts.set(postId, updatedPost);
+
+    // Auto-moderation: Remove post if it gets 3+ reports
+    let postRemoved = false;
+    let userFlagged = false;
+    
+    if (updatedPost.reportCount >= 3) {
+      // Mark post as removed
+      this.posts.set(postId, { ...updatedPost, isRemoved: true });
+      postRemoved = true;
+
+      // Flag the post author
+      if (post.sessionId) {
+        await this.flagUser(post.sessionId);
+        userFlagged = true;
+      }
+    }
+
+    return { 
+      success: true, 
+      postRemoved,
+      userFlagged
+    };
+  }
+
+  async getUserFlags(sessionId: string): Promise<UserFlag | undefined> {
+    return Array.from(this.userFlags.values()).find(f => f.sessionId === sessionId);
+  }
+
+  async flagUser(sessionId: string): Promise<void> {
+    const existingFlag = await this.getUserFlags(sessionId);
+    
+    if (existingFlag) {
+      // Increment flag count
+      const updatedFlag = {
+        ...existingFlag,
+        flagCount: existingFlag.flagCount + 1,
+        lastFlaggedAt: new Date(),
+        isBanned: existingFlag.flagCount + 1 >= 3 // Ban after 3 flags
+      };
+      this.userFlags.set(existingFlag.id, updatedFlag);
+    } else {
+      // Create new flag record
+      const flagId = randomUUID();
+      const newFlag: UserFlag = {
+        id: flagId,
+        sessionId,
+        flagCount: 1,
+        isBanned: false,
+        lastFlaggedAt: new Date(),
+        createdAt: new Date(),
+      };
+      this.userFlags.set(flagId, newFlag);
+    }
   }
 }
 

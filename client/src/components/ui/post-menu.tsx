@@ -51,20 +51,33 @@ export function PostMenu({ postId, isOwner = false }: PostMenuProps) {
     },
   });
 
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}#post-${postId}`;
-    navigator.clipboard.writeText(url);
-    toast({
-      title: "Link copied",
-      description: "Post link has been copied to your clipboard.",
-    });
-  };
+  const reportMutation = useMutation({
+    mutationFn: async (reason: string) => {
+      return apiRequest("POST", "/api/reports", {
+        postId,
+        reason,
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      toast({
+        title: data.postRemoved ? "Post removed" : "Report submitted",
+        description: data.postRemoved 
+          ? "The post has been removed due to multiple reports. The user has been flagged."
+          : "Thank you for helping keep our community safe.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit report. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
-  const handleReport = () => {
-    toast({
-      title: "Report submitted",
-      description: "Thank you for helping keep our community safe.",
-    });
+  const handleReport = (reason: string) => {
+    reportMutation.mutate(reason);
   };
 
   return (
@@ -80,10 +93,6 @@ export function PostMenu({ postId, isOwner = false }: PostMenuProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={handleCopyLink}>
-            <Copy className="h-4 w-4 mr-2" />
-            Copy link
-          </DropdownMenuItem>
           {isOwner ? (
             <DropdownMenuItem 
               onClick={() => setShowDeleteDialog(true)}
@@ -93,10 +102,24 @@ export function PostMenu({ postId, isOwner = false }: PostMenuProps) {
               Delete post
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={handleReport}>
-              <Flag className="h-4 w-4 mr-2" />
-              Report post
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem onClick={() => handleReport("spam")}>
+                <Flag className="h-4 w-4 mr-2" />
+                Report as Spam
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleReport("harassment")}>
+                <Flag className="h-4 w-4 mr-2" />
+                Report Harassment
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleReport("inappropriate")}>
+                <Flag className="h-4 w-4 mr-2" />
+                Report Inappropriate
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleReport("other")}>
+                <Flag className="h-4 w-4 mr-2" />
+                Report Other Issue
+              </DropdownMenuItem>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
