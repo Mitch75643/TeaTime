@@ -66,7 +66,7 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
           <Button
             onClick={keepUsername}
             disabled={isCurrentUsername}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
           >
             <Check className="h-4 w-4 mr-2" />
             {isCurrentUsername ? "Current" : "Keep This"}
