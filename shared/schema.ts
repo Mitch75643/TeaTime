@@ -81,7 +81,11 @@ export const dramaVoteSchema = z.object({
 });
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
-export type Post = typeof posts.$inferSelect & { sessionId?: string };
+export type Post = typeof posts.$inferSelect & { 
+  sessionId?: string;
+  postContext?: string;
+  communitySection?: string;
+};
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof comments.$inferSelect;
 export type Reaction = typeof reactions.$inferSelect;

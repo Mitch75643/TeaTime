@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { PostCard } from "@/components/ui/post-card";
@@ -34,6 +34,38 @@ function getDateString() {
   });
 }
 
+function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeDiff = tomorrow.getTime() - now.getTime();
+      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      
+      setTimeLeft(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+      <Calendar className="h-4 w-4" />
+      <span>⏳ New prompt in: {timeLeft}</span>
+    </div>
+  );
+}
+
 export default function DailySpill() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const todayPrompt = getDailyPrompt();
@@ -43,15 +75,9 @@ export default function DailySpill() {
   const { data: posts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", { tags: "#dailyspill" }],
     queryFn: async () => {
-      const response = await fetch("/api/posts?sortBy=new");
+      const response = await fetch("/api/posts?sortBy=new&postContext=daily");
       if (!response.ok) throw new Error("Failed to fetch posts");
-      const allPosts = await response.json();
-      // Filter for posts with #dailyspill tag and from today
-      const today = new Date().toDateString();
-      return allPosts.filter((post: Post) => 
-        post.tags?.includes("#dailyspill") && 
-        new Date(post.createdAt!).toDateString() === today
-      );
+      return response.json();
     },
   });
 
@@ -145,6 +171,7 @@ export default function DailySpill() {
         defaultCategory="daily"
         defaultTags={["#dailyspill"]}
         promptText={todayPrompt}
+        postContext={{ page: 'daily' }}
       />
       
       <BottomNav />

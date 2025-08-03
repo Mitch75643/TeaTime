@@ -169,6 +169,8 @@ export function PostModal({
       content: content.trim(),
       category: category as any,
       tags: allTags,
+      postContext: postContext.page,
+      communitySection: postContext.section,
     });
   };
 

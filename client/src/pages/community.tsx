@@ -169,7 +169,7 @@ export default function Community() {
   const { data: posts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", "community"],
     queryFn: async () => {
-      const response = await fetch("/api/posts?sortBy=new");
+      const response = await fetch("/api/posts?sortBy=new&postContext=community");
       if (!response.ok) throw new Error("Failed to fetch posts");
       return response.json();
     },

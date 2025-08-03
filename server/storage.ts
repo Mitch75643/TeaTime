@@ -3,8 +3,8 @@ import { randomUUID } from "crypto";
 
 export interface IStorage {
   // Posts
-  createPost(post: InsertPost, alias: string, sessionId?: string): Promise<Post>;
-  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string): Promise<Post[]>;
+  createPost(post: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post>;
+  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<Post[]>;
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
@@ -39,7 +39,7 @@ export class MemStorage implements IStorage {
     this.dramaVotes = new Map();
   }
 
-  async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
+  async createPost(insertPost: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post> {
     const id = randomUUID();
     const post: Post = {
       ...insertPost,
@@ -50,13 +50,30 @@ export class MemStorage implements IStorage {
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
+      postContext: postContext || 'home',
+      communitySection: communitySection || null,
     };
     this.posts.set(id, post);
     return post;
   }
 
-  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string): Promise<Post[]> {
+  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<Post[]> {
     let posts = Array.from(this.posts.values());
+    
+    // Filter by user session if requested
+    if (userSessionId) {
+      posts = posts.filter(post => post.sessionId === userSessionId);
+    }
+    
+    // Filter by post context (home, daily, community)
+    if (postContext) {
+      posts = posts.filter(post => post.postContext === postContext);
+    }
+    
+    // Filter by community section
+    if (section) {
+      posts = posts.filter(post => post.communitySection === section);
+    }
     
     if (category && category !== 'all') {
       posts = posts.filter(post => post.category === category);

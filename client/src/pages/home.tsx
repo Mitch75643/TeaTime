@@ -28,6 +28,8 @@ export default function Home() {
       }
       params.append("sortBy", feedType);
       
+      params.append("postContext", "home");
+      
       const response = await fetch(`/api/posts?${params}`);
       if (!response.ok) throw new Error("Failed to fetch posts");
       return response.json();
@@ -135,6 +137,7 @@ export default function Home() {
       <PostModal
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
+        postContext={{ page: 'home' }}
       />
     </div>
   );

@@ -34,12 +34,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get posts
   app.get("/api/posts", async (req, res) => {
     try {
-      const category = req.query.category as string;
-      const sortBy = req.query.sortBy as 'trending' | 'new' || 'new';
-      const tags = req.query.tags as string;
-      const posts = await storage.getPosts(category, sortBy, tags);
+      const { category, sortBy = 'new', tags, userOnly, postContext, section } = req.query;
+      const sessionId = req.session.id!;
+      
+      const posts = await storage.getPosts(
+        category as string,
+        sortBy as 'trending' | 'new',
+        tags as string,
+        userOnly === 'true' ? sessionId : undefined,
+        postContext as string,
+        section as string
+      );
       res.json(posts);
     } catch (error) {
+      console.error("Failed to fetch posts:", error);
       res.status(500).json({ message: "Failed to fetch posts" });
     }
   });
@@ -57,7 +65,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const alias = generateAlias();
       const sessionId = req.session.id!;
-      const post = await storage.createPost(validatedData, alias, sessionId);
+      const postContext = req.body.postContext || 'home';
+      const communitySection = req.body.communitySection;
+      
+      const post = await storage.createPost(validatedData, alias, sessionId, postContext, communitySection);
       res.json(post);
     } catch (error) {
       if (error instanceof Error) {
