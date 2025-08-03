@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { getAvatarById } from "@/lib/avatars";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
+import { useUserAlias } from "@/hooks/use-user-alias";
 import type { Post } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
@@ -47,6 +48,7 @@ export function PostCard({ post }: PostCardProps) {
   const [sessionId, setSessionId] = useState<string>('');
   const queryClient = useQueryClient();
   const { userAvatarId } = useUserAvatar();
+  const { userAlias } = useUserAlias();
 
   // Get current session ID
   useEffect(() => {
@@ -186,7 +188,9 @@ export function PostCard({ post }: PostCardProps) {
             )}
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900">{post.alias}</p>
+            <p className="text-sm font-medium text-gray-900">
+              {sessionId && post.sessionId === sessionId ? userAlias : post.alias}
+            </p>
             <p className="text-xs text-gray-500">{timeAgo}</p>
           </div>
         </div>

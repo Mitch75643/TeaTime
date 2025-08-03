@@ -73,3 +73,12 @@ The architecture prioritizes anonymous user interaction, real-time-feeling updat
 - **Characters** (👽): Meme Energy, Alien Tea, Robot Gossip, Unicorn Dreams
 
 All avatars maintain user anonymity while allowing personality expression through gossip-themed, copyright-free SVG designs.
+
+### Random Fun Alias System (January 2025)
+- **Auto-Generated Aliases**: Implemented comprehensive random alias generator with gossip-themed names like "TiredIntern42", "SpillQueen89", "💅DramaDiva13"
+- **Alias Categories**: Drama, Chill, Funny, Mysterious, Emotional themes with personality-based combinations
+- **Format Variations**: Emoji-style (e.g. 💅DramaDiva13), Combined words + numbers (e.g. TeaSpiller99), Personality-based (e.g. PettyPrince, ChaoticNeutral)
+- **Alias Persistence**: Uses localStorage with custom event system for real-time updates across all app components
+- **Alias Refresh**: Users can generate new aliases anytime through profile settings with interactive AliasSelector component
+- **Global Integration**: User aliases appear on posts, comments, profile page, and all user interactions, replacing "Anonymous User"
+- **Session Sync**: Alias system integrates with session management to show user's current alias for their own content while preserving stored aliases for others

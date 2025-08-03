@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getAvatarById } from "@/lib/avatars";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
+import { useUserAlias } from "@/hooks/use-user-alias";
 import type { Comment, InsertComment } from "@shared/schema";
 
 interface CommentsDrawerProps {
@@ -31,9 +32,19 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   const [isOpen, setIsOpen] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [sessionId, setSessionId] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userAvatarId } = useUserAvatar();
+  const { userAlias } = useUserAlias();
+
+  // Get current session ID
+  useEffect(() => {
+    fetch('/api/session')
+      .then(res => res.json())
+      .then(data => setSessionId(data.sessionId))
+      .catch(() => setSessionId(''));
+  }, []);
 
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
     queryKey: ["/api/posts", postId, "comments"],
@@ -49,7 +60,8 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
     mutationFn: async (data: InsertComment) => {
       return apiRequest("POST", `/api/posts/${postId}/comments`, {
         ...data,
-        avatarId: userAvatarId
+        avatarId: userAvatarId,
+        alias: userAlias
       });
     },
     onSuccess: () => {
@@ -196,7 +208,9 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
-                            <p className="text-sm font-medium text-gray-900">{comment.alias}</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              {comment.sessionId === sessionId ? userAlias : (comment.alias || "Anonymous")}
+                            </p>
                             <span className="text-xs text-gray-500">
                               {formatDistanceToNow(new Date(comment.createdAt!), { addSuffix: true })}
                             </span>
@@ -303,7 +317,9 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2">
-                                  <p className="text-sm font-medium text-gray-900">{reply.alias}</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {reply.sessionId === sessionId ? userAlias : (reply.alias || "Anonymous")}
+                                  </p>
                                   <span className="text-xs text-gray-500">
                                     {formatDistanceToNow(new Date(reply.createdAt!), { addSuffix: true })}
                                   </span>

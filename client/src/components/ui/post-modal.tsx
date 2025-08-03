@@ -9,7 +9,9 @@ import { Label } from "./label";
 import { X, Hash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { generateAlias } from "@/lib/aliases";
+import { useUserAvatar } from "@/hooks/use-user-avatar";
+import { useUserAlias } from "@/hooks/use-user-alias";
+import { getAvatarById } from "@/lib/avatars";
 import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/draft-storage";
 import type { InsertPost } from "@shared/schema";
 
@@ -58,19 +60,15 @@ export function PostModal({
   const [tagsInput, setTagsInput] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
-  const [currentAlias, setCurrentAlias] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const tagInputRef = useRef<HTMLInputElement>(null);
+  const { userAvatarId } = useUserAvatar();
+  const { userAlias } = useUserAlias();
 
-  // Generate a new alias and load draft when modal opens
+  // Load draft and set defaults when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Only generate new alias if we don't have one
-      if (!currentAlias) {
-        setCurrentAlias(generateAlias());
-      }
-      
       // Set default values if provided
       if (defaultCategory) {
         setCategory(defaultCategory);
@@ -88,11 +86,8 @@ export function PostModal({
           setSelectedTags(draft.tags);
         }
       }
-    } else {
-      // Reset alias when modal closes
-      setCurrentAlias("");
     }
-  }, [isOpen, defaultCategory, defaultTags, currentAlias]);
+  }, [isOpen, defaultCategory, defaultTags]);
 
   // Auto-save draft as user types
   useEffect(() => {
@@ -111,7 +106,11 @@ export function PostModal({
 
   const createPostMutation = useMutation({
     mutationFn: async (data: InsertPost & { postContext?: string; communitySection?: string }) => {
-      return apiRequest("POST", "/api/posts", data);
+      return apiRequest("POST", "/api/posts", {
+        ...data,
+        alias: userAlias,
+        avatarId: userAvatarId
+      });
     },
     onSuccess: () => {
       // Invalidate all post queries to ensure posts appear everywhere they should
@@ -241,7 +240,7 @@ export function PostModal({
               maxLength={500}
             />
             <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
-              <span>Your alias: <span className="font-medium text-purple-600 dark:text-purple-400">{currentAlias}</span></span>
+              <span>Your alias: <span className="font-medium text-purple-600 dark:text-purple-400">{userAlias}</span></span>
               <span className={content.length > 450 ? "text-red-500" : ""}>{content.length}/500</span>
             </div>
           </div>

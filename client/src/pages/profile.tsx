@@ -28,6 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { getAvatarById } from "@/lib/avatars";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
+import { useUserAlias } from "@/hooks/use-user-alias";
+import { AliasSelector } from "@/components/ui/alias-selector";
 import type { Post } from "@shared/schema";
 
 export default function Profile() {
@@ -35,6 +37,7 @@ export default function Profile() {
   const [notifications, setNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
   const { userAvatarId, updateAvatar } = useUserAvatar();
+  const { userAlias, fullAlias, generateNewAlias } = useUserAlias();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -154,9 +157,9 @@ export default function Profile() {
               </div>
               
               <div>
-                <CardTitle className="text-xl">Anonymous User</CardTitle>
+                <CardTitle className="text-xl">{userAlias}</CardTitle>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Your identity is always protected on TeaSpill
+                  Your anonymous TeaSpill identity
                 </p>
               </div>
             </div>
@@ -255,7 +258,28 @@ export default function Profile() {
 
         {/* Settings Tab */}
         {activeTab === "settings" && (
-          <div className="space-y-6">{/* Rest of settings content */}
+          <div className="space-y-6">
+            {/* Alias Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <User className="h-5 w-5 mr-2" />
+                  Alias Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AliasSelector
+                  currentAlias={fullAlias}
+                  onSelect={(newAlias) => {
+                    generateNewAlias();
+                    toast({
+                      title: "Alias updated!",
+                      description: `You're now known as ${newAlias.alias}`,
+                    });
+                  }}
+                />
+              </CardContent>
+            </Card>
 
         {/* Theme Settings */}
         <Card>
