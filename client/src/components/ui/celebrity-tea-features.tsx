@@ -56,9 +56,9 @@ export function CelebrityTeaFeatures({ onSpillAbout, onCreatePost }: CelebrityTe
             Based on recent posts & reactions
           </p>
         </CardHeader>
-        <CardContent className="p-3 max-h-48 overflow-y-auto">
+        <CardContent className="p-3">
           <div className="space-y-2">
-            {trendingCelebs.map((celeb, index) => (
+            {trendingCelebs.slice(0, 5).map((celeb, index) => (
               <div
                 key={celeb.name}
                 className={cn(
