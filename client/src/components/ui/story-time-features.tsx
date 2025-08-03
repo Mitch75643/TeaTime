@@ -7,11 +7,11 @@ import { BookOpen, Sparkles, Heart, Skull, Laugh, Frown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const storyCategories = [
-  { id: "horror", name: "Horror", emoji: "👻", icon: Skull, color: "text-red-600" },
-  { id: "funny", name: "Funny", emoji: "😂", icon: Laugh, color: "text-yellow-600" },
-  { id: "cringe", name: "Cringe", emoji: "😬", icon: Frown, color: "text-orange-600" },
-  { id: "sad", name: "Sad", emoji: "😢", icon: Heart, color: "text-blue-600" },
-  { id: "feel-good", name: "Feel-Good", emoji: "✨", icon: Sparkles, color: "text-green-600" }
+  { id: "horror", name: "Horror", emoji: "😱" },
+  { id: "funny", name: "Funny", emoji: "😂" },
+  { id: "weird", name: "Weird", emoji: "🤨" },
+  { id: "romantic", name: "Romantic", emoji: "💘" },
+  { id: "embarrassing", name: "Embarrassing", emoji: "😳" }
 ];
 
 const storyPrompts = [
@@ -54,19 +54,6 @@ export function StoryTimeFeatures({
 
   return (
     <div className="space-y-6">
-      {/* Create Post Button */}
-      <div className="text-center">
-        <Button
-          onClick={onCreatePost}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white w-full"
-        >
-          + Create Post
-        </Button>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          🧠 Got a wild, weird, or funny story? We wanna hear it.
-        </p>
-      </div>
-
       {/* Category Filters */}
       <Card className="border-blue-200 dark:border-blue-800">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
@@ -76,22 +63,22 @@ export function StoryTimeFeatures({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+          <div className="flex gap-2 overflow-x-auto">
             <Button
               variant={selectedCategory === "all" ? "default" : "outline"}
               onClick={() => onCategoryChange?.("all")}
-              className="justify-center h-12 w-12"
+              className="whitespace-nowrap flex items-center gap-2 h-10 px-4"
             >
-              📚
+              🔄 All
             </Button>
             {storyCategories.map((category) => (
               <Button
                 key={category.id}
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 onClick={() => onCategoryChange?.(category.id)}
-                className="justify-center h-12 w-12"
+                className="whitespace-nowrap flex items-center gap-2 h-10 px-4"
               >
-                {category.emoji}
+                {category.emoji} {category.name}
               </Button>
             ))}
           </div>
