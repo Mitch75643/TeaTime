@@ -280,48 +280,6 @@ export default function Profile() {
                   >
                     <PostCard post={post} />
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-4">
-                    <div className="flex items-center space-x-4">
-                      <span className="flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {new Date(post.createdAt!).toLocaleDateString()}
-                      </span>
-                      <span className="capitalize">
-                        {post.category === 'drama' ? '🎭 Am I in the Wrong?' : `${getCategoryEmoji(post.category)} ${post.category}`}
-                      </span>
-                      {/* Source label */}
-                      <span className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs font-medium">
-                        {typeof sourceInfo.icon === 'string' ? (
-                          <span className="text-xs">{sourceInfo.icon}</span>
-                        ) : (
-                          sourceInfo.icon
-                        )}
-                        <span>{sourceInfo.label}</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewInContext(post);
-                        }}
-                        className="h-6 px-2 text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400"
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        View in Context
-                      </Button>
-                      <span className="flex items-center">
-                        <Heart className="h-3 w-3 mr-1" />
-                        {Object.values(post.reactions || {}).reduce((sum, count) => sum + count, 0)}
-                      </span>
-                      <span className="flex items-center">
-                        <MessageCircle className="h-3 w-3 mr-1" />
-                        {post.commentCount || 0}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               );
             })}

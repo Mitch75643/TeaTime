@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/ui/post-card";
@@ -11,7 +11,7 @@ import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -91,7 +91,7 @@ export default function TopicFeed() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("new");
   const [storyCategory, setStoryCategory] = useState("all");
-
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   
   // Get topic ID from URL params
@@ -189,6 +189,14 @@ export default function TopicFeed() {
     setLocation('/community');
   };
 
+  const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+    setIsRefreshing(false);
+  };
+
   const sortOptions: { value: SortOption; label: string }[] = [
     { value: "new", label: "New" },
     { value: "trending", label: "Trending" },
@@ -233,8 +241,22 @@ export default function TopicFeed() {
             <p className={cn("text-sm opacity-90 mb-4", topic.textColor)}>
               {topic.description}
             </p>
-            <div className={cn("text-sm opacity-75", topic.textColor)}>
-              {topic.count} posts • {posts.length} showing
+            <div className="flex items-center justify-center space-x-4">
+              <div className={cn("text-sm opacity-75", topic.textColor)}>
+                {topic.count} posts • {posts.length} showing
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className={cn(
+                  "text-xs p-2 rounded-full border border-white/20 hover:bg-white/10",
+                  topic.textColor
+                )}
+              >
+                <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
           </div>
         </div>

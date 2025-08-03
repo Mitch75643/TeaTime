@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Coffee, Plus, Calendar, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Trophy } from "lucide-react";
+import { Coffee, Plus, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -292,7 +292,6 @@ export default function DailySpill() {
           )}
           <CardHeader className="pb-3">
             <div className="flex items-center space-x-2 mb-2">
-              <Calendar className="h-4 w-4" />
               <CountdownTimer />
             </div>
             <CardTitle className="text-xl font-bold flex items-center space-x-2">

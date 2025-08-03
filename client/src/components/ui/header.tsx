@@ -18,7 +18,9 @@ export function Header() {
     <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Flame className="h-6 w-6" />
+          <div className="h-6 w-6 text-orange-300">
+            🔥
+          </div>
           <h1 className="text-xl font-bold">TeaSpill</h1>
         </div>
         <div className="flex items-center space-x-3">

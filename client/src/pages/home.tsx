@@ -117,7 +117,7 @@ export default function Home() {
         {feedType === "new" && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              New Posts
+              Recent Community Posts
               {posts.length !== allPosts.length && (
                 <span className="ml-2 text-sm text-gray-500">
                   ({posts.length} new)
@@ -129,9 +129,10 @@ export default function Home() {
               size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="flex items-center space-x-1"
+              className="flex items-center space-x-1 text-purple-600 hover:text-purple-800 dark:text-purple-400"
             >
               <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-xs">Refresh</span>
             </Button>
           </div>
         )}

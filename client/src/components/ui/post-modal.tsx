@@ -199,13 +199,15 @@ export function PostModal({
       <DialogContent className="w-[95vw] max-w-md mx-auto my-8 max-h-[85vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle>
-            <div className="flex items-center space-x-2">
-              <span>Spill the Tea ☕</span>
-              {hasDraft() && (
-                <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded-full">
-                  Draft saved
-                </span>
-              )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span>Spill the Tea ☕</span>
+                {hasDraft() && (
+                  <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded-full">
+                    Draft saved
+                  </span>
+                )}
+              </div>
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -238,6 +240,7 @@ export function PostModal({
               placeholder={promptText ? `Responding to: "${promptText}"` : "Share your thoughts anonymously..."}
               className="h-24 resize-none"
               maxLength={500}
+              autoFocus
             />
             <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
               <span>Your username: <span className="font-medium text-purple-600 dark:text-purple-400">{userAlias}</span></span>
