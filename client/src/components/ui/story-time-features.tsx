@@ -63,11 +63,11 @@ export function StoryTimeFeatures({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="grid grid-cols-3 gap-3">
             <Button
               variant={selectedCategory === "all" ? "default" : "outline"}
               onClick={() => onCategoryChange?.("all")}
-              className="whitespace-nowrap flex items-center gap-2 h-10 px-4"
+              className="flex items-center gap-2 h-12 px-4"
             >
               🔄 All
             </Button>
@@ -76,7 +76,7 @@ export function StoryTimeFeatures({
                 key={category.id}
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 onClick={() => onCategoryChange?.(category.id)}
-                className="whitespace-nowrap flex items-center gap-2 h-10 px-4"
+                className="flex items-center gap-2 h-12 px-4"
               >
                 {category.emoji} {category.name}
               </Button>
