@@ -70,11 +70,13 @@ The architecture prioritizes anonymous user interaction, real-time-feeling updat
 - **WebAuthn Integration**: Full biometric authentication using Web Authentication API for Face ID, Touch ID, and fingerprint support
 - **Privacy-First Design**: Biometric data never leaves user's device - only encrypted tokens stored locally for secure unlock
 - **Cross-Device Sync**: Optional account upgrade system with passphrase or email for accessing anonymous data across devices
-- **Authentication Flow**: Users can stay completely anonymous or upgrade for sync with biometric convenience login
+- **Initial Authentication Flow**: First-time users see welcome screen with choice to "Stay Anonymous" or "Enable Cross-Device Sync"
+- **Authentication Options**: Users can choose biometric login, passphrase, email sync, or remain completely anonymous
 - **Security Features**: Device-specific credential storage, automatic fallback to manual login, and encrypted token management
 - **UI Components**: Comprehensive setup flows for sync configuration and biometric enrollment with clear privacy explanations
-- **Settings Integration**: Dedicated settings page accessible via header for managing authentication preferences and biometric options
+- **Profile Integration**: All authentication settings accessible through profile page settings tab (no separate settings page)
 - **Anonymous Preservation**: All features maintain complete user anonymity with no personal data collection or tracking
+- **Return User Experience**: Existing users bypass welcome screen and continue with their chosen authentication method
 
 ### Avatar Categories
 - **Moods** (😊): Happy Vibes, Wink Queen, Sassy Energy, Sleepy Mood, Tea Shocked

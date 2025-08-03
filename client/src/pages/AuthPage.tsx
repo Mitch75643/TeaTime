@@ -16,6 +16,7 @@ export function AuthPage() {
   };
 
   const handleStayAnonymous = () => {
+    localStorage.setItem('teaspill_auth_seen', 'true');
     setLocation('/');
   };
 

@@ -373,10 +373,199 @@ interface AnonymousAuthProviderProps {
 }
 
 export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) {
+  const [hasChosenAuth, setHasChosenAuth] = React.useState(false);
+
   React.useEffect(() => {
-    // Initialize authentication system on app startup
-    anonymousAuth.createOrGetUser();
+    // Check if user has already made an authentication choice
+    const existingUser = localStorage.getItem(STORAGE_KEYS.USER_DATA);
+    const hasSeenAuth = localStorage.getItem('teaspill_auth_seen') === 'true';
+    
+    if (existingUser || hasSeenAuth) {
+      // User has already authenticated or chosen to stay anonymous
+      anonymousAuth.createOrGetUser();
+      setHasChosenAuth(true);
+    }
   }, []);
+
+  // If user hasn't chosen authentication method, show auth page
+  if (!hasChosenAuth) {
+    return React.createElement('div', { 
+      style: { 
+        minHeight: '100vh', 
+        background: 'linear-gradient(to bottom right, #fff7ed, #fef3c7)', 
+        padding: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
+    }, React.createElement('div', {
+      style: {
+        width: '100%',
+        maxWidth: '32rem',
+        background: 'white',
+        borderRadius: '0.5rem',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+        border: '1px solid #fed7aa',
+        padding: '2rem'
+      }
+    }, [
+      React.createElement('div', { 
+        key: 'header',
+        style: { textAlign: 'center', marginBottom: '2rem' }
+      }, [
+        React.createElement('div', {
+          key: 'icon',
+          style: {
+            width: '4rem',
+            height: '4rem',
+            background: 'linear-gradient(to right, #f97316, #f59e0b)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1rem'
+          }
+        }, '🔒'),
+        React.createElement('h1', {
+          key: 'title',
+          style: {
+            fontSize: '2rem',
+            fontWeight: 'bold',
+            background: 'linear-gradient(to right, #ea580c, #d97706)',
+            backgroundClip: 'text',
+            color: 'transparent',
+            marginBottom: '0.5rem'
+          }
+        }, 'Welcome to TeaSpill'),
+        React.createElement('p', {
+          key: 'subtitle',
+          style: {
+            fontSize: '1.125rem',
+            color: '#6b7280'
+          }
+        }, 'Share your stories anonymously with complete privacy')
+      ]),
+      React.createElement('div', {
+        key: 'choices',
+        style: { display: 'grid', gap: '1rem' }
+      }, [
+        // Anonymous option
+        React.createElement('div', {
+          key: 'anonymous',
+          style: {
+            border: '2px solid #fed7aa',
+            borderRadius: '0.5rem',
+            padding: '1.5rem',
+            cursor: 'pointer',
+            transition: 'border-color 0.2s'
+          },
+          onClick: () => {
+            localStorage.setItem('teaspill_auth_seen', 'true');
+            anonymousAuth.createOrGetUser();
+            setHasChosenAuth(true);
+          }
+        }, [
+          React.createElement('div', {
+            key: 'content',
+            style: { display: 'flex', alignItems: 'center', gap: '1rem' }
+          }, [
+            React.createElement('div', {
+              key: 'icon',
+              style: {
+                width: '3rem',
+                height: '3rem',
+                background: '#fff7ed',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }
+            }, '👤'),
+            React.createElement('div', { key: 'text' }, [
+              React.createElement('h3', {
+                key: 'title',
+                style: { fontWeight: '600', color: '#9a3412', marginBottom: '0.25rem' }
+              }, 'Stay Anonymous'),
+              React.createElement('p', {
+                key: 'desc',
+                style: { fontSize: '0.875rem', color: '#6b7280' }
+              }, 'Start sharing immediately with a local anonymous account')
+            ])
+          ]),
+          React.createElement('button', {
+            key: 'button',
+            style: {
+              width: '100%',
+              background: '#ea580c',
+              color: 'white',
+              padding: '0.75rem',
+              borderRadius: '0.375rem',
+              border: 'none',
+              fontWeight: '500',
+              marginTop: '1rem',
+              cursor: 'pointer'
+            }
+          }, 'Continue Anonymously')
+        ]),
+        // Sync option  
+        React.createElement('div', {
+          key: 'sync',
+          style: {
+            border: '2px solid #bfdbfe',
+            borderRadius: '0.5rem',
+            padding: '1.5rem',
+            cursor: 'pointer'
+          },
+          onClick: () => {
+            localStorage.setItem('teaspill_auth_seen', 'true');
+            window.location.href = '/auth';
+          }
+        }, [
+          React.createElement('div', {
+            key: 'content',
+            style: { display: 'flex', alignItems: 'center', gap: '1rem' }
+          }, [
+            React.createElement('div', {
+              key: 'icon',
+              style: {
+                width: '3rem',
+                height: '3rem',
+                background: '#eff6ff',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }
+            }, '🔑'),
+            React.createElement('div', { key: 'text' }, [
+              React.createElement('h3', {
+                key: 'title',
+                style: { fontWeight: '600', color: '#1e40af', marginBottom: '0.25rem' }
+              }, 'Enable Cross-Device Sync'),
+              React.createElement('p', {
+                key: 'desc',
+                style: { fontSize: '0.875rem', color: '#6b7280' }
+              }, 'Access your anonymous account from multiple devices')
+            ])
+          ]),
+          React.createElement('button', {
+            key: 'button',
+            style: {
+              width: '100%',
+              background: 'transparent',
+              color: '#1e40af',
+              padding: '0.75rem',
+              borderRadius: '0.375rem',
+              border: '1px solid #bfdbfe',
+              fontWeight: '500',
+              marginTop: '1rem',
+              cursor: 'pointer'
+            }
+          }, 'Set Up Sync & Login Options')
+        ])
+      ])
+    ]));
+  }
 
   return React.createElement(React.Fragment, null, children);
 }
