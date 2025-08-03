@@ -31,6 +31,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Get session info
+  app.get("/api/session", (req, res) => {
+    res.json({ sessionId: req.session.id });
+  });
+
   // Get posts
   app.get("/api/posts", async (req, res) => {
     try {

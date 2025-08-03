@@ -42,7 +42,16 @@ const reactionEmojis = {
 
 export function PostCard({ post }: PostCardProps) {
   const [userReactions, setUserReactions] = useState<Record<string, boolean>>({});
+  const [sessionId, setSessionId] = useState<string>('');
   const queryClient = useQueryClient();
+
+  // Get current session ID
+  useEffect(() => {
+    fetch('/api/session')
+      .then(res => res.json())
+      .then(data => setSessionId(data.sessionId))
+      .catch(() => setSessionId(''));
+  }, []);
 
   // Load user reactions from localStorage
   useEffect(() => {
@@ -141,7 +150,10 @@ export function PostCard({ post }: PostCardProps) {
           )}>
             {categoryEmojis[post.category]} {categoryLabel}
           </span>
-          <PostMenu postId={post.id} isOwner={false} />
+          <PostMenu 
+            postId={post.id} 
+            isOwner={post.sessionId === sessionId && sessionId !== ''} 
+          />
         </div>
       </div>
 
