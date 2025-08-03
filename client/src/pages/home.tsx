@@ -6,7 +6,6 @@ import { FeedToggle } from "@/components/ui/feed-toggle";
 import { FloatingPostButton } from "@/components/ui/floating-post-button";
 import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
-import { DailyTeaHighlight } from "@/components/ui/daily-tea-highlight";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
@@ -60,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 floating-shapes">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
       <div className="sticky top-16 z-40 bg-white dark:bg-gray-800">
@@ -75,8 +74,6 @@ export default function Home() {
       </div>
 
       <main className="pb-20 px-4 space-y-4 pt-4">
-        {/* Daily Tea Highlight */}
-        <DailyTeaHighlight onCreatePost={() => setIsPostModalOpen(true)} />
         {feedType === "new" && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">

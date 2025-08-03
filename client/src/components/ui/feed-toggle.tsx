@@ -16,12 +16,12 @@ export function FeedToggle({ feedType, onFeedTypeChange }: FeedToggleProps) {
           className={cn(
             "flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md transition-all font-medium text-base",
             feedType === "new"
-              ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-sm"
+              ? "bg-white dark:bg-gray-600 text-purple-600 dark:text-purple-400 shadow-sm"
               : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
           )}
           onClick={() => onFeedTypeChange("new")}
         >
-          <span><span className="animate-pulse">🆕</span> New</span>
+          <span>🆕 New</span>
         </Button>
         
         <Button
@@ -29,12 +29,12 @@ export function FeedToggle({ feedType, onFeedTypeChange }: FeedToggleProps) {
           className={cn(
             "flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md transition-all font-medium text-base",
             feedType === "trending"
-              ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm"
+              ? "bg-white dark:bg-gray-600 text-red-600 dark:text-red-400 shadow-sm"
               : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
           )}
           onClick={() => onFeedTypeChange("trending")}
         >
-          <span><span className="animate-bounce">🔥</span> Trending</span>
+          <span>🔥 Trending</span>
         </Button>
       </div>
     </div>

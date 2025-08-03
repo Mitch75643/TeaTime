@@ -136,11 +136,9 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <article className={cn(
       "rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden",
-      "post-card",
-      `post-card-${post.category}`,
       post.isDrama 
-        ? "bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-2 border-orange-200 dark:border-orange-800"
-        : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
+        ? "bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200"
+        : "bg-white border-gray-100"
     )}>
       {/* Trending Badge */}
       {isTrending && !post.isDrama && (
