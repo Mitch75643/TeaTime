@@ -107,6 +107,7 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [suggestions] = useState<Suggestion[]>(sampleSuggestions);
   const [userVotes, setUserVotes] = useState<Record<string, boolean>>({});
 
@@ -231,19 +232,35 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
                   Rate your experience:
                 </p>
                 <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setRating(star)}
-                      className={cn(
-                        "text-lg transition-colors",
-                        star <= rating ? "text-yellow-400" : "text-gray-300"
-                      )}
-                    >
-                      ⭐
-                    </button>
-                  ))}
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const isActive = star <= (hoverRating || rating);
+                    return (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className={cn(
+                          "text-xl transition-all duration-200 hover:scale-110",
+                          isActive 
+                            ? "text-yellow-400 drop-shadow-sm" 
+                            : "text-gray-300 hover:text-yellow-200"
+                        )}
+                      >
+                        {isActive ? "★" : "☆"}
+                      </button>
+                    );
+                  })}
                 </div>
+                {rating > 0 && (
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                    {rating === 1 && "Poor experience"}
+                    {rating === 2 && "Below average"}
+                    {rating === 3 && "Average"}
+                    {rating === 4 && "Good experience"}
+                    {rating === 5 && "Excellent experience"}
+                  </p>
+                )}
               </div>
             )}
 
@@ -285,50 +302,66 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {suggestions.map((suggestion) => (
-              <Card key={suggestion.id} className={cn("border", getCategoryBadgeStyle(suggestion.category), "border-opacity-30")}>
-                <CardContent className="p-3">
-                  <div className="space-y-2">
-                    {/* Header with category badge */}
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className={cn("text-xs", getCategoryBadgeStyle(suggestion.category))}>
+              <Card key={suggestion.id} className={cn(
+                "border hover:shadow-md transition-shadow duration-200", 
+                getCategoryBadgeStyle(suggestion.category), 
+                "border-opacity-40"
+              )}>
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    {/* Header with category badge and rating/votes */}
+                    <div className="flex items-start justify-between">
+                      <Badge variant="outline" className={cn("text-xs shrink-0", getCategoryBadgeStyle(suggestion.category))}>
                         {suggestionCategories.find(cat => cat.id === suggestion.category)?.emoji} {suggestion.category}
                       </Badge>
-                      {suggestion.rating && (
-                        <div className="flex">
-                          {[...Array(suggestion.rating)].map((_, i) => (
-                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 ml-2">
+                        {suggestion.rating && (
+                          <div className="flex">
+                            {[...Array(suggestion.rating)].map((_, i) => (
+                              <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVote(suggestion.id)}
+                          className={cn(
+                            "h-6 px-2 text-xs shrink-0",
+                            userVotes[suggestion.id] && "text-blue-600 bg-blue-50"
+                          )}
+                        >
+                          <ThumbsUp className="h-3 w-3 mr-1" />
+                          {suggestion.upvotes + (userVotes[suggestion.id] ? 1 : 0)}
+                        </Button>
+                      </div>
                     </div>
 
-                    {/* Title */}
-                    <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
+                    {/* Title - Bold and properly sized */}
+                    <h3 className="font-bold text-sm leading-tight text-gray-900 dark:text-gray-100">
                       {suggestion.title}
                     </h3>
 
-                    {/* Description preview */}
-                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                      {suggestion.description}
+                    {/* Description preview - Smaller and truncated */}
+                    <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400 line-clamp-3">
+                      {suggestion.description.length > 80 
+                        ? `${suggestion.description.substring(0, 80)}...` 
+                        : suggestion.description
+                      }
                     </p>
 
-                    {/* Footer with vote */}
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-xs text-gray-500">{suggestion.author}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleVote(suggestion.id)}
-                        className={cn(
-                          "h-6 px-2 text-xs",
-                          userVotes[suggestion.id] && "text-blue-600 bg-blue-50"
-                        )}
-                      >
-                        <ThumbsUp className="h-3 w-3 mr-1" />
-                        {suggestion.upvotes + (userVotes[suggestion.id] ? 1 : 0)}
-                      </Button>
+                    {/* Footer with author */}
+                    <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          by {suggestion.author}
+                        </span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          {suggestion.createdAt.toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
