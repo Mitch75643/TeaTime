@@ -21,7 +21,14 @@ import {
   FileText,
   Calendar,
   Heart,
-  MessageCircle
+  MessageCircle,
+  ExternalLink,
+  Home,
+  Coffee,
+  Star,
+  Flame,
+  Zap,
+  FlaskConical
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +37,7 @@ import { getAvatarById } from "@/lib/avatars";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
 import { AliasSelector } from "@/components/ui/alias-selector";
+import { useLocation } from "wouter";
 import type { Post } from "@shared/schema";
 
 export default function Profile() {
@@ -40,6 +48,7 @@ export default function Profile() {
   const { userAlias, fullAlias, generateNewAlias, keepCurrentUsername } = useUserAlias();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Get user's posts (using session ID for identification)
   const { data: userPosts = [], isLoading } = useQuery<Post[]>({
@@ -120,6 +129,40 @@ export default function Profile() {
       'hot-takes': '🌍'
     };
     return emojis[category] || '';
+  };
+
+  const getPostSourceInfo = (post: Post) => {
+    // Determine source based on postContext and communitySection
+    if (post.postContext === 'daily-spill') {
+      return { icon: <Coffee className="h-3 w-3" />, label: 'Daily Spill', route: '/daily-spill' };
+    }
+    
+    if (post.postContext === 'community' && post.communitySection) {
+      switch (post.communitySection) {
+        case 'celebrity-tea':
+          return { icon: <Star className="h-3 w-3" />, label: 'Celebrity Tea', route: '/community/celebrity-tea' };
+        case 'story-time':
+          return { icon: '📖', label: `Story Time${post.storyType ? ` (${post.storyType})` : ''}`, route: '/community/story-time' };
+        case 'hot-topics':
+          return { icon: <Flame className="h-3 w-3" />, label: 'Hot Topics', route: '/community/hot-topics' };
+        case 'daily-debate':
+          return { icon: <Zap className="h-3 w-3" />, label: 'Daily Debate', route: '/community/daily-debate' };
+        case 'tea-experiments':
+          return { icon: <FlaskConical className="h-3 w-3" />, label: 'Tea Experiments', route: '/community/tea-experiments' };
+        case 'suggestions':
+          return { icon: '💡', label: 'Feedback/Suggestions', route: '/community/suggestions' };
+        default:
+          return { icon: '🏠', label: 'Community', route: '/community' };
+      }
+    }
+    
+    // Default to home page
+    return { icon: <Home className="h-3 w-3" />, label: 'Home Page', route: '/' };
+  };
+
+  const handleViewInContext = (post: Post) => {
+    const sourceInfo = getPostSourceInfo(post);
+    setLocation(sourceInfo.route);
   };
 
   return (
@@ -227,32 +270,61 @@ export default function Profile() {
               </Card>
             )}
 
-            {userPosts.map((post: Post) => (
-              <div key={post.id} className="space-y-2">
-                <PostCard post={post} />
-                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-4">
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(post.createdAt!).toLocaleDateString()}
-                    </span>
-                    <span className="capitalize">
-                      {post.category === 'drama' ? '🎭 Am I in the Wrong?' : `${getCategoryEmoji(post.category)} ${post.category}`}
-                    </span>
+            {userPosts.map((post: Post) => {
+              const sourceInfo = getPostSourceInfo(post);
+              return (
+                <div key={post.id} className="space-y-2">
+                  <div 
+                    className="cursor-pointer transition-transform hover:scale-[1.02]"
+                    onClick={() => handleViewInContext(post)}
+                  >
+                    <PostCard post={post} />
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="flex items-center">
-                      <Heart className="h-3 w-3 mr-1" />
-                      {Object.values(post.reactions || {}).reduce((sum, count) => sum + count, 0)}
-                    </span>
-                    <span className="flex items-center">
-                      <MessageCircle className="h-3 w-3 mr-1" />
-                      {post.commentCount || 0}
-                    </span>
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-4">
+                    <div className="flex items-center space-x-4">
+                      <span className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(post.createdAt!).toLocaleDateString()}
+                      </span>
+                      <span className="capitalize">
+                        {post.category === 'drama' ? '🎭 Am I in the Wrong?' : `${getCategoryEmoji(post.category)} ${post.category}`}
+                      </span>
+                      {/* Source label */}
+                      <span className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                        {typeof sourceInfo.icon === 'string' ? (
+                          <span className="text-xs">{sourceInfo.icon}</span>
+                        ) : (
+                          sourceInfo.icon
+                        )}
+                        <span>{sourceInfo.label}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewInContext(post);
+                        }}
+                        className="h-6 px-2 text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View in Context
+                      </Button>
+                      <span className="flex items-center">
+                        <Heart className="h-3 w-3 mr-1" />
+                        {Object.values(post.reactions || {}).reduce((sum, count) => sum + count, 0)}
+                      </span>
+                      <span className="flex items-center">
+                        <MessageCircle className="h-3 w-3 mr-1" />
+                        {post.commentCount || 0}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
