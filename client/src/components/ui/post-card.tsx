@@ -166,7 +166,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
         <div className="flex items-center space-x-2">
           <span className={cn(
-            "px-3 py-1 text-xs font-medium rounded-full border-2",
+            "px-3 py-1 text-xs font-bold rounded-full border-2 shadow-sm",
             post.isDrama 
               ? "gradient-drama text-white border-red-300"
               : categoryColors[post.category] || "bg-gray-100 text-gray-800 border-gray-200"
