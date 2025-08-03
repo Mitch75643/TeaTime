@@ -24,13 +24,13 @@ const categoryEmojis: Record<string, string> = {
 };
 
 const categoryColors: Record<string, string> = {
-  school: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
-  work: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
-  relationships: "bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300",
-  family: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
-  money: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
-  "hot-takes": "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
-  drama: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+  school: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700",
+  work: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-700",
+  relationships: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-700",
+  family: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-700",
+  money: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-700",
+  "hot-takes": "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-700",
+  drama: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-700",
 };
 
 const reactionEmojis = {
@@ -166,10 +166,10 @@ export function PostCard({ post }: PostCardProps) {
         </div>
         <div className="flex items-center space-x-2">
           <span className={cn(
-            "px-2 py-1 text-xs font-medium rounded-full",
+            "px-3 py-1 text-xs font-medium rounded-full border-2",
             post.isDrama 
-              ? "gradient-drama text-white"
-              : categoryColors[post.category] || "bg-gray-100 text-gray-800"
+              ? "gradient-drama text-white border-red-300"
+              : categoryColors[post.category] || "bg-gray-100 text-gray-800 border-gray-200"
           )}>
             {categoryEmojis[post.category]} {categoryLabel}
           </span>
