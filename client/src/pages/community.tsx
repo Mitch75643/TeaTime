@@ -194,9 +194,9 @@ export default function Community() {
                   onClick={() => handleSectionClick(section.id)}
                 >
                   <div className="p-4 flex flex-col h-full">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <span className="text-2xl">{section.emoji}</span>
-                      <h3 className={cn("font-bold text-lg", section.textColor)}>
+                    <div className="flex items-start space-x-3 mb-3">
+                      <span className="text-2xl flex-shrink-0">{section.emoji}</span>
+                      <h3 className={cn("font-bold text-lg leading-tight break-words", section.textColor)}>
                         {section.name}
                       </h3>
                     </div>
