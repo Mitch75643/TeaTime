@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 import { Badge } from "./badge";
 import { cn } from "@/lib/utils";
 import { avatars, getAvatarsByCategory, getAvatarById, categoryLabels, type Avatar } from "@/lib/avatars";
-import { Palette, Check } from "lucide-react";
+import { Edit2, Check } from "lucide-react";
 
 interface AvatarSelectorProps {
   currentAvatarId?: string;
@@ -42,26 +42,13 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
       <DialogTrigger asChild>
         <Button
           variant="outline"
+          size="icon"
           className={cn(
-            "relative group overflow-hidden rounded-full border-2 border-dashed border-purple-300 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-400/30 transition-all duration-200",
+            "rounded-full bg-white border-2 border-gray-300 hover:border-purple-500 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 shadow-sm",
             className
           )}
         >
-          <div className="w-8 h-8 relative">
-            {currentAvatar ? (
-              <div 
-                className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: currentAvatar.svg }}
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                <Palette className="h-4 w-4 text-white" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-full flex items-center justify-center">
-              <Palette className="h-3 w-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </div>
+          <Edit2 className="h-4 w-4 text-gray-600 hover:text-purple-600" />
         </Button>
       </DialogTrigger>
       
