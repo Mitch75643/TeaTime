@@ -330,7 +330,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
           {/* Comment Input */}
           {!replyingTo && (
-            <div className="flex-shrink-0 border-t pt-4 pb-2 space-y-3 bg-white">
+            <div className="flex-shrink-0 border-t border-gray-600 pt-4 pb-2 space-y-3">
               <Textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
