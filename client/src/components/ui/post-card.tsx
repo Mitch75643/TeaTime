@@ -62,10 +62,12 @@ export function PostCard({ post }: PostCardProps) {
   }, [post.id]);
 
   const reactionMutation = useMutation({
-    mutationFn: async ({ type }: { type: string }) => {
+    mutationFn: async ({ type, previousType, remove }: { type: string; previousType?: string; remove?: boolean }) => {
       return apiRequest("POST", "/api/reactions", {
         type,
         postId: post.id,
+        previousType,
+        remove: remove || false
       });
     },
     onSuccess: () => {
@@ -74,27 +76,33 @@ export function PostCard({ post }: PostCardProps) {
   });
 
   const handleReaction = (type: string) => {
-    // Only allow one reaction per user - clear others when selecting new one
-    const hasCurrentReaction = Object.values(userReactions).some(Boolean);
+    // Get the currently active reaction type (if any)
+    const currentActiveType = Object.keys(userReactions).find(key => userReactions[key]);
     const isCurrentType = userReactions[type];
     
-    let newUserReactions: Record<string, boolean>;
+    let newUserReactions: Record<string, boolean> = {};
+    
     if (isCurrentType) {
-      // Remove current reaction if clicking the same type
-      newUserReactions = { ...userReactions, [type]: false };
+      // Toggle off - remove current reaction
+      Object.keys(reactionEmojis).forEach(key => {
+        newUserReactions[key] = false;
+      });
     } else {
-      // Clear all reactions and set new one
-      newUserReactions = Object.keys(userReactions).reduce((acc, key) => {
-        acc[key] = key === type;
-        return acc;
-      }, {} as Record<string, boolean>);
-      newUserReactions[type] = true;
+      // Set new reaction - clear all others and set this one
+      Object.keys(reactionEmojis).forEach(key => {
+        newUserReactions[key] = key === type;
+      });
     }
     
     setUserReactions(newUserReactions);
     localStorage.setItem(`reactions-${post.id}`, JSON.stringify(newUserReactions));
     
-    reactionMutation.mutate({ type, postId: post.id });
+    // Send to server with previous reaction info for proper counting
+    reactionMutation.mutate({ 
+      type, 
+      previousType: currentActiveType,
+      remove: isCurrentType
+    });
   };
 
   const timeAgo = formatDistanceToNow(new Date(post.createdAt!), { addSuffix: true });
@@ -191,6 +199,8 @@ export function PostCard({ post }: PostCardProps) {
             const count = reactions[type as keyof typeof reactions] || 0;
             const isActive = userReactions[type] || false;
             
+            const hasOtherReaction = Object.keys(userReactions).some(key => key !== type && userReactions[key]);
+            
             return (
               <Button
                 key={type}
@@ -198,16 +208,22 @@ export function PostCard({ post }: PostCardProps) {
                 className={cn(
                   "flex items-center space-x-1 transition-all p-1 hover:scale-110",
                   isActive ? (
-                    type === "fire" ? "text-red-500 font-medium bg-red-50 dark:bg-red-900/20" :
-                    type === "cry" ? "text-blue-500 font-medium bg-blue-50 dark:bg-blue-900/20" :
-                    type === "eyes" ? "text-yellow-600 font-medium bg-yellow-50 dark:bg-yellow-900/20" :
-                    "text-purple-500 font-medium bg-purple-50 dark:bg-purple-900/20"
-                  ) : "text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                    type === "fire" ? "text-red-500 font-medium bg-red-50 dark:bg-red-900/20 ring-2 ring-red-200" :
+                    type === "cry" ? "text-blue-500 font-medium bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200" :
+                    type === "eyes" ? "text-yellow-600 font-medium bg-yellow-50 dark:bg-yellow-900/20 ring-2 ring-yellow-200" :
+                    "text-purple-500 font-medium bg-purple-50 dark:bg-purple-900/20 ring-2 ring-purple-200"
+                  ) : hasOtherReaction ? 
+                    "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400 opacity-60" :
+                    "text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                 )}
                 onClick={() => handleReaction(type)}
                 disabled={reactionMutation.isPending}
               >
-                <span className={cn("text-lg transition-transform", isActive && "animate-pulse")}>{emoji}</span>
+                <span className={cn(
+                  "text-lg transition-transform", 
+                  isActive && "animate-pulse scale-110",
+                  hasOtherReaction && !isActive && "opacity-50"
+                )}>{emoji}</span>
                 <span className="text-sm font-medium">{count}</span>
               </Button>
             );

@@ -123,6 +123,8 @@ export const reactionSchema = z.object({
   type: z.enum(["fire", "cry", "eyes", "clown"]),
   postId: z.string().optional(),
   commentId: z.string().optional(),
+  previousType: z.enum(["fire", "cry", "eyes", "clown"]).optional(),
+  remove: z.boolean().optional(),
 });
 
 export const dramaVoteSchema = z.object({

@@ -133,23 +133,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Toggle reaction
+  // Toggle reaction with "one emoji per post" logic
   app.post("/api/reactions", async (req, res) => {
     try {
-      const validatedData = reactionSchema.parse(req.body);
+      const { type, postId, previousType, remove } = req.body;
       const sessionId = req.session.id!;
       
-      const hasReacted = await storage.hasUserReacted(
-        validatedData.postId,
-        validatedData.commentId,
-        validatedData.type,
-        sessionId
-      );
-
-      if (hasReacted) {
-        await storage.removeReaction(validatedData, sessionId);
+      if (remove) {
+        // Remove current reaction
+        await storage.removeReaction({ type, postId }, sessionId);
       } else {
-        await storage.addReaction(validatedData, sessionId);
+        // If user had a previous reaction, remove it first
+        if (previousType && previousType !== type) {
+          await storage.removeReaction({ type: previousType, postId }, sessionId);
+        }
+        
+        // Add new reaction
+        await storage.addReaction({ type, postId }, sessionId);
       }
 
       res.json({ success: true });
