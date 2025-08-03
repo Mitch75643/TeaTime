@@ -34,10 +34,11 @@ const categoryColors: Record<string, string> = {
 };
 
 const reactionEmojis = {
-  fire: "🔥",
-  cry: "😭",
-  eyes: "👀",
-  clown: "🤡",
+  laugh: "😂",
+  sad: "😢", 
+  angry: "😡",
+  thumbsUp: "👍",
+  thumbsDown: "👎",
 };
 
 export function PostCard({ post }: PostCardProps) {
