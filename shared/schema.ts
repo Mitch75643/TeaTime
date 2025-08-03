@@ -97,6 +97,47 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Anonymous User System
+export const anonymousUsers = pgTable("anonymous_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  anonId: varchar("anon_id").notNull().unique(), // anon_XYZ123 format
+  sessionId: varchar("session_id").notNull(),
+  deviceFingerprint: varchar("device_fingerprint"), // Optional device identification
+  alias: varchar("alias").notNull(), // Generated fun username
+  avatarId: varchar("avatar_id").default("happy-face"),
+  
+  // Account upgrade fields (for cross-device sync)
+  isUpgraded: boolean("is_upgraded").default(false),
+  passphraseHash: varchar("passphrase_hash"), // For passphrase login
+  email: varchar("email"), // Optional email for simple login
+  emailVerified: boolean("email_verified").default(false),
+  
+  // User preferences and stats
+  preferences: jsonb("preferences").default({}), // Theme, notifications, etc.
+  postCount: integer("post_count").default(0),
+  totalReactions: integer("total_reactions").default(0),
+  
+  // Privacy and security
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  
+  // Account status
+  isBanned: boolean("is_banned").default(false),
+  banReason: varchar("ban_reason"),
+});
+
+// Device sessions for cross-device sync
+export const deviceSessions = pgTable("device_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  anonUserId: varchar("anon_user_id").notNull().references(() => anonymousUsers.id),
+  sessionId: varchar("session_id").notNull(),
+  deviceFingerprint: varchar("device_fingerprint"),
+  deviceName: varchar("device_name"), // "Chrome on Windows", "Safari on iPhone", etc.
+  isActive: boolean("is_active").default(true),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
@@ -165,6 +206,37 @@ export const notificationSchema = z.object({
   triggerAlias: z.string(),
 });
 
+// Anonymous User schemas
+export const createAnonymousUserSchema = z.object({
+  deviceFingerprint: z.string().optional(),
+  alias: z.string().optional(),
+  avatarId: z.string().optional(),
+});
+
+export const upgradeAccountSchema = z.object({
+  upgradeType: z.enum(['passphrase', 'email']),
+  passphrase: z.string().min(8).max(100).optional(),
+  email: z.string().email().optional(),
+}).refine((data) => {
+  if (data.upgradeType === 'passphrase') return !!data.passphrase;
+  if (data.upgradeType === 'email') return !!data.email;
+  return false;
+}, {
+  message: "Must provide passphrase for passphrase login or email for email login"
+});
+
+export const loginSchema = z.object({
+  loginType: z.enum(['passphrase', 'email']),
+  passphrase: z.string().optional(),
+  email: z.string().email().optional(),
+}).refine((data) => {
+  if (data.loginType === 'passphrase') return !!data.passphrase;
+  if (data.loginType === 'email') return !!data.email;
+  return false;
+}, {
+  message: "Must provide credentials for selected login type"
+});
+
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 
   sessionId?: string;
@@ -178,7 +250,12 @@ export type DramaVote = typeof dramaVotes.$inferSelect;
 export type UserFlag = typeof userFlags.$inferSelect;
 export type Report = typeof reports.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type AnonymousUser = typeof anonymousUsers.$inferSelect;
+export type DeviceSession = typeof deviceSessions.$inferSelect;
 export type ReactionInput = z.infer<typeof reactionSchema>;
 export type DramaVoteInput = z.infer<typeof dramaVoteSchema>;
 export type ReportInput = z.infer<typeof reportSchema>;
 export type NotificationInput = z.infer<typeof notificationSchema>;
+export type CreateAnonymousUserInput = z.infer<typeof createAnonymousUserSchema>;
+export type UpgradeAccountInput = z.infer<typeof upgradeAccountSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;

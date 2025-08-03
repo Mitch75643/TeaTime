@@ -1,5 +1,6 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { createHash } from "crypto";
 
 export interface IStorage {
   // Posts
@@ -40,6 +41,16 @@ export interface IStorage {
   markNotificationAsRead(notificationId: string, sessionId: string): Promise<void>;
   markAllNotificationsAsRead(sessionId: string): Promise<void>;
   getUnreadNotificationCount(sessionId: string): Promise<number>;
+  
+  // Anonymous User System
+  createAnonymousUser(userData: CreateAnonymousUserInput, sessionId: string): Promise<AnonymousUser>;
+  getAnonymousUser(anonId: string): Promise<AnonymousUser | undefined>;
+  getAnonymousUserBySession(sessionId: string): Promise<AnonymousUser | undefined>;
+  syncUserSession(anonId: string, sessionId: string, deviceFingerprint?: string): Promise<AnonymousUser>;
+  upgradeAccount(anonId: string, upgradeData: UpgradeAccountInput): Promise<{ success: boolean; error?: string }>;
+  loginUser(loginData: LoginInput & { deviceFingerprint?: string }): Promise<{ success: boolean; error?: string; user?: AnonymousUser }>;
+  updateUserProfile(anonId: string, updates: { alias?: string; avatarId?: string }): Promise<void>;
+  createDeviceSession(anonUserId: string, sessionId: string, deviceFingerprint?: string): Promise<DeviceSession>;
 }
 
 export class MemStorage implements IStorage {
@@ -50,6 +61,8 @@ export class MemStorage implements IStorage {
   private reports: Map<string, Report>;
   private userFlags: Map<string, UserFlag>;
   private notifications: Map<string, Notification>;
+  private anonymousUsers: Map<string, AnonymousUser>;
+  private deviceSessions: Map<string, DeviceSession>;
 
   constructor() {
     this.posts = new Map();
@@ -59,6 +72,8 @@ export class MemStorage implements IStorage {
     this.reports = new Map();
     this.userFlags = new Map();
     this.notifications = new Map();
+    this.anonymousUsers = new Map();
+    this.deviceSessions = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -508,6 +523,179 @@ export class MemStorage implements IStorage {
     return Array.from(this.notifications.values())
       .filter(n => n.recipientSessionId === sessionId && !n.isRead)
       .length;
+  }
+
+  // Anonymous User System methods
+  private generateAnonId(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'anon_';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  private hashPassword(password: string): string {
+    return createHash('sha256').update(password).digest('hex');
+  }
+
+  async createAnonymousUser(userData: CreateAnonymousUserInput, sessionId: string): Promise<AnonymousUser> {
+    const id = randomUUID();
+    const anonId = this.generateAnonId();
+    
+    const user: AnonymousUser = {
+      id,
+      anonId,
+      sessionId,
+      deviceFingerprint: userData.deviceFingerprint || null,
+      alias: userData.alias || `AnonUser${Math.floor(Math.random() * 1000)}`,
+      avatarId: userData.avatarId || 'happy-face',
+      isUpgraded: false,
+      passphraseHash: null,
+      email: null,
+      emailVerified: false,
+      preferences: {},
+      postCount: 0,
+      totalReactions: 0,
+      lastActiveAt: new Date(),
+      createdAt: new Date(),
+      isBanned: false,
+      banReason: null,
+    };
+
+    this.anonymousUsers.set(id, user);
+    
+    // Create device session
+    await this.createDeviceSession(id, sessionId, userData.deviceFingerprint);
+    
+    return user;
+  }
+
+  async getAnonymousUser(anonId: string): Promise<AnonymousUser | undefined> {
+    return Array.from(this.anonymousUsers.values()).find(user => user.anonId === anonId);
+  }
+
+  async getAnonymousUserBySession(sessionId: string): Promise<AnonymousUser | undefined> {
+    return Array.from(this.anonymousUsers.values()).find(user => user.sessionId === sessionId);
+  }
+
+  async syncUserSession(anonId: string, sessionId: string, deviceFingerprint?: string): Promise<AnonymousUser> {
+    const user = await this.getAnonymousUser(anonId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Update session ID and last active
+    user.sessionId = sessionId;
+    user.lastActiveAt = new Date();
+    this.anonymousUsers.set(user.id, user);
+
+    // Create new device session if needed
+    const existingSession = Array.from(this.deviceSessions.values())
+      .find(session => session.anonUserId === user.id && session.sessionId === sessionId);
+    
+    if (!existingSession) {
+      await this.createDeviceSession(user.id, sessionId, deviceFingerprint);
+    }
+
+    return user;
+  }
+
+  async upgradeAccount(anonId: string, upgradeData: UpgradeAccountInput): Promise<{ success: boolean; error?: string }> {
+    const user = await this.getAnonymousUser(anonId);
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    if (user.isUpgraded) {
+      return { success: false, error: 'Account already upgraded' };
+    }
+
+    try {
+      if (upgradeData.upgradeType === 'passphrase' && upgradeData.passphrase) {
+        user.passphraseHash = this.hashPassword(upgradeData.passphrase);
+      } else if (upgradeData.upgradeType === 'email' && upgradeData.email) {
+        // Check if email already exists
+        const existingUser = Array.from(this.anonymousUsers.values())
+          .find(u => u.email === upgradeData.email && u.id !== user.id);
+        
+        if (existingUser) {
+          return { success: false, error: 'Email already in use' };
+        }
+        
+        user.email = upgradeData.email;
+        user.emailVerified = true; // For demo purposes
+      }
+
+      user.isUpgraded = true;
+      this.anonymousUsers.set(user.id, user);
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Failed to upgrade account' };
+    }
+  }
+
+  async loginUser(loginData: LoginInput & { deviceFingerprint?: string }): Promise<{ success: boolean; error?: string; user?: AnonymousUser }> {
+    try {
+      let user: AnonymousUser | undefined;
+
+      if (loginData.loginType === 'passphrase' && loginData.passphrase) {
+        const hashedPassphrase = this.hashPassword(loginData.passphrase);
+        user = Array.from(this.anonymousUsers.values())
+          .find(u => u.passphraseHash === hashedPassphrase && u.isUpgraded);
+      } else if (loginData.loginType === 'email' && loginData.email) {
+        user = Array.from(this.anonymousUsers.values())
+          .find(u => u.email === loginData.email && u.isUpgraded);
+      }
+
+      if (!user) {
+        return { success: false, error: 'Invalid credentials' };
+      }
+
+      // Generate new session for this device
+      const newSessionId = randomUUID();
+      user.sessionId = newSessionId;
+      user.lastActiveAt = new Date();
+      this.anonymousUsers.set(user.id, user);
+
+      // Create device session
+      await this.createDeviceSession(user.id, newSessionId, loginData.deviceFingerprint);
+
+      return { success: true, user };
+    } catch (error) {
+      return { success: false, error: 'Login failed' };
+    }
+  }
+
+  async updateUserProfile(anonId: string, updates: { alias?: string; avatarId?: string }): Promise<void> {
+    const user = await this.getAnonymousUser(anonId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (updates.alias) user.alias = updates.alias;
+    if (updates.avatarId) user.avatarId = updates.avatarId;
+    
+    user.lastActiveAt = new Date();
+    this.anonymousUsers.set(user.id, user);
+  }
+
+  async createDeviceSession(anonUserId: string, sessionId: string, deviceFingerprint?: string): Promise<DeviceSession> {
+    const id = randomUUID();
+    const session: DeviceSession = {
+      id,
+      anonUserId,
+      sessionId,
+      deviceFingerprint: deviceFingerprint || null,
+      deviceName: null, // Could be enhanced with user agent parsing
+      isActive: true,
+      lastActiveAt: new Date(),
+      createdAt: new Date(),
+    };
+
+    this.deviceSessions.set(id, session);
+    return session;
   }
 }
 

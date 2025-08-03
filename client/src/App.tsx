@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { AnonymousAuthProvider } from "@/lib/anonymousAuth";
 import Home from "@/pages/home";
 import Trending from "@/pages/trending";
 import Community from "@/pages/community";
@@ -31,10 +32,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <div className="app-container bg-background text-foreground">
-            <Toaster />
-            <Router />
-          </div>
+          <AnonymousAuthProvider>
+            <div className="app-container bg-background text-foreground">
+              <Toaster />
+              <Router />
+            </div>
+          </AnonymousAuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

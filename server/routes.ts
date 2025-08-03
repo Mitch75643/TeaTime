@@ -2,7 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
-import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema } from "@shared/schema";
+import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema } from "@shared/schema";
 
 declare module 'express-session' {
   interface SessionData {
@@ -376,6 +376,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Anonymous Authentication Routes
+  // Create new anonymous user
+  app.post("/api/auth/create-anon", async (req, res) => {
+    try {
+      const validatedData = createAnonymousUserSchema.parse(req.body);
+      const sessionId = req.session.id!;
+      
+      const user = await storage.createAnonymousUser(validatedData, sessionId);
+      res.json(user);
+    } catch (error) {
+      console.error("Failed to create anonymous user:", error);
+      res.status(500).json({ message: "Failed to create anonymous user" });
+    }
+  });
+
+  // Sync user session (returning user)
+  app.post("/api/auth/sync/:anonId", async (req, res) => {
+    try {
+      const { anonId } = req.params;
+      const { deviceFingerprint } = req.body;
+      const sessionId = req.session.id!;
+      
+      const user = await storage.syncUserSession(anonId, sessionId, deviceFingerprint);
+      res.json(user);
+    } catch (error) {
+      console.error("Failed to sync user session:", error);
+      res.status(404).json({ message: "User not found" });
+    }
+  });
+
+  // Upgrade account for cross-device sync
+  app.post("/api/auth/upgrade", async (req, res) => {
+    try {
+      const { anonId, ...upgradeData } = req.body;
+      const validatedData = upgradeAccountSchema.parse(upgradeData);
+      
+      const result = await storage.upgradeAccount(anonId, validatedData);
+      res.json(result);
+    } catch (error) {
+      console.error("Failed to upgrade account:", error);
+      res.status(500).json({ success: false, error: "Failed to upgrade account" });
+    }
+  });
+
+  // Login from another device
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      const { deviceFingerprint } = req.body;
+      
+      const result = await storage.loginUser({ ...validatedData, deviceFingerprint });
+      
+      if (result.success && result.user) {
+        // Update session with the user's session ID
+        req.session.id = result.user.sessionId;
+      }
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Failed to login:", error);
+      res.status(500).json({ success: false, error: "Login failed" });
+    }
+  });
+
+  // Update user profile
+  app.post("/api/auth/update-profile", async (req, res) => {
+    try {
+      const { anonId, alias, avatarId } = req.body;
+      
+      if (!anonId) {
+        return res.status(400).json({ message: "Anonymous ID required" });
+      }
+      
+      await storage.updateUserProfile(anonId, { alias, avatarId });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Get current user info
+  app.get("/api/auth/user", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const user = await storage.getAnonymousUserBySession(sessionId);
+      
+      if (user) {
+        res.json(user);
+      } else {
+        res.status(404).json({ message: "User not found" });
+      }
+    } catch (error) {
+      console.error("Failed to get user info:", error);
+      res.status(500).json({ message: "Failed to get user info" });
     }
   });
 
