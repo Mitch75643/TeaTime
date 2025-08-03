@@ -135,6 +135,7 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
     setTitle("");
     setDescription("");
     setRating(0);
+    setHoverRating(0);
     setSelectedCategory(null);
   };
 
@@ -158,29 +159,29 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
   };
 
   return (
-    <div className="space-y-4 mt-6">
+    <div className="w-full max-w-2xl mx-auto px-4 py-6 space-y-6">
       {/* Category Selection - Always Visible */}
-      <Card className="border-gray-200 dark:border-gray-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <Card className="border-gray-200 dark:border-gray-700 shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base font-semibold text-gray-800 dark:text-gray-200 text-center">
             What would you like to share?
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0 space-y-2">
+        <CardContent className="pt-0 space-y-3">
           {suggestionCategories.map((category) => (
             <Button
               key={category.id}
               variant={selectedCategory === category.id ? "default" : "outline"}
               onClick={() => handleCategoryClick(category.id)}
               className={cn(
-                "w-full justify-start h-auto p-3 text-left",
+                "w-full justify-start h-auto p-4 text-left transition-all",
                 category.color,
-                selectedCategory === category.id ? category.bgColor : "",
+                selectedCategory === category.id ? category.bgColor : "hover:bg-gray-50 dark:hover:bg-gray-800",
                 selectedCategory === category.id ? category.textColor : ""
               )}
             >
               <div className="flex items-center gap-3">
-                <span className="text-lg">{category.emoji}</span>
+                <span className="text-xl">{category.emoji}</span>
                 <div>
                   <p className={cn("font-medium text-sm", 
                     selectedCategory === category.id ? category.textColor : category.textColor
@@ -196,180 +197,107 @@ export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsF
 
       {/* Selected Category Form */}
       {selectedCategory && selectedCategoryData && (
-        <div className="mt-4">
-          <Card className={cn("border-2", selectedCategoryData.color)}>
-            <CardHeader className={cn("pb-3", selectedCategoryData.bgColor)}>
+        <div className="mt-6">
+          <Card className={cn("border-2 shadow-lg", selectedCategoryData.color)}>
+            <CardHeader className={cn("pb-4", selectedCategoryData.bgColor)}>
               <div className="flex items-center justify-between">
-                <CardTitle className={cn("text-sm font-medium flex items-center gap-2", selectedCategoryData.textColor)}>
-                  <span className="text-base">{selectedCategoryData.emoji}</span>
+                <CardTitle className={cn("text-base font-semibold flex items-center gap-2", selectedCategoryData.textColor)}>
+                  <span className="text-xl">{selectedCategoryData.emoji}</span>
                   {selectedCategoryData.name}
                 </CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedCategory(null)}
-                  className="text-xs"
+                  className="text-sm hover:bg-white/20"
                 >
-                  ← Back
+                  ← Close
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-            {/* Title Input */}
-            <div>
-              <Input
-                placeholder={selectedCategoryData.titlePlaceholder}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-
-            {/* Rating for Feedback */}
-            {selectedCategory === "feedback" && (
+            <CardContent className="p-6 space-y-4">
+              {/* Title Input */}
               <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                  Rate your experience:
-                </p>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => {
-                    const isActive = star <= (hoverRating || rating);
-                    return (
-                      <button
-                        key={star}
-                        onClick={() => setRating(star)}
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        className={cn(
-                          "text-xl transition-all duration-200 hover:scale-110",
-                          isActive 
-                            ? "text-yellow-400 drop-shadow-sm" 
-                            : "text-gray-300 hover:text-yellow-200"
-                        )}
-                      >
-                        {isActive ? "★" : "☆"}
-                      </button>
-                    );
-                  })}
-                </div>
-                {rating > 0 && (
-                  <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                    {rating === 1 && "Poor experience"}
-                    {rating === 2 && "Below average"}
-                    {rating === 3 && "Average"}
-                    {rating === 4 && "Good experience"}
-                    {rating === 5 && "Excellent experience"}
-                  </p>
-                )}
+                <Input
+                  placeholder={selectedCategoryData.titlePlaceholder}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="text-sm p-3 border-2 focus:border-gray-400"
+                />
               </div>
-            )}
 
-            {/* Description */}
-            <div>
-              <Textarea
-                placeholder={selectedCategoryData.descriptionPlaceholder}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="text-sm min-h-[60px] resize-none"
-                rows={3}
-              />
-            </div>
-
-            {/* Submit Button */}
-            <Button 
-              onClick={handleSubmit}
-              disabled={!title.trim() || !description.trim() || (selectedCategory === "feedback" && rating === 0)}
-              className={cn(
-                "w-full text-sm",
-                selectedCategory === "bug" && "bg-red-500 hover:bg-red-600",
-                selectedCategory === "feature" && "bg-blue-500 hover:bg-blue-600", 
-                selectedCategory === "feedback" && "bg-yellow-500 hover:bg-yellow-600"
+              {/* Rating for Feedback */}
+              {selectedCategory === "feedback" && (
+                <div className="text-center py-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    Rate your experience:
+                  </p>
+                  <div className="flex justify-center gap-2 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const isActive = star <= (hoverRating || rating);
+                      return (
+                        <button
+                          key={star}
+                          onClick={() => setRating(star)}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          className={cn(
+                            "text-2xl transition-all duration-200 hover:scale-125 p-1",
+                            isActive 
+                              ? "text-yellow-400 drop-shadow-sm" 
+                              : "text-gray-300 hover:text-yellow-200"
+                          )}
+                        >
+                          {isActive ? "★" : "☆"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {rating > 0 && (
+                    <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
+                      {rating === 1 && "Poor experience"}
+                      {rating === 2 && "Below average"}
+                      {rating === 3 && "Average"}
+                      {rating === 4 && "Good experience"}
+                      {rating === 5 && "Excellent experience"}
+                    </p>
+                  )}
+                </div>
               )}
-            >
-              <Send className="h-3 w-3 mr-2" />
-              Submit {selectedCategoryData.name}
-            </Button>
-          </CardContent>
-        </Card>
+
+              {/* Description */}
+              <div>
+                <Textarea
+                  placeholder={selectedCategoryData.descriptionPlaceholder}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="text-sm min-h-[80px] p-3 border-2 focus:border-gray-400 resize-none"
+                  rows={4}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-2">
+                <Button 
+                  onClick={handleSubmit}
+                  disabled={!title.trim() || !description.trim() || (selectedCategory === "feedback" && rating === 0)}
+                  className={cn(
+                    "w-full text-sm py-3 font-medium",
+                    selectedCategory === "bug" && "bg-red-500 hover:bg-red-600",
+                    selectedCategory === "feature" && "bg-blue-500 hover:bg-blue-600", 
+                    selectedCategory === "feedback" && "bg-yellow-500 hover:bg-yellow-600"
+                  )}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Submit {selectedCategoryData.name}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
-      {/* Community Suggestions Feed */}
-      <Card className="border-gray-200 dark:border-gray-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            🏆 Top Community Suggestions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {suggestions.map((suggestion) => (
-              <Card key={suggestion.id} className={cn(
-                "border hover:shadow-md transition-shadow duration-200", 
-                getCategoryBadgeStyle(suggestion.category), 
-                "border-opacity-40"
-              )}>
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    {/* Header with category badge and rating/votes */}
-                    <div className="flex items-start justify-between">
-                      <Badge variant="outline" className={cn("text-xs shrink-0", getCategoryBadgeStyle(suggestion.category))}>
-                        {suggestionCategories.find(cat => cat.id === suggestion.category)?.emoji} {suggestion.category}
-                      </Badge>
-                      <div className="flex items-center gap-2 ml-2">
-                        {suggestion.rating && (
-                          <div className="flex">
-                            {[...Array(suggestion.rating)].map((_, i) => (
-                              <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleVote(suggestion.id)}
-                          className={cn(
-                            "h-6 px-2 text-xs shrink-0",
-                            userVotes[suggestion.id] && "text-blue-600 bg-blue-50"
-                          )}
-                        >
-                          <ThumbsUp className="h-3 w-3 mr-1" />
-                          {suggestion.upvotes + (userVotes[suggestion.id] ? 1 : 0)}
-                        </Button>
-                      </div>
-                    </div>
 
-                    {/* Title - Bold and properly sized */}
-                    <h3 className="font-bold text-sm leading-tight text-gray-900 dark:text-gray-100">
-                      {suggestion.title}
-                    </h3>
-
-                    {/* Description preview - Smaller and truncated */}
-                    <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400 line-clamp-3">
-                      {suggestion.description.length > 80 
-                        ? `${suggestion.description.substring(0, 80)}...` 
-                        : suggestion.description
-                      }
-                    </p>
-
-                    {/* Footer with author */}
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          by {suggestion.author}
-                        </span>
-                        <span className="text-xs text-gray-400 dark:text-gray-500">
-                          {suggestion.createdAt.toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
