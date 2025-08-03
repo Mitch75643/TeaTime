@@ -54,6 +54,17 @@ export function StoryTimeFeatures({
 
   return (
     <div className="space-y-6">
+      {/* Create Post Button */}
+      <div className="flex justify-center">
+        <Button
+          onClick={onCreatePost}
+          className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          <BookOpen className="h-4 w-4 mr-2" />
+          + Create Post
+        </Button>
+      </div>
+
       {/* Category Filters */}
       <Card className="border-blue-200 dark:border-blue-800">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">

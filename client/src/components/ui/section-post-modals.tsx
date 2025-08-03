@@ -139,7 +139,7 @@ export function SectionPostModal({
       .filter(tag => tag.trim())
       .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
     
-    const allTags = [...new Set([...selectedTags, ...manualTags])].slice(0, 5);
+    const allTags = Array.from(new Set([...selectedTags, ...manualTags])).slice(0, 5);
 
     // Build the post data based on section
     const postData: InsertPost = {
@@ -252,9 +252,9 @@ export function SectionPostModal({
                   <SelectValue placeholder="What kind of story is this?" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="horror">👻 Horror</SelectItem>
+                  <SelectItem value="horror">😱 Horror</SelectItem>
                   <SelectItem value="funny">😂 Funny</SelectItem>
-                  <SelectItem value="weird">🤪 Weird</SelectItem>
+                  <SelectItem value="weird">🤔 Weird</SelectItem>
                   <SelectItem value="romantic">💕 Romantic</SelectItem>
                   <SelectItem value="embarrassing">😳 Embarrassing</SelectItem>
                 </SelectContent>
@@ -324,7 +324,8 @@ export function SectionPostModal({
           <div>
             <Label htmlFor="content">
               {section === "daily-debate" ? "Your Bold Statement" : 
-               section === "hot-topics" ? "Your Response" : "Your Post"}
+               section === "hot-topics" ? "Your Response" : 
+               section === "story-time" ? "Tell your story..." : "Your Post"}
             </Label>
             <Textarea
               id="content"
@@ -437,7 +438,7 @@ function getContentPlaceholder(section: string): string {
     case "celebrity-tea":
       return "Spill the tea about this celebrity...";
     case "story-time":
-      return "Tell us your story...";
+      return "Tell your story...";
     case "hot-topics":
       return "Share your take on this trending topic. What's your opinion? Why is everyone talking about it?";
     case "daily-debate":
