@@ -17,13 +17,13 @@ const WEEKLY_THEMES = [
   { 
     name: "Love Week", 
     emoji: "💖", 
-    color: "from-orange-500 to-orange-600",
+    color: "from-red-500 to-pink-500",
     description: "Share your romantic wins, fails, and everything in between" 
   },
   { 
     name: "Rant Week", 
     emoji: "😡", 
-    color: "from-red-500 to-orange-500",
+    color: "from-red-600 to-red-700",
     description: "Let it all out - what's been bothering you lately?" 
   },
   { 
@@ -35,7 +35,7 @@ const WEEKLY_THEMES = [
   { 
     name: "Unpopular Opinions", 
     emoji: "🤯", 
-    color: "from-orange-600 to-orange-700",
+    color: "from-purple-600 to-violet-600",
     description: "Share those thoughts everyone disagrees with" 
   },
   { 
@@ -43,6 +43,24 @@ const WEEKLY_THEMES = [
     emoji: "🌪️", 
     color: "from-green-500 to-teal-500",
     description: "When life gets messy - share your chaotic moments" 
+  },
+  { 
+    name: "Money Week", 
+    emoji: "💰", 
+    color: "from-green-600 to-emerald-600",
+    description: "Spill the tea about money, work, and financial drama" 
+  },
+  { 
+    name: "Drama Week", 
+    emoji: "🎭", 
+    color: "from-purple-500 to-fuchsia-500",
+    description: "Share the juiciest drama and messy situations" 
+  },
+  { 
+    name: "Self-Care Week", 
+    emoji: "🧘‍♀️", 
+    color: "from-blue-400 to-cyan-400",
+    description: "Focus on wellness, mental health, and taking care of yourself" 
   }
 ];
 
@@ -76,6 +94,24 @@ const THEMED_PROMPTS: Record<string, string[]> = {
     "Share a moment when everything went wrong at once",
     "Tell us about a time you caused complete chaos by accident",
     "What's your most 'main character energy' moment?",
+  ],
+  "Money Week": [
+    "What's the most expensive mistake you've ever made?",
+    "Share a time when money caused drama in your life",
+    "What's the cheapest thing you've ever done to save money?",
+    "Tell us about a financial decision you regret",
+  ],
+  "Drama Week": [
+    "What's the messiest drama you've ever witnessed?",
+    "Share a time when you accidentally started drama",
+    "What's the pettiest thing you've ever done?",
+    "Tell us about drama that was totally worth it",
+  ],
+  "Self-Care Week": [
+    "What's the best self-care advice you've ever received?",
+    "Share a mental health breakthrough you've had",
+    "What's something you do for yourself that others don't understand?",
+    "Tell us about a time you chose yourself first",
   ]
 };
 
