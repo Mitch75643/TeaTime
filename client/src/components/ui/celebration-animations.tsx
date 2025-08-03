@@ -16,18 +16,30 @@ const playSound = (soundType: string) => {
     
     switch (soundType) {
       case "twinkle":
-        // Soft twinkle/glitter sound
-        const twinkleOsc = audioContext.createOscillator();
-        const twinkleGain = audioContext.createGain();
-        twinkleOsc.connect(twinkleGain);
-        twinkleGain.connect(audioContext.destination);
-        twinkleOsc.type = "sine";
-        twinkleOsc.frequency.setValueAtTime(1500, audioContext.currentTime);
-        twinkleOsc.frequency.exponentialRampToValueAtTime(2000, audioContext.currentTime + 0.3);
-        twinkleGain.gain.setValueAtTime(0.15, audioContext.currentTime);
-        twinkleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-        twinkleOsc.start(audioContext.currentTime);
-        twinkleOsc.stop(audioContext.currentTime + 0.4);
+        // Soft water droplet sound - gentle and natural
+        const dropOsc = audioContext.createOscillator();
+        const dropGain = audioContext.createGain();
+        const dropFilter = audioContext.createBiquadFilter();
+        
+        dropOsc.connect(dropFilter);
+        dropFilter.connect(dropGain);
+        dropGain.connect(audioContext.destination);
+        
+        dropOsc.type = "sine";
+        dropFilter.type = "lowpass";
+        dropFilter.frequency.setValueAtTime(800, audioContext.currentTime);
+        
+        // Create a gentle droplet effect
+        dropOsc.frequency.setValueAtTime(400, audioContext.currentTime);
+        dropOsc.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+        dropOsc.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+        
+        dropGain.gain.setValueAtTime(0, audioContext.currentTime);
+        dropGain.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.02);
+        dropGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+        
+        dropOsc.start(audioContext.currentTime);
+        dropOsc.stop(audioContext.currentTime + 0.35);
         break;
         
       case "whoosh":
@@ -129,7 +141,7 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
     if (isVisible) {
       setShowAnimation(true);
       
-      // Play sound effect - using same pleasant twinkle sound for all topics
+      // Play sound effect - using soft water droplet sound for all topics
       playSound("twinkle");
       
       // Auto-hide after animation
