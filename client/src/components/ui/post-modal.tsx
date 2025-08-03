@@ -156,7 +156,7 @@ export function PostModal({
       .filter(tag => tag.trim())
       .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
     
-    const allTags = [...new Set([...selectedTags, ...manualTags])].slice(0, 5);
+    const allTags = Array.from(new Set([...selectedTags, ...manualTags])).slice(0, 5);
 
     createPostMutation.mutate({
       content: content.trim(),
@@ -196,7 +196,7 @@ export function PostModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md mx-4">
+      <DialogContent className="w-[95vw] max-w-md mx-auto my-8 max-h-[85vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle>
             <div className="flex items-center space-x-2">
@@ -236,7 +236,7 @@ export function PostModal({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={promptText ? `Responding to: "${promptText}"` : "Share your thoughts anonymously..."}
-              className="h-32 resize-none"
+              className="h-24 resize-none"
               maxLength={500}
             />
             <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">

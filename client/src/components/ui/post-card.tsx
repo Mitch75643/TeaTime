@@ -142,10 +142,10 @@ export function PostCard({ post }: PostCardProps) {
     <article 
       id={`post-${post.id}`}
       className={cn(
-        "rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden",
+        "w-full max-w-full rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden break-words",
         post.isDrama 
           ? "bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200"
-          : "bg-white border-gray-100"
+          : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
       )}>
       {/* Trending Badge */}
       {isTrending && !post.isDrama && (
@@ -154,8 +154,8 @@ export function PostCard({ post }: PostCardProps) {
         </div>
       )}
 
-      <div className={cn("flex items-start justify-between", isTrending && !post.isDrama && "pt-2")}>
-        <div className="flex items-center space-x-2">
+      <div className={cn("flex items-start justify-between gap-3", isTrending && !post.isDrama && "pt-2")}>
+        <div className="flex items-center space-x-3 min-w-0 flex-1">
           <div className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden",
             post.isDrama 
@@ -187,19 +187,19 @@ export function PostCard({ post }: PostCardProps) {
               )
             )}
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-900">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
               {sessionId && post.sessionId === sessionId ? userAlias : post.alias}
             </p>
-            <p className="text-xs text-gray-500">{timeAgo}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{timeAgo}</p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-shrink-0">
           <span className={cn(
-            "px-3 py-1 text-xs font-bold rounded-full border-2 shadow-sm",
+            "px-3 py-1 text-xs font-bold rounded-full border-2 shadow-sm whitespace-nowrap",
             post.isDrama 
               ? "gradient-drama text-white border-red-300"
-              : categoryColors[post.category] || "bg-gray-100 text-gray-800 border-gray-200"
+              : categoryColors[post.category] || "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
           )}>
             {categoryEmojis[post.category]} {categoryLabel}
           </span>
@@ -211,7 +211,7 @@ export function PostCard({ post }: PostCardProps) {
       </div>
 
       <div className="space-y-2">
-        <p className="text-gray-900 leading-relaxed">{post.content}</p>
+        <p className="text-gray-900 dark:text-gray-100 leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{post.content}</p>
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {post.tags.map((tag, index) => (
