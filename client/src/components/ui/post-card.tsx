@@ -34,10 +34,10 @@ const categoryColors: Record<string, string> = {
 };
 
 const reactionEmojis = {
-  laugh: "😂",
-  sad: "😢", 
   thumbsUp: "👍",
   thumbsDown: "👎",
+  laugh: "😂",
+  sad: "😢", 
 };
 
 export function PostCard({ post }: PostCardProps) {
@@ -125,7 +125,7 @@ export function PostCard({ post }: PostCardProps) {
     post.category.charAt(0).toUpperCase() + post.category.slice(1);
 
   // Calculate trending score for visual indication
-  const reactions = post.reactions as Record<string, number> || { laugh: 0, sad: 0, thumbsUp: 0, thumbsDown: 0 };
+  const reactions = post.reactions as Record<string, number> || { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 };
   const trendingScore = (reactions.laugh || 0) * 3 + 
                        (reactions.thumbsUp || 0) * 2 + 
                        (reactions.sad || 0) + 
