@@ -1,343 +1,330 @@
 import { useState } from "react";
-import { Button } from "./button";
-import { Card, CardContent, CardHeader, CardTitle } from "./card";
-import { Badge } from "./badge";
-import { Input } from "./input";
-import { Textarea } from "./textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
-import { Lightbulb, Bug, Zap, ArrowUp, ArrowDown, Eye, CheckCircle, Clock, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Bug, 
+  Sparkles, 
+  MessageSquare,
+  Plus, 
+  ThumbsUp, 
+  Star,
+  Send
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const suggestionTypes = [
-  { 
-    id: "bug", 
-    name: "Bug Report", 
-    emoji: "🐛", 
-    icon: Bug, 
-    color: "text-red-600",
-    description: "Report issues or problems" 
-  },
-  { 
-    id: "feature", 
-    name: "Feature Request", 
-    emoji: "✨", 
-    icon: Zap, 
-    color: "text-blue-600",
-    description: "Suggest new features" 
-  },
-  { 
-    id: "idea", 
-    name: "General Idea", 
-    emoji: "💡", 
-    icon: Lightbulb, 
-    color: "text-yellow-600",
-    description: "Share your thoughts" 
-  }
-];
-
-const statusLabels = [
-  { id: "planned", label: "📋 Planned", color: "bg-blue-100 text-blue-700", description: "We're working on this!" },
-  { id: "review", label: "👀 In Review", color: "bg-purple-100 text-purple-700", description: "Team is discussing" },
-  { id: "completed", label: "✅ Completed", color: "bg-green-100 text-green-700", description: "Done and live!" },
-  { id: "pending", label: "⏳ Pending", color: "bg-gray-100 text-gray-700", description: "Waiting for review" }
-];
+type SuggestionCategory = "bug" | "feature" | "feedback";
 
 interface Suggestion {
   id: string;
   title: string;
   description: string;
-  type: string;
+  category: SuggestionCategory;
   upvotes: number;
-  downvotes: number;
-  status: string;
   author: string;
-  createdAt: string;
+  createdAt: Date;
+  rating?: number; // For feedback type
+  hasVoted?: boolean;
 }
 
-const topSuggestions: Suggestion[] = [
+interface SuggestionsFeaturesProps {
+  onSubmitSuggestion: (suggestion: Omit<Suggestion, 'id' | 'upvotes' | 'createdAt' | 'hasVoted'>) => void;
+  onVote: (suggestionId: string, voteType: "up") => void;
+}
+
+const suggestionCategories = [
   {
-    id: "1",
-    title: "Dark mode for notifications panel",
-    description: "The notifications panel doesn't follow dark mode theme properly",
-    type: "bug",
-    upvotes: 47,
-    downvotes: 2,
-    status: "planned",
-    author: "TechSavvy23",
-    createdAt: "2 days ago"
+    id: "bug" as const,
+    name: "Bug Report",
+    emoji: "🐞",
+    icon: Bug,
+    color: "border-red-200 hover:border-red-300",
+    bgColor: "bg-red-50 dark:bg-red-900/20",
+    textColor: "text-red-600 dark:text-red-400",
+    titlePlaceholder: "What's the bug and where did it happen?",
+    descriptionPlaceholder: "Describe exactly what went wrong and where. Be as specific as you can."
   },
   {
-    id: "2", 
-    title: "Add voice messages for posts",
-    description: "Sometimes text doesn't capture the emotion. Voice notes would be amazing!",
-    type: "feature",
-    upvotes: 34,
-    downvotes: 8,
-    status: "review",
-    author: "VoiceQueen89",
-    createdAt: "1 week ago"
+    id: "feature" as const,
+    name: "Feature Request", 
+    emoji: "✨",
+    icon: Sparkles,
+    color: "border-blue-200 hover:border-blue-300",
+    bgColor: "bg-blue-50 dark:bg-blue-900/20",
+    textColor: "text-blue-600 dark:text-blue-400",
+    titlePlaceholder: "What should we add?",
+    descriptionPlaceholder: "Describe the feature, how it would work, and why it would be useful."
   },
   {
-    id: "3",
-    title: "Better emoji reactions",
-    description: "We need more diverse reactions beyond the basic ones",
-    type: "feature", 
-    upvotes: 28,
-    downvotes: 3,
-    status: "pending",
-    author: "EmojiLover42",
-    createdAt: "3 days ago"
-  },
-  {
-    id: "4",
-    title: "Profile customization options",
-    description: "Let users add bio, favorite quotes, or mood status",
-    type: "idea",
-    upvotes: 25,
-    downvotes: 5,
-    status: "review",
-    author: "CustomizeMe",
-    createdAt: "5 days ago"
+    id: "feedback" as const,
+    name: "Feedback",
+    emoji: "💬", 
+    icon: MessageSquare,
+    color: "border-yellow-200 hover:border-yellow-300",
+    bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
+    textColor: "text-yellow-600 dark:text-yellow-400",
+    titlePlaceholder: "What are your thoughts or feedback?",
+    descriptionPlaceholder: "Share your experience, suggestions, or general thoughts about TeaSpill."
   }
 ];
 
-interface SuggestionsFeaturesProps {
-  onSubmitSuggestion: (suggestion: Omit<Suggestion, 'id' | 'upvotes' | 'downvotes' | 'createdAt'>) => void;
-  onVote: (suggestionId: string, voteType: 'up' | 'down') => void;
-}
+// Sample suggestions for display
+const sampleSuggestions: Suggestion[] = [
+  {
+    id: "1",
+    title: "Dark mode notification bug",
+    description: "Notifications don't follow dark mode properly...",
+    category: "bug",
+    upvotes: 47,
+    author: "TechUser23",
+    createdAt: new Date("2025-01-01"),
+  },
+  {
+    id: "2", 
+    title: "Add voice messages",
+    description: "Voice notes would capture emotion better...",
+    category: "feature",
+    upvotes: 34,
+    author: "VoiceQueen89",
+    createdAt: new Date("2025-01-02"),
+  },
+  {
+    id: "3",
+    title: "App feels really smooth",
+    description: "Great job on the latest updates!",
+    category: "feedback",
+    upvotes: 28,
+    author: "HappyUser42",
+    createdAt: new Date("2025-01-03"),
+    rating: 5
+  }
+];
 
 export function SuggestionsFeatures({ onSubmitSuggestion, onVote }: SuggestionsFeaturesProps) {
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [selectedType, setSelectedType] = useState("idea");
-  const [userVotes, setUserVotes] = useState<Record<string, 'up' | 'down' | null>>({});
+  const [selectedCategory, setSelectedCategory] = useState<SuggestionCategory | null>(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [rating, setRating] = useState(0);
+  const [suggestions] = useState<Suggestion[]>(sampleSuggestions);
+  const [userVotes, setUserVotes] = useState<Record<string, boolean>>({});
 
-  const handleVote = (suggestionId: string, voteType: 'up' | 'down') => {
-    setUserVotes(prev => ({
-      ...prev,
-      [suggestionId]: prev[suggestionId] === voteType ? null : voteType
-    }));
-    onVote(suggestionId, voteType);
-  };
+  const selectedCategoryData = suggestionCategories.find(cat => cat.id === selectedCategory);
 
   const handleSubmit = () => {
-    if (newTitle.trim() && newDescription.trim()) {
-      onSubmitSuggestion({
-        title: newTitle,
-        description: newDescription,
-        type: selectedType,
-        status: "pending",
-        author: "You", // Will be replaced with actual username
-      });
-      setNewTitle("");
-      setNewDescription("");
-      setSelectedType("idea");
+    if (!selectedCategory || !title.trim() || !description.trim()) return;
+    
+    const newSuggestion = {
+      title: title.trim(),
+      description: description.trim(),
+      category: selectedCategory,
+      author: "You",
+      rating: selectedCategory === "feedback" ? rating : undefined
+    };
+    
+    onSubmitSuggestion(newSuggestion);
+    
+    // Reset form
+    setTitle("");
+    setDescription("");
+    setRating(0);
+    setSelectedCategory(null);
+  };
+
+  const handleVote = (suggestionId: string) => {
+    setUserVotes(prev => ({
+      ...prev,
+      [suggestionId]: !prev[suggestionId]
+    }));
+    onVote(suggestionId, "up");
+  };
+
+  const getCategoryBadgeStyle = (category: SuggestionCategory) => {
+    switch (category) {
+      case "bug":
+        return "bg-red-100 text-red-700 border-red-200";
+      case "feature":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "feedback":
+        return "bg-yellow-100 text-yellow-700 border-yellow-200";
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusInfo = statusLabels.find(s => s.id === status) || statusLabels[3];
-    return (
-      <Badge className={statusInfo.color}>
-        {statusInfo.label}
-      </Badge>
-    );
-  };
-
-  const getTypeIcon = (type: string) => {
-    const typeInfo = suggestionTypes.find(t => t.id === type) || suggestionTypes[2];
-    const Icon = typeInfo.icon;
-    return <Icon className={cn("h-4 w-4", typeInfo.color)} />;
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Submit New Suggestion */}
-      <Card className="border-blue-200 dark:border-blue-800">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-          <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-            <Plus className="h-5 w-5" />
-            💡 Share Your Idea
-          </CardTitle>
-          <p className="text-sm text-blue-600 dark:text-blue-400">
-            Help make TeaSpill even better for everyone
-          </p>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            {/* Type Selector */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                What type of suggestion is this?
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {suggestionTypes.map((type) => {
-                  const Icon = type.icon;
-                  return (
-                    <Button
-                      key={type.id}
-                      variant={selectedType === type.id ? "default" : "outline"}
-                      onClick={() => setSelectedType(type.id)}
-                      className="h-auto p-3 justify-start"
-                    >
-                      <div className="text-left w-full">
-                        <div className="flex items-center gap-2 font-medium">
-                          <span>{type.emoji}</span>
-                          <span className="text-sm">{type.name}</span>
-                        </div>
-                        <div className="text-xs opacity-70 mt-1">
-                          {type.description}
-                        </div>
-                      </div>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
+    <div className="space-y-4">
+      {/* Category Selection */}
+      {!selectedCategory && (
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              What would you like to share?
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            {suggestionCategories.map((category) => (
+              <Button
+                key={category.id}
+                variant="outline"
+                onClick={() => setSelectedCategory(category.id)}
+                className={cn(
+                  "w-full justify-start h-auto p-3 text-left",
+                  category.color,
+                  category.bgColor
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{category.emoji}</span>
+                  <div>
+                    <p className={cn("font-medium text-sm", category.textColor)}>
+                      {category.name}
+                    </p>
+                  </div>
+                </div>
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
+      {/* Selected Category Form */}
+      {selectedCategory && selectedCategoryData && (
+        <Card className={cn("border-2", selectedCategoryData.color)}>
+          <CardHeader className={cn("pb-3", selectedCategoryData.bgColor)}>
+            <div className="flex items-center justify-between">
+              <CardTitle className={cn("text-sm font-medium flex items-center gap-2", selectedCategoryData.textColor)}>
+                <span className="text-base">{selectedCategoryData.emoji}</span>
+                {selectedCategoryData.name}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCategory(null)}
+                className="text-xs"
+              >
+                ← Back
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {/* Title Input */}
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                Title (be specific and clear):
-              </label>
               <Input
-                placeholder="What's your suggestion about?"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                maxLength={100}
+                placeholder={selectedCategoryData.titlePlaceholder}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="text-sm"
               />
-              <div className="text-xs text-gray-500 mt-1 text-right">
-                {newTitle.length}/100
-              </div>
             </div>
 
-            {/* Description Input */}
+            {/* Rating for Feedback */}
+            {selectedCategory === "feedback" && (
+              <div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                  Rate your experience:
+                </p>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setRating(star)}
+                      className={cn(
+                        "text-lg transition-colors",
+                        star <= rating ? "text-yellow-400" : "text-gray-300"
+                      )}
+                    >
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                Description (provide details):
-              </label>
               <Textarea
-                placeholder="Explain your suggestion in detail. Include why it would be helpful and how it might work."
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                className="h-24 resize-none"
-                maxLength={500}
+                placeholder={selectedCategoryData.descriptionPlaceholder}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="text-sm min-h-[60px] resize-none"
+                rows={3}
               />
-              <div className="text-xs text-gray-500 mt-1 text-right">
-                {newDescription.length}/500
-              </div>
             </div>
 
-            <Button
+            {/* Submit Button */}
+            <Button 
               onClick={handleSubmit}
-              disabled={!newTitle.trim() || !newDescription.trim()}
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+              disabled={!title.trim() || !description.trim() || (selectedCategory === "feedback" && rating === 0)}
+              className={cn(
+                "w-full text-sm",
+                selectedCategory === "bug" && "bg-red-500 hover:bg-red-600",
+                selectedCategory === "feature" && "bg-blue-500 hover:bg-blue-600", 
+                selectedCategory === "feedback" && "bg-yellow-500 hover:bg-yellow-600"
+              )}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Submit Suggestion
+              <Send className="h-3 w-3 mr-2" />
+              Submit {selectedCategoryData.name}
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Top Suggestions */}
-      <Card className="border-purple-200 dark:border-purple-800">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
-          <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
-            <ArrowUp className="h-5 w-5" />
+      {/* Community Suggestions Feed */}
+      <Card className="border-gray-200 dark:border-gray-700">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
             🏆 Top Community Suggestions
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            {topSuggestions.map((suggestion) => (
-              <div
-                key={suggestion.id}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-all"
-              >
-                <div className="flex items-start gap-3">
-                  {/* Voting */}
-                  <div className="flex flex-col items-center gap-1 min-w-[50px]">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleVote(suggestion.id, 'up')}
-                      className={cn(
-                        "h-8 w-8 p-0",
-                        userVotes[suggestion.id] === 'up' && "bg-green-100 border-green-400 text-green-600"
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {suggestions.map((suggestion) => (
+              <Card key={suggestion.id} className={cn("border", getCategoryBadgeStyle(suggestion.category), "border-opacity-30")}>
+                <CardContent className="p-3">
+                  <div className="space-y-2">
+                    {/* Header with category badge */}
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className={cn("text-xs", getCategoryBadgeStyle(suggestion.category))}>
+                        {suggestionCategories.find(cat => cat.id === suggestion.category)?.emoji} {suggestion.category}
+                      </Badge>
+                      {suggestion.rating && (
+                        <div className="flex">
+                          {[...Array(suggestion.rating)].map((_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
                       )}
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {suggestion.upvotes - suggestion.downvotes}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleVote(suggestion.id, 'down')}
-                      className={cn(
-                        "h-8 w-8 p-0",
-                        userVotes[suggestion.id] === 'down' && "bg-red-100 border-red-400 text-red-600"
-                      )}
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {getTypeIcon(suggestion.type)}
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                          {suggestion.title}
-                        </h3>
-                      </div>
-                      {getStatusBadge(suggestion.status)}
                     </div>
-                    
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+
+                    {/* Title */}
+                    <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
+                      {suggestion.title}
+                    </h3>
+
+                    {/* Description preview */}
+                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
                       {suggestion.description}
                     </p>
-                    
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span>by {suggestion.author}</span>
-                      <span>{suggestion.createdAt}</span>
-                      <div className="flex items-center gap-1">
-                        <ArrowUp className="h-3 w-3 text-green-500" />
-                        <span>{suggestion.upvotes}</span>
-                        <ArrowDown className="h-3 w-3 text-red-500 ml-2" />
-                        <span>{suggestion.downvotes}</span>
-                      </div>
+
+                    {/* Footer with vote */}
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs text-gray-500">{suggestion.author}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleVote(suggestion.id)}
+                        className={cn(
+                          "h-6 px-2 text-xs",
+                          userVotes[suggestion.id] && "text-blue-600 bg-blue-50"
+                        )}
+                      >
+                        <ThumbsUp className="h-3 w-3 mr-1" />
+                        {suggestion.upvotes + (userVotes[suggestion.id] ? 1 : 0)}
+                      </Button>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Status Legend */}
-      <Card className="border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <Eye className="h-5 w-5" />
-            📊 Status Meanings
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-2 gap-3">
-            {statusLabels.map((status) => (
-              <div key={status.id} className="flex items-center gap-3">
-                <Badge className={status.color}>
-                  {status.label}
-                </Badge>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {status.description}
-                </span>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </CardContent>
