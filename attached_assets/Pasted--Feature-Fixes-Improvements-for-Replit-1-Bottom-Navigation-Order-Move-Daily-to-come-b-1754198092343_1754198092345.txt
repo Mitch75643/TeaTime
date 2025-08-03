@@ -1,0 +1,133 @@
+✅ 🛠️ Feature Fixes & Improvements for Replit
+🧭 1. Bottom Navigation Order
+Move Daily (☕) to come before Community (🌐) in the bottom taskbar
+
+☕ 2. Daily Section (Redesign + Logic)
+Add a Leaderboard based on most-reacted posts
+
+Enable a voting system for posts (like 👍 / 👎)
+
+A new daily prompt should be auto-generated every 24 hours
+
+Trending posts in this section should reset every 24 hours as well
+
+🆕 3. New Section Refresh Button
+Add a refresh button on the New section
+
+When tapped:
+
+Load new posts only
+
+Do not repeat previously seen posts during a single session
+
+🌐 4. Community Page UI Fixes
+Make the topic bar horizontally scrollable to allow more categories
+
+Remove extra emojis beside community section names — only keep one color emoji per section for visual clarity
+
+5. 🔁 Updated Developer Prompt for Replit (Community Cards & UI)
+Please update the Community experience with the following layout and interaction changes for each topic card, inspired by the attached design:
+
+🎨 Community Card Redesign
+When a user taps any Community category card (e.g., "Celebrity Tea"), open a full-screen modal or slide-up info card with the following layout:
+
+🔍 Card Layout (Use for ALL Community Sections)
+Top Row:
+
+Icon + Section Name (e.g., 🎤 Celebrity Tea)
+
+Star icon to favorite/pin section
+
+Description Text:
+
+Brief intro to what the section is about
+(e.g., “Spill the latest celebrity gossip, pop culture moments, and influencer drama”)
+
+Popular Tags:
+
+Styled hashtag buttons like #Selena (12), #Drama (22), etc.
+
+Include tag count next to each
+
+Post CTA Button:
+
+Prominent button: + Share [Section Name]
+
+Button opens the post editor with custom card color theme matching the section
+
+Styling:
+
+Gradient background color matching section
+
+Rounded corners and soft shadows
+
+Responsive and scrollable
+
+🛠️ Interaction Logic for Each Section
+🎤 Celebrity Tea
+Clicking + Share Celebrity Tea opens a custom post layout:
+
+Input 1: “Celebrity or Topic” (short text field)
+
+Input 2: “What’s the tea?” (long post input)
+
+Optional Tags: #Viral, #Beef, etc.
+
+No category field
+
+📖 Stories
+Clicking on a topic (e.g., “Scary”, “Funny”) opens:
+
+A card styled with the topic’s theme
+
+Title auto-fills with “Scary Story”, etc.
+
+Normal post field + hashtag area
+
+No category shown; use topic as visual label
+
+🔥 Hot Topics
+Card opens with:
+
+Quick intro description: “Spicy takes. Keep it real.”
+
+Hashtags like #UnpopularOpinion, #Bold
+
+Only allow “hot take” style posts
+
+Keep layout minimal, reaction-heavy
+
+🗳 Daily Debate
+Clicking into card opens:
+
+Daily prompt from the system or created by user
+
+Others can thumbs up / thumbs down only
+
+No comments, no reactions, no hashtags
+
+Leaderboard shown for top upvoted debates
+
+🧪 Tea Experiments
+Card explains: “Share a dilemma, let the community choose your fate.”
+
+Posts use A/B format — option A vs B
+
+Community votes shown as percentage (e.g., A: 40% / B: 60%)
+
+No comment section
+
+🧭 Navigation Note
+These cards should open as a modal or new page (not a standard post feed)
+
+Design should be consistent with your screenshot:
+
+Section color scheme
+
+Bold title
+
+Descriptive subtitle
+
+Hashtag bubble buttons
+
+Big “Share” CTA

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { FeedToggle } from "@/components/ui/feed-toggle";
@@ -8,15 +8,18 @@ import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import type { Post } from "@shared/schema";
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [feedType, setFeedType] = useState<"new" | "trending">("new");
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [seenPostIds, setSeenPostIds] = useState<Set<string>>(new Set());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
-  const { data: posts = [], isLoading } = useQuery<Post[]>({
+  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -31,6 +34,28 @@ export default function Home() {
     },
   });
 
+  // Filter out seen posts when in "new" mode
+  const posts = feedType === "new" 
+    ? allPosts.filter(post => !seenPostIds.has(post.id))
+    : allPosts;
+
+  // Track seen posts
+  useEffect(() => {
+    if (allPosts.length > 0) {
+      const newSeenIds = new Set(seenPostIds);
+      allPosts.forEach(post => newSeenIds.add(post.id));
+      setSeenPostIds(newSeenIds);
+    }
+  }, [allPosts]);
+
+  const handleRefresh = async () => {
+    if (feedType !== "new") return;
+    
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+    setIsRefreshing(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -40,10 +65,24 @@ export default function Home() {
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
         />
-        <FeedToggle
-          feedType={feedType}
-          onFeedTypeChange={setFeedType}
-        />
+        <div className="flex items-center justify-between px-4 py-2">
+          <FeedToggle
+            feedType={feedType}
+            onFeedTypeChange={setFeedType}
+          />
+          {feedType === "new" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center space-x-1"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+          )}
+        </div>
       </div>
 
       <main className="pb-20 px-4 space-y-4 pt-4">

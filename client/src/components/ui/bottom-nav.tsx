@@ -12,8 +12,8 @@ export function BottomNav() {
 
   const navItems = [
     { id: "home", label: "Home", icon: Home, path: "/" },
-    { id: "community", label: "Community", icon: Users, path: "/community" },
     { id: "daily", label: "Daily", icon: Coffee, path: "/daily-spill" },
+    { id: "community", label: "Community", icon: Users, path: "/community" },
     { id: "me", label: "Me", icon: User, path: "/profile" },
   ];
 
@@ -26,7 +26,7 @@ export function BottomNav() {
             const isActive = location === item.path;
             
             // Add spacer for the floating button in the middle
-            if (index === 2) {
+            if (index === 1) {
               return (
                 <div key={`spacer-${index}`} className="flex-1 flex justify-center">
                   <Link href={item.path!}>

@@ -19,6 +19,7 @@ interface PostModalProps {
   defaultCategory?: string;
   defaultTags?: string[];
   promptText?: string;
+  sectionTheme?: string;
 }
 
 const categories = [
@@ -38,7 +39,7 @@ const popularTags = [
   "#nsfw", "#serious", "#update", "#urgent", "#anonymous", "#story"
 ];
 
-export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags = [], promptText }: PostModalProps) {
+export function PostModal({ isOpen, onClose, defaultCategory = "", defaultTags = [], promptText = "", sectionTheme = "" }: PostModalProps) {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [tagsInput, setTagsInput] = useState("");
