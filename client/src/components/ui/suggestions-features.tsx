@@ -67,7 +67,7 @@ const suggestionCategories = [
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     textColor: "text-yellow-600 dark:text-yellow-400",
     titlePlaceholder: "What are your thoughts or feedback?",
-    descriptionPlaceholder: "Share your experience, suggestions, or general thoughts about TeaSpill."
+    descriptionPlaceholder: "Share your experience, suggestions, or general thoughts about Tfess."
   }
 ];
 

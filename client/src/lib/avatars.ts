@@ -1,4 +1,4 @@
-// Pre-made avatar collection for TeaSpill
+// Pre-made avatar collection for Tfess
 // Using SVG-based avatars for copyright-free, customizable profile pictures
 
 export interface Avatar {

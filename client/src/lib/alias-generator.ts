@@ -1,4 +1,4 @@
-// Fun username generator for Fessr users
+// Fun username generator for Tfess users
 const adjectives = [
   // Drama & Gossip themed
   "Spicy", "Petty", "Chaotic", "Dramatic", "Messy", "Salty", "Shady", "Sneaky",

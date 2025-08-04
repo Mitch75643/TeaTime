@@ -33,7 +33,7 @@ function generateFunUsername(): string {
 function generateDeviceFingerprint(): string {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  ctx?.fillText('Fessr', 10, 10);
+  ctx?.fillText('Tfess', 10, 10);
   
   const fingerprint = [
     navigator.userAgent,
@@ -56,10 +56,10 @@ function generateDeviceFingerprint(): string {
 
 // Local storage keys
 const STORAGE_KEYS = {
-  ANON_ID: 'fessr_anon_id',
-  USER_DATA: 'fessr_user_data',
-  DEVICE_FINGERPRINT: 'fessr_device_fp',
-  IS_UPGRADED: 'fessr_is_upgraded',
+  ANON_ID: 'tfess_anon_id',
+  USER_DATA: 'tfess_user_data',
+  DEVICE_FINGERPRINT: 'tfess_device_fp',
+  IS_UPGRADED: 'tfess_is_upgraded',
 } as const;
 
 export interface LocalUserData {
@@ -241,8 +241,8 @@ class AnonymousAuthService {
     if (!this.currentUser || this.currentUser.isUpgraded) return false;
     
     // Check if user has made posts or been active
-    const hasPosted = localStorage.getItem('fessr_has_posted') === 'true';
-    const visitCount = parseInt(localStorage.getItem('fessr_visit_count') || '0');
+    const hasPosted = localStorage.getItem('tfess_has_posted') === 'true';
+    const visitCount = parseInt(localStorage.getItem('tfess_visit_count') || '0');
     
     return hasPosted || visitCount > 2;
   }

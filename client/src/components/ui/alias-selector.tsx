@@ -34,7 +34,7 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
   return (
     <Card className={cn("w-full max-w-md", className)}>
       <CardHeader className="text-center">
-        <CardTitle className="text-lg">Your TeaSpill Username</CardTitle>
+        <CardTitle className="text-lg">Your Tfess Username</CardTitle>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           This is how you'll appear to others (your identity stays anonymous)
         </p>

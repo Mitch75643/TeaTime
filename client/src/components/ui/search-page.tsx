@@ -185,7 +185,7 @@ export function SearchPage({ isOpen, onClose }: SearchPageProps) {
             <div className="text-center py-12">
               <Search className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Search TeaSpill
+                Search Tfess
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Search for posts, tags, or browse by category

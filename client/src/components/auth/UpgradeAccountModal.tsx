@@ -166,7 +166,7 @@ export function UpgradeAccountModal({ isOpen, onClose, onSuccess }: UpgradeAccou
                         type="password"
                         value={passphrase}
                         onChange={(e) => setPassphrase(e.target.value)}
-                        placeholder="e.g., MySecretTeaSpillPhrase2024"
+                        placeholder="e.g., MySecretTfessPhrase2024"
                         required
                         minLength={8}
                       />

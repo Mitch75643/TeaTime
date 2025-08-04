@@ -83,7 +83,7 @@ export function PostCreationModal({ trigger, onPostCreated }: PostCreationModalP
         <DialogHeader>
           <DialogTitle className="text-center">Share Your Tea ☕</DialogTitle>
           <p className="text-sm text-gray-600 text-center">
-            Post anonymously to the TeaSpill community
+            Post anonymously to the Tfess community
           </p>
         </DialogHeader>
         

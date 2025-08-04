@@ -56,7 +56,7 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
         <DialogHeader>
           <DialogTitle className="text-center">Choose Your Profile Pic</DialogTitle>
           <p className="text-sm text-gray-600 text-center">
-            Pick an avatar that represents your TeaSpill personality
+            Pick an avatar that represents your Tfess personality
           </p>
         </DialogHeader>
         

@@ -125,7 +125,7 @@ export default function Profile() {
   const handleExportData = () => {
     const data = {
       reactions: Object.keys(localStorage).filter(key => key.startsWith('reactions-')),
-      drafts: localStorage.getItem('teaspill-post-draft'),
+      drafts: localStorage.getItem('tfess-post-draft'),
       timestamp: new Date().toISOString()
     };
     
@@ -133,7 +133,7 @@ export default function Profile() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'teaspill-data.json';
+    a.download = 'tfess-data.json';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -247,7 +247,7 @@ export default function Profile() {
               <div>
                 <CardTitle className="text-xl mb-2">{userAlias}</CardTitle>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Your anonymous TeaSpill username
+                  Your anonymous Tfess username
                 </p>
               </div>
             </div>
@@ -605,7 +605,7 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button variant="ghost" className="w-full justify-start">
-              How to use TeaSpill
+              How to use Tfess
             </Button>
             <Button variant="ghost" className="w-full justify-start">
               Community Guidelines
@@ -614,14 +614,14 @@ export default function Profile() {
               Report a Problem
             </Button>
             <Button variant="ghost" className="w-full justify-start">
-              About TeaSpill
+              About Tfess
             </Button>
           </CardContent>
         </Card>
 
             {/* App Info */}
             <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4">
-              <p>TeaSpill v1.0.0</p>
+              <p>Tfess v1.0.0</p>
               <p>Made for anonymous sharing</p>
             </div>
           </div>

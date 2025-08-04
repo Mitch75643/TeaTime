@@ -5,7 +5,7 @@ export interface PostDraft {
   timestamp: number;
 }
 
-const DRAFT_KEY = 'teaspill-post-draft';
+const DRAFT_KEY = 'tfess-post-draft';
 const DRAFT_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
 export function saveDraft(draft: Omit<PostDraft, 'timestamp'>) {

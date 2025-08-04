@@ -10,7 +10,7 @@ import { Shield, Fingerprint, Key, User, Mail, AlertCircle, Check } from "lucide
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { checkBiometricSupport, authenticateWithBiometrics, isBiometricEnabled } from "@/lib/biometricAuth";
 import { useLocation } from "wouter";
-import fessrLogo from "../../assets/fessr-logo.png";
+import tfessLogo from "../../assets/fessr-logo.png";
 
 interface LoginPageProps {
   onLoginSuccess?: () => void;
@@ -46,7 +46,7 @@ export function LoginPage({ onLoginSuccess, onStayAnonymous }: LoginPageProps) {
       setBiometricSupported(supported);
       
       // Check if user has any saved biometric credentials
-      const savedUsers = localStorage.getItem('teaspill_user_data');
+      const savedUsers = localStorage.getItem('tfess_user_data');
       if (savedUsers) {
         // Check if any saved user has biometric enabled
         const userData = JSON.parse(savedUsers);
@@ -64,7 +64,7 @@ export function LoginPage({ onLoginSuccess, onStayAnonymous }: LoginPageProps) {
     setError(null);
     
     try {
-      const savedUsers = localStorage.getItem('teaspill_user_data');
+      const savedUsers = localStorage.getItem('tfess_user_data');
       if (!savedUsers) {
         throw new Error('No saved user data found');
       }
@@ -150,13 +150,13 @@ export function LoginPage({ onLoginSuccess, onStayAnonymous }: LoginPageProps) {
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto w-16 h-16 flex items-center justify-center">
             <img 
-              src={fessrLogo} 
-              alt="Fessr Logo" 
+              src={tfessLogo} 
+              alt="Tfess Logo" 
               className="w-12 h-12 object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-            Welcome to Fessr
+            Welcome to Tfess
           </CardTitle>
           <CardDescription>
             Choose how you'd like to continue - completely anonymous or with secure sync

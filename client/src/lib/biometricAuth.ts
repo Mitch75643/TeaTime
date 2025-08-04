@@ -1,5 +1,5 @@
 /**
- * Biometric Authentication Service for Fessr
+ * Biometric Authentication Service for Tfess
  * Handles Face ID, Touch ID, and other platform biometric authentication
  */
 
@@ -20,7 +20,7 @@ export interface BiometricAuthService {
 }
 
 class BiometricAuthServiceImpl implements BiometricAuthService {
-  private readonly STORAGE_PREFIX = 'fessr_biometric_';
+  private readonly STORAGE_PREFIX = 'tfess_biometric_';
   
   /**
    * Check if biometric authentication is supported on this device
@@ -53,7 +53,7 @@ class BiometricAuthServiceImpl implements BiometricAuthService {
     const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
       challenge: challenge,
       rp: {
-        name: "Fessr",
+        name: "Tfess",
         id: window.location.hostname,
       },
       user: {

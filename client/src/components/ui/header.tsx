@@ -6,7 +6,7 @@ import { getAvatarById } from "@/lib/avatars";
 import { useLocation } from "wouter";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
-import fessrLogo from "../../assets/fessr-logo.png";
+import tfessLogo from "../../assets/fessr-logo.png";
 
 export function Header() {
   const [, setLocation] = useLocation();
@@ -23,11 +23,11 @@ export function Header() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <img 
-            src={fessrLogo} 
-            alt="Fessr Logo" 
+            src={tfessLogo} 
+            alt="Tfess Logo" 
             className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter brightness-0 invert translate-y-1 translate-x-0.5"
           />
-          <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide -translate-x-0.5">Fessr</h1>
+          <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide -translate-x-0.5">Tfess</h1>
         </div>
         <div className="flex items-center space-x-3">
           <NotificationsPanel />

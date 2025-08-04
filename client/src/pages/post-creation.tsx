@@ -77,7 +77,7 @@ export default function PostCreation() {
           <CardHeader>
             <CardTitle className="text-center">Share Your Tea ☕</CardTitle>
             <p className="text-sm text-gray-600 text-center">
-              Post anonymously to the TeaSpill community
+              Post anonymously to the Tfess community
             </p>
           </CardHeader>
           

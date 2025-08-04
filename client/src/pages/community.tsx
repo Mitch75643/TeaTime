@@ -131,7 +131,7 @@ const communitySections = [
     name: "Feedback/Suggestions",
     emoji: "💡",
     icon: Lightbulb, 
-    description: "Share feature ideas and feedback to improve TeaSpill",
+    description: "Share feature ideas and feedback to improve Tfess",
     tags: [
       { tag: "#Feature", count: 9 },
       { tag: "#Feedback", count: 12 },
