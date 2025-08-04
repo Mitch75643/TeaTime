@@ -51,6 +51,7 @@ import { BiometricSetup } from "@/components/auth/BiometricSetup";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BanTestingPanel } from "@/components/admin/ban-testing-panel";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
@@ -594,6 +595,9 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Ban System Testing (Development Only) */}
+        <BanTestingPanel />
 
         {/* Help & Support */}
         <Card>

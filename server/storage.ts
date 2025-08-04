@@ -1,4 +1,4 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { createHash } from "crypto";
 
@@ -51,6 +51,13 @@ export interface IStorage {
   loginUser(loginData: LoginInput & { deviceFingerprint?: string }): Promise<{ success: boolean; error?: string; user?: AnonymousUser }>;
   updateUserProfile(anonId: string, updates: { alias?: string; avatarId?: string }): Promise<void>;
   createDeviceSession(anonUserId: string, sessionId: string, deviceFingerprint?: string): Promise<DeviceSession>;
+  
+  // Device Ban System
+  createBannedDevice(banData: { deviceFingerprint: string; bannedBy?: string; banReason?: string; isTemporary?: boolean; expiresAt?: string; deviceMetadata?: Record<string, any> }): Promise<BannedDevice>;
+  getBannedDevice(deviceFingerprint: string): Promise<BannedDevice | undefined>;
+  getAllBannedDevices(): Promise<BannedDevice[]>;
+  updateBannedDevice(deviceFingerprint: string, updates: Partial<BannedDevice>): Promise<boolean>;
+  removeBannedDevice(deviceFingerprint: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -63,6 +70,7 @@ export class MemStorage implements IStorage {
   private notifications: Map<string, Notification>;
   private anonymousUsers: Map<string, AnonymousUser>;
   private deviceSessions: Map<string, DeviceSession>;
+  private bannedDevices: Map<string, BannedDevice>;
 
   constructor() {
     this.posts = new Map();
@@ -74,6 +82,7 @@ export class MemStorage implements IStorage {
     this.notifications = new Map();
     this.anonymousUsers = new Map();
     this.deviceSessions = new Map();
+    this.bannedDevices = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -700,6 +709,47 @@ export class MemStorage implements IStorage {
 
     this.deviceSessions.set(id, session);
     return session;
+  }
+
+  // Device Ban System methods
+  async createBannedDevice(banData: { deviceFingerprint: string; bannedBy?: string; banReason?: string; isTemporary?: boolean; expiresAt?: string; deviceMetadata?: Record<string, any> }): Promise<BannedDevice> {
+    const id = randomUUID();
+    const bannedDevice: BannedDevice = {
+      id,
+      deviceFingerprint: banData.deviceFingerprint,
+      bannedBy: banData.bannedBy || null,
+      banReason: banData.banReason || null,
+      isTemporary: banData.isTemporary || false,
+      expiresAt: banData.expiresAt || null,
+      deviceMetadata: banData.deviceMetadata || {},
+      createdAt: new Date(),
+    };
+
+    this.bannedDevices.set(banData.deviceFingerprint, bannedDevice);
+    return bannedDevice;
+  }
+
+  async getBannedDevice(deviceFingerprint: string): Promise<BannedDevice | undefined> {
+    return this.bannedDevices.get(deviceFingerprint);
+  }
+
+  async getAllBannedDevices(): Promise<BannedDevice[]> {
+    return Array.from(this.bannedDevices.values());
+  }
+
+  async updateBannedDevice(deviceFingerprint: string, updates: Partial<BannedDevice>): Promise<boolean> {
+    const existingBan = this.bannedDevices.get(deviceFingerprint);
+    if (!existingBan) {
+      return false;
+    }
+
+    const updatedBan = { ...existingBan, ...updates };
+    this.bannedDevices.set(deviceFingerprint, updatedBan);
+    return true;
+  }
+
+  async removeBannedDevice(deviceFingerprint: string): Promise<boolean> {
+    return this.bannedDevices.delete(deviceFingerprint);
   }
 }
 

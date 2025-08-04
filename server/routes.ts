@@ -2,8 +2,9 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
-import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, type ModerationResponse } from "@shared/schema";
+import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, banDeviceSchema, checkBanSchema, type ModerationResponse } from "@shared/schema";
 import { comprehensiveModeration } from "./moderation";
+import { checkDeviceBanMiddleware, strictBanCheckMiddleware, banSystem, startBanCleanupScheduler } from "./banMiddleware";
 
 declare module 'express-session' {
   interface SessionData {
@@ -31,6 +32,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     next();
   });
+
+  // Apply general ban check middleware to all routes
+  app.use(checkDeviceBanMiddleware);
+
+  // Start ban cleanup scheduler
+  startBanCleanupScheduler();
 
   // Get session info
   app.get("/api/session", (req, res) => {
@@ -106,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create post
-  app.post("/api/posts", async (req, res) => {
+  app.post("/api/posts", strictBanCheckMiddleware, async (req, res) => {
     try {
       const validatedData = insertPostSchema.parse(req.body);
       
@@ -175,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create comment
-  app.post("/api/posts/:postId/comments", async (req, res) => {
+  app.post("/api/posts/:postId/comments", strictBanCheckMiddleware, async (req, res) => {
     try {
       const validatedData = insertCommentSchema.parse({
         ...req.body,
@@ -526,6 +533,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to get user info:", error);
       res.status(500).json({ message: "Failed to get user info" });
+    }
+  });
+
+  // ====== Device Ban Management Routes ======
+
+  // Check if device is banned
+  app.post("/api/bans/check", async (req, res) => {
+    try {
+      const { deviceFingerprint } = checkBanSchema.parse(req.body);
+      const { banned, banInfo } = await banSystem.isDeviceBanned(deviceFingerprint);
+      
+      res.json({ 
+        banned,
+        banInfo: banned ? banInfo : undefined
+      });
+    } catch (error) {
+      console.error("Ban check error:", error);
+      res.status(500).json({ error: "Ban check failed" });
+    }
+  });
+
+  // Ban a device (admin only)
+  app.post("/api/bans/ban", async (req, res) => {
+    try {
+      const banData = banDeviceSchema.parse(req.body);
+      const bannedBy = req.session.id || 'system'; // In real app, use admin authentication
+      
+      const banRecord = await banSystem.banDevice({
+        ...banData,
+        bannedBy,
+        expiresAt: banData.expiresAt,
+      });
+      
+      res.json(banRecord);
+    } catch (error) {
+      console.error("Ban device error:", error);
+      res.status(500).json({ error: "Failed to ban device" });
+    }
+  });
+
+  // Unban a device (admin only)
+  app.post("/api/bans/unban", async (req, res) => {
+    try {
+      const { deviceFingerprint } = checkBanSchema.parse(req.body);
+      const unbannedBy = req.session.id || 'system';
+      
+      const success = await banSystem.unbanDevice(deviceFingerprint, unbannedBy);
+      
+      if (success) {
+        res.json({ success: true, message: "Device unbanned successfully" });
+      } else {
+        res.status(404).json({ error: "Device not found in ban list" });
+      }
+    } catch (error) {
+      console.error("Unban device error:", error);
+      res.status(500).json({ error: "Failed to unban device" });
+    }
+  });
+
+  // Get all banned devices (admin only)
+  app.get("/api/bans/list", async (req, res) => {
+    try {
+      const bannedDevices = await banSystem.getAllBannedDevices();
+      res.json(bannedDevices);
+    } catch (error) {
+      console.error("Get banned devices error:", error);
+      res.status(500).json({ error: "Failed to fetch banned devices" });
+    }
+  });
+
+  // Get ban statistics (admin only)
+  app.get("/api/bans/stats", async (req, res) => {
+    try {
+      const stats = await banSystem.getBanStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Get ban stats error:", error);
+      res.status(500).json({ error: "Failed to fetch ban statistics" });
     }
   });
 

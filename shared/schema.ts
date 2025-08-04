@@ -156,6 +156,17 @@ export const deviceSessions = pgTable("device_sessions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const bannedDevices = pgTable("banned_devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  deviceFingerprint: varchar("device_fingerprint").notNull().unique(),
+  bannedBy: varchar("banned_by"), // admin identifier
+  banReason: text("ban_reason"),
+  isTemporary: boolean("is_temporary").default(false),
+  expiresAt: timestamp("expires_at"), // null for permanent bans
+  createdAt: timestamp("created_at").defaultNow(),
+  deviceMetadata: jsonb("device_metadata").default({}), // store device info for debugging
+});
+
 export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
@@ -270,6 +281,23 @@ export const moderationResponseSchema = z.object({
 });
 
 export type ModerationResponse = z.infer<typeof moderationResponseSchema>;
+
+// Device Ban schemas
+export const banDeviceSchema = z.object({
+  deviceFingerprint: z.string(),
+  banReason: z.string(),
+  isTemporary: z.boolean().default(false),
+  expiresAt: z.date().optional(),
+  deviceMetadata: z.object({}).optional().default({}),
+});
+
+export const checkBanSchema = z.object({
+  deviceFingerprint: z.string(),
+});
+
+export type BanDevice = z.infer<typeof banDeviceSchema>;
+export type CheckBan = z.infer<typeof checkBanSchema>;
+export type BannedDevice = typeof bannedDevices.$inferSelect;
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 

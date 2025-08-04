@@ -16,6 +16,8 @@ import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/draft-storage"
 import { HomeCategoryAnimation, useHomeCategoryAnimation } from "./home-category-animations";
 import type { InsertPost, ModerationResponse } from "@shared/schema";
 import { MentalHealthSupport } from "@/components/ui/mental-health-support";
+import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
+import { AccessDeniedMessage } from "@/components/ui/ban-screen";
 
 interface PostModalProps {
   isOpen: boolean;
@@ -79,6 +81,7 @@ export function PostModal({
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
   const { animation, triggerAnimation, completeAnimation } = useHomeCategoryAnimation();
+  const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
 
   // Load draft and set defaults when modal opens
   useEffect(() => {
@@ -120,10 +123,21 @@ export function PostModal({
 
   const createPostMutation = useMutation({
     mutationFn: async (data: InsertPost & { postContext?: string; communitySection?: string }): Promise<any> => {
+      // Check if user is banned before attempting to post
+      if (!canPerformAction('post')) {
+        throw new Error("Access denied - device is banned from posting");
+      }
+
+      const deviceFingerprint = getFingerprint();
+      if (!deviceFingerprint) {
+        throw new Error("Device security check failed");
+      }
+
       return apiRequest("POST", "/api/posts", {
         ...data,
         alias: userAlias,
-        avatarId: userAvatarId
+        avatarId: userAvatarId,
+        deviceFingerprint
       });
     },
     onSuccess: (response) => {
@@ -164,6 +178,16 @@ export function PostModal({
   });
 
   const handleSubmit = () => {
+    // Check if user is banned
+    if (!canPerformAction('post')) {
+      toast({
+        title: "Access Denied",
+        description: banInfo?.banReason || "Your device is banned from posting",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!content.trim() || !category) {
       toast({
         title: "Missing information",

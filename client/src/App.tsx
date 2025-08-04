@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { AnonymousAuthProvider } from "@/lib/anonymousAuth";
+import { DeviceBanGuard } from "@/components/ui/device-ban-guard";
 import Home from "@/pages/home";
 import Trending from "@/pages/trending";
 import Community from "@/pages/community";
@@ -35,10 +36,12 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <AnonymousAuthProvider>
-            <div className="app-container bg-background text-foreground">
-              <Toaster />
-              <Router />
-            </div>
+            <DeviceBanGuard allowPartialAccess={false}>
+              <div className="app-container bg-background text-foreground">
+                <Toaster />
+                <Router />
+              </div>
+            </DeviceBanGuard>
           </AnonymousAuthProvider>
         </TooltipProvider>
       </ThemeProvider>

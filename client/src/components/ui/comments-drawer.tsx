@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getAvatarById } from "@/lib/avatars";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
+import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
 import type { Comment, InsertComment } from "@shared/schema";
 
 interface CommentsDrawerProps {
@@ -37,6 +38,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   const queryClient = useQueryClient();
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
+  const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
 
   // Get current session ID
   useEffect(() => {
@@ -58,10 +60,21 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
   const createCommentMutation = useMutation({
     mutationFn: async (data: InsertComment) => {
+      // Check if user is banned before attempting to comment
+      if (!canPerformAction('comment')) {
+        throw new Error("Access denied - device is banned from commenting");
+      }
+
+      const deviceFingerprint = getFingerprint();
+      if (!deviceFingerprint) {
+        throw new Error("Device security check failed");
+      }
+
       return apiRequest("POST", `/api/posts/${postId}/comments`, {
         ...data,
         avatarId: userAvatarId,
-        alias: userAlias
+        alias: userAlias,
+        deviceFingerprint
       });
     },
     onSuccess: () => {
@@ -107,6 +120,16 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   const handleSubmit = () => {
     const content = replyingTo ? replyText.trim() : comment.trim();
     if (!content) return;
+
+    // Check if user is banned
+    if (!canPerformAction('comment')) {
+      toast({
+        title: "Access Denied",
+        description: banInfo?.banReason || "Your device is banned from commenting",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (content.length > 300) {
       toast({
