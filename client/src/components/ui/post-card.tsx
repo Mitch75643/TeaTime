@@ -65,11 +65,12 @@ export function PostCard({ post }: PostCardProps) {
   const queryClient = useQueryClient();
   const { profile, getCachedProfile } = useUserProfile();
   
-  // Use cached profile data to prevent flashing
+  // Use cached profile data to prevent flashing - try multiple sources immediately
   const cachedProfile = getCachedProfile();
-  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || 'mask-anonymous';
-  const userAlias = profile?.alias || cachedProfile?.alias || 'Anonymous';
-  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || localStorage.getItem('userAvatarId') || 'mask-anonymous';
+  const storedAlias = localStorage.getItem('userUsername');
+  const userAlias = profile?.alias || cachedProfile?.alias || (storedAlias ? JSON.parse(storedAlias).alias : 'Anonymous');
+  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor || localStorage.getItem('userAvatarColor') || 'gradient-purple-blue';
 
   // Check if this is the user's own post
   const isOwner = sessionId === post.sessionId;

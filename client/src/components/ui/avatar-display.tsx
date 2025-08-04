@@ -52,17 +52,17 @@ export function AvatarDisplay({
   const emoji = getAvatarEmoji(avatarId);
   const { profile, getCachedProfile } = useUserProfile();
   
-  // Get cached profile data to prevent flashing
+  // Get cached profile data immediately to prevent flashing - try multiple sources
   const cachedProfile = getCachedProfile();
-  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId;
-  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || localStorage.getItem('userAvatarId') || 'mask-anonymous';
+  const userAvatarColor = profile?.avatarColor || cachedProfile?.avatarColor || localStorage.getItem('userAvatarColor') || 'gradient-purple-blue';
   
   // Determine if this is the current user's avatar by comparing avatarId
   const isUserAvatar = isCurrentUser || avatarId === userAvatarId;
   
   // Use user's selected color for their own avatar, fallback for others
   const gradient = gradientColors || 
-    (isUserAvatar && avatarColor ? avatarColor : generateGradientColors(avatarId));
+    (isUserAvatar ? userAvatarColor : generateGradientColors(avatarId));
   
   return (
     <div

@@ -14,10 +14,10 @@ export function Header() {
   const { profile, getCachedProfile } = useUserProfile();
   const { user } = useAnonymousAuth();
   
-  // Use cached profile data to prevent flashing
+  // Use cached profile data to prevent flashing - try multiple sources immediately
   const cachedProfile = getCachedProfile();
-  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || 'mask-anonymous';
-  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || localStorage.getItem('userAvatarId') || 'mask-anonymous';
+  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor || localStorage.getItem('userAvatarColor') || 'gradient-purple-blue';
 
   const handleProfileClick = () => {
     setLocation('/profile');

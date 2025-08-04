@@ -64,21 +64,43 @@ export function useUserProfile() {
     };
   }, []);
 
-  // Initialize profile from cache or create new one
+  // Initialize profile from cache or create new one - ALWAYS return cached data immediately
   useEffect(() => {
+    // If global profile exists, use it immediately
     if (globalUserProfile) {
       setProfile(globalUserProfile);
       setIsInitialized(true);
       return;
     }
 
-    // Try to load from cache first for instant display
+    // Always try to load from cache first for instant display
     const cachedProfile = loadProfileFromCache();
     if (cachedProfile) {
       globalUserProfile = cachedProfile;
       setProfile(cachedProfile);
       setIsInitialized(true);
       notifyProfileListeners();
+    } else {
+      // If no cache, try to create from localStorage immediately
+      const avatarId = localStorage.getItem('userAvatarId') || 'mask-anonymous';
+      const storedAlias = localStorage.getItem('userUsername'); // Use the correct key
+      const alias = storedAlias ? JSON.parse(storedAlias).alias : 'Anonymous';
+      const avatarColor = localStorage.getItem('userAvatarColor') || 'gradient-purple-blue';
+      
+      if (avatarId && alias && avatarColor) {
+        const immediateProfile: UserProfile = {
+          avatarId,
+          alias,
+          avatarColor,
+          sessionId: undefined,
+          isUpgraded: false
+        };
+        globalUserProfile = immediateProfile;
+        setProfile(immediateProfile);
+        saveProfileToCache(immediateProfile);
+        setIsInitialized(true);
+        notifyProfileListeners();
+      }
     }
   }, []);
 
@@ -117,7 +139,28 @@ export function useUserProfile() {
 
   // Method to get cached profile data immediately (for preventing flash)
   const getCachedProfile = useCallback((): UserProfile | null => {
-    return globalUserProfile || loadProfileFromCache();
+    if (globalUserProfile) return globalUserProfile;
+    
+    const cachedProfile = loadProfileFromCache();
+    if (cachedProfile) return cachedProfile;
+    
+    // Last resort: build from localStorage
+    const avatarId = localStorage.getItem('userAvatarId');
+    const storedAlias = localStorage.getItem('userUsername'); // Use the correct key
+    const alias = storedAlias ? JSON.parse(storedAlias).alias : null;
+    const avatarColor = localStorage.getItem('userAvatarColor');
+    
+    if (avatarId && alias && avatarColor) {
+      return {
+        avatarId,
+        alias,
+        avatarColor,
+        sessionId: undefined,
+        isUpgraded: false
+      };
+    }
+    
+    return null;
   }, []);
 
   // Method to check if profile data is available
@@ -141,6 +184,14 @@ export function useUserProfile() {
       localStorage.setItem('userAvatarId', updates.avatarId);
       window.dispatchEvent(new CustomEvent('avatarChanged', { 
         detail: { avatarId: updates.avatarId } 
+      }));
+    }
+    
+    if (updates.alias) {
+      const aliasData = { alias: updates.alias, emoji: '', category: '' };
+      localStorage.setItem('userUsername', JSON.stringify(aliasData)); // Use the correct key
+      window.dispatchEvent(new CustomEvent('userUsernameChanged', { 
+        detail: aliasData
       }));
     }
     
