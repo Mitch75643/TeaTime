@@ -5,6 +5,7 @@ import { PostCard } from "@/components/ui/post-card";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
+import { CommunityTopicAnimation, useCommunityTopicAnimation } from "@/components/ui/community-topic-animations";
 import { useSmartFeed } from "@/hooks/use-smart-feed";
 import { 
   NewPostsBanner, 
@@ -16,7 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Plus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowLeft, Users, Plus, MessageSquare, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -123,7 +126,9 @@ export default function TopicFeed() {
   const { topicId } = useParams<{ topicId: string }>();
   const [, setLocation] = useLocation();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"feed" | "your-posts">("feed");
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
+  const { animation: topicAnimation, triggerAnimation: triggerTopicAnimation, completeAnimation: completeTopicAnimation } = useCommunityTopicAnimation();
   
   const topicConfig = topicConfigs[topicId as keyof typeof topicConfigs];
   
@@ -134,9 +139,9 @@ export default function TopicFeed() {
     }
   }, [topicConfig, setLocation]);
 
-  // Smart feed hook with batching and auto-refresh
-  const smartFeed = useSmartFeed({
-    queryKey: ["/api/posts", topicConfig?.category || topicId, "new"],
+  // Smart feed hook for all posts
+  const allPostsFeed = useSmartFeed({
+    queryKey: ["/api/posts", topicConfig?.category || topicId, "new", "all"],
     apiEndpoint: "/api/posts",
     queryParams: {
       category: topicConfig?.category || topicId,
@@ -147,6 +152,22 @@ export default function TopicFeed() {
     autoRefreshInterval: 25000, // 25 seconds
   });
 
+  // Smart feed hook for user's posts in this topic
+  const userPostsFeed = useSmartFeed({
+    queryKey: ["/api/posts", topicConfig?.category || topicId, "new", "user"],
+    apiEndpoint: `/api/posts/${topicId}/new/user`,
+    queryParams: {
+      postContext: "community",
+      section: topicId,
+    },
+    postContext: topicId,
+    batchSize: 25,
+    autoRefreshInterval: 25000, // 25 seconds
+  });
+
+  // Use the appropriate feed based on active tab
+  const currentFeed = activeTab === "feed" ? allPostsFeed : userPostsFeed;
+  
   const {
     posts,
     isLoading,
@@ -159,21 +180,19 @@ export default function TopicFeed() {
     refresh,
     acceptNewPosts,
     dismissNewPosts,
-  } = smartFeed;
+  } = currentFeed;
 
-  const handlePostSuccess = () => {
-    // Trigger celebration animation based on topic type
-    if (topicConfig?.celebrationType && topicConfig.celebrationType === "paparazzi") {
-      triggerCelebration("paparazzi");
-    } else if (topicConfig?.celebrationType && topicConfig.celebrationType === "story") {
-      triggerCelebration("story");
-    } else if (topicConfig?.celebrationType) {
-      // Default celebration type
-      triggerCelebration("paparazzi");
+  const handlePostSuccess = (section: string) => {
+    // Trigger both celebration and topic animations
+    if (topicConfig?.celebrationType) {
+      const animationType = topicConfig.celebrationType as any;
+      triggerCelebration(animationType);
+      triggerTopicAnimation(section as any);
     }
     
-    // Refresh feed to show new post
-    refresh();
+    // Refresh both feeds to show new post
+    allPostsFeed.refresh();
+    userPostsFeed.refresh();
   };
 
   if (!topicConfig) {
@@ -236,50 +255,109 @@ export default function TopicFeed() {
         show={showNewPostsBanner}
       />
 
+      {/* Tabs */}
+      <div className="sticky top-16 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-4">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "feed" | "your-posts")}>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-700">
+              <TabsTrigger value="feed" className="flex items-center space-x-2">
+                <MessageSquare className="h-4 w-4" />
+                <span>Feed</span>
+              </TabsTrigger>
+              <TabsTrigger value="your-posts" className="flex items-center space-x-2">
+                <User className="h-4 w-4" />
+                <span>Your Posts</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </div>
+
       {/* Sticky Header */}
       <StickyRefreshHeader
-        title={`${topicConfig.name} Feed`}
+        title={activeTab === "feed" ? `${topicConfig.name} Feed` : `Your ${topicConfig.name} Posts`}
         subtitle={`${posts.length} posts`}
         onRefresh={refresh}
         isRefreshing={isRefreshing}
-        className="top-16"
+        className="top-28"
       />
 
-      <SmartFeedContainer>
-        {isLoading ? (
-          <FeedSkeleton count={5} />
-        ) : posts.length === 0 ? (
-          <div className="text-center py-12">
-            <span className="text-6xl mb-4 block">{topicConfig.emoji}</span>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              No {topicConfig.name.toLowerCase()} yet
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">
-              Be the first to start the conversation!
-            </p>
-            <Button
-              onClick={() => setIsPostModalOpen(true)}
-              className={cn("shadow-lg hover:shadow-xl text-white", topicConfig.gradient)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Share Your {topicConfig.name.includes('Tea') ? 'Tea' : 'Story'}
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="space-y-4">
-              {posts.map((post: Post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
-            <LoadMoreButton
-              onLoadMore={loadMore}
-              isLoading={isLoadingMore}
-              hasMore={hasMore}
-            />
-          </>
-        )}
-      </SmartFeedContainer>
+      {/* Tab Content */}
+      <div className="px-4 md:px-6 lg:px-8 py-4 max-w-screen-sm lg:max-w-2xl mx-auto">
+        <Tabs value={activeTab} className="space-y-4">
+          <TabsContent value="feed" className="space-y-4 mt-0">
+            {isLoading ? (
+              <FeedSkeleton count={5} />
+            ) : posts.length === 0 ? (
+              <div className="text-center py-12">
+                <span className="text-6xl mb-4 block">{topicConfig.emoji}</span>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  No {topicConfig.name.toLowerCase()} yet
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Be the first to start the conversation!
+                </p>
+                <Button
+                  onClick={() => setIsPostModalOpen(true)}
+                  className={cn("shadow-lg hover:shadow-xl text-white", topicConfig.gradient)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Share Your {topicConfig.name.includes('Tea') ? 'Tea' : 'Story'}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {posts.map((post: Post) => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                </div>
+                <LoadMoreButton
+                  onLoadMore={loadMore}
+                  isLoading={isLoadingMore}
+                  hasMore={hasMore}
+                />
+              </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="your-posts" className="space-y-4 mt-0">
+            {isLoading ? (
+              <FeedSkeleton count={3} />
+            ) : posts.length === 0 ? (
+              <div className="text-center py-12">
+                <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  No posts yet
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  You haven't shared anything in {topicConfig.name.toLowerCase()} yet.
+                </p>
+                <Button
+                  onClick={() => setIsPostModalOpen(true)}
+                  className={cn("shadow-lg hover:shadow-xl text-white", topicConfig.gradient)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Share Your First {topicConfig.name.includes('Tea') ? 'Tea' : 'Story'}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {posts.map((post: Post) => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                </div>
+                <LoadMoreButton
+                  onLoadMore={loadMore}
+                  isLoading={isLoadingMore}
+                  hasMore={hasMore}
+                />
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
 
       <SectionPostModal 
         isOpen={isPostModalOpen}
@@ -295,6 +373,13 @@ export default function TopicFeed() {
         isVisible={celebration.isVisible}
         type={celebration.type}
         onComplete={completeCelebration}
+      />
+      
+      {/* Community Topic Animation */}
+      <CommunityTopicAnimation
+        isVisible={topicAnimation.isVisible}
+        type={topicAnimation.type}
+        onComplete={completeTopicAnimation}
       />
       
       <BottomNav />
