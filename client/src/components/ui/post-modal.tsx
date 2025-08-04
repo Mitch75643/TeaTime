@@ -116,14 +116,8 @@ export function PostModal({
       });
     },
     onSuccess: () => {
-      // Invalidate all relevant post queries to ensure posts appear everywhere they should
+      // Invalidate all post queries to ensure posts appear everywhere they should
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
-      
-      // For daily spill posts, also invalidate the specific daily query
-      if (postContext.page === 'daily') {
-        queryClient.invalidateQueries({ queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }] });
-      }
-      
       clearDraft(); // Clear draft after successful post
       
       // Trigger animation for home page posts

@@ -36,7 +36,6 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={handleProfileClick}
-              data-tour="profile"
               className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-10 h-10"
             >
               {currentAvatar ? (
