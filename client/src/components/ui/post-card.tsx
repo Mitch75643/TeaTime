@@ -299,11 +299,13 @@ export function PostCard({ post }: PostCardProps) {
             );
           })}
         </div>
-        <CommentsDrawer 
-          postId={post.id} 
-          commentCount={post.commentCount || 0}
-          isDrama={post.isDrama || false}
-        />
+        <div data-tour="comment-button">
+          <CommentsDrawer 
+            postId={post.id} 
+            commentCount={post.commentCount || 0}
+            isDrama={post.isDrama || false}
+          />
+        </div>
       </div>
 
 

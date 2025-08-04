@@ -25,6 +25,7 @@ export function FloatingPostButton() {
     <>
       <Button
         onClick={() => setIsActionSheetOpen(true)}
+        data-tour="create-post"
         className={cn(
           "fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50",
           "w-14 h-14 rounded-full shadow-lg",

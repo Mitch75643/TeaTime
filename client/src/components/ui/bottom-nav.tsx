@@ -20,7 +20,10 @@ export function BottomNav() {
   return (
     <>
       {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-2xl border-t border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto">
+      <nav 
+        className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-2xl border-t border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto"
+        data-tour="bottom-nav"
+      >
         {/* Gradient accent bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600"></div>
         

@@ -7,6 +7,9 @@ import { FloatingPostButton } from "@/components/ui/floating-post-button";
 import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { OnboardingTour, useOnboardingTour } from "@/components/ui/onboarding-tour";
+import { WelcomeScreen } from "@/components/ui/welcome-screen";
+import { TourTriggerButton } from "@/components/ui/tour-trigger-button";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
 import type { Post } from "@shared/schema";
@@ -29,6 +32,15 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const { 
+    showTour, 
+    showWelcome, 
+    isFirstVisit, 
+    startTourFromWelcome,
+    completeTour, 
+    skipTour, 
+    skipWelcome 
+  } = useOnboardingTour();
 
   // Check for focus parameter in URL (from notifications)
   useEffect(() => {
@@ -83,6 +95,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
+      
+      {/* Tour Trigger Button - only show for returning users */}
+      {!isFirstVisit && <TourTriggerButton />}
       
       <div className="sticky top-16 z-40 bg-white dark:bg-gray-800">
         <CategoryTabs
@@ -170,7 +185,7 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4" data-tour="feed">
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
@@ -186,6 +201,20 @@ export default function Home() {
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
         postContext={{ page: 'home' }}
+      />
+
+      {/* Welcome Screen */}
+      <WelcomeScreen
+        isVisible={showWelcome}
+        onStartTour={startTourFromWelcome}
+        onSkip={skipWelcome}
+      />
+
+      {/* Onboarding Tour */}
+      <OnboardingTour
+        isVisible={showTour}
+        onComplete={completeTour}
+        onSkip={skipTour}
       />
     </div>
   );
