@@ -43,8 +43,10 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { AvatarSelector } from "@/components/ui/avatar-selector";
+import { AvatarColorPicker } from "@/components/ui/avatar-color-picker";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
+import { useAvatarColor } from "@/hooks/use-avatar-color";
 import { AliasSelector } from "@/components/ui/alias-selector";
 import { useLocation } from "wouter";
 import type { Post } from "@shared/schema";
@@ -64,6 +66,7 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
   const { userAvatarId, updateAvatar } = useUserAvatar();
   const { userAlias, fullAlias, generateNewAlias, keepCurrentUsername } = useUserAlias();
+  const { avatarColor, updateAvatarColor } = useAvatarColor();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -103,6 +106,14 @@ export default function Profile() {
     toast({
       title: "Avatar updated!",
       description: "Your new profile picture has been saved.",
+    });
+  };
+
+  const handleColorSelect = (color: string) => {
+    updateAvatarColor(color);
+    toast({
+      title: "Avatar color updated!",
+      description: "Your profile picture color has been changed.",
     });
   };
 
@@ -233,6 +244,7 @@ export default function Profile() {
                   avatarId={userAvatarId} 
                   size="xl" 
                   className="border-4 border-white dark:border-gray-800 shadow-lg"
+                  gradientColors={avatarColor}
                 />
                 
                 {/* Avatar Edit Button */}
@@ -246,11 +258,22 @@ export default function Profile() {
                 </Button>
               </div>
               
-              <div>
-                <CardTitle className="text-xl mb-2">{userAlias}</CardTitle>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Your anonymous Tfess username
-                </p>
+              <div className="space-y-3">
+                <div>
+                  <CardTitle className="text-xl mb-2">{userAlias}</CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Your anonymous Tfess username
+                  </p>
+                </div>
+                
+                {/* Avatar Customization */}
+                <div className="flex flex-col gap-2">
+                  <AvatarColorPicker
+                    currentColor={avatarColor}
+                    onColorSelect={handleColorSelect}
+                    className="mx-auto"
+                  />
+                </div>
               </div>
             </div>
           </CardHeader>

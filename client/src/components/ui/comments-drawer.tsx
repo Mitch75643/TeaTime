@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
+import { useAvatarColor } from "@/hooks/use-avatar-color";
 import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
 import type { Comment, InsertComment } from "@shared/schema";
 
@@ -38,6 +39,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   const queryClient = useQueryClient();
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
+  const { avatarColor } = useAvatarColor();
   const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
 
   // Get current session ID
@@ -216,6 +218,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                           avatarId={comment.sessionId === sessionId ? userAvatarId : (comment.avatarId || 'mask-anonymous')}
                           size="sm"
                           showBorder={false}
+                          gradientColors={comment.sessionId === sessionId ? avatarColor : undefined}
                         />
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">

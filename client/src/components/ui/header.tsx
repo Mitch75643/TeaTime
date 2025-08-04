@@ -5,6 +5,7 @@ import { AuthButton } from "../auth/AuthButton";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useLocation } from "wouter";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
+import { useAvatarColor } from "@/hooks/use-avatar-color";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { MentalHealthQuickAccess } from "@/components/ui/mental-health-support";
 import tfessLogo from "../../assets/fessr-logo.png";
@@ -12,6 +13,7 @@ import tfessLogo from "../../assets/fessr-logo.png";
 export function Header() {
   const [, setLocation] = useLocation();
   const { userAvatarId } = useUserAvatar();
+  const { avatarColor } = useAvatarColor();
   const { user } = useAnonymousAuth();
 
   const handleProfileClick = () => {
@@ -43,6 +45,7 @@ export function Header() {
                 avatarId={userAvatarId}
                 size="md"
                 className="border-2 border-white/40 shadow-lg"
+                gradientColors={avatarColor}
               />
             </Button>
           ) : (

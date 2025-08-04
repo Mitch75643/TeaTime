@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
+import { useAvatarColor } from "@/hooks/use-avatar-color";
 import type { Post } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
@@ -66,6 +67,7 @@ export function PostCard({ post }: PostCardProps) {
   const queryClient = useQueryClient();
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
+  const { avatarColor } = useAvatarColor();
 
   // Check if this is the user's own post
   const isOwner = sessionId === post.sessionId;
@@ -183,6 +185,7 @@ export function PostCard({ post }: PostCardProps) {
             avatarId={sessionId && post.sessionId === sessionId ? userAvatarId : (post.avatarId || 'mask-anonymous')}
             size="sm"
             showBorder={false}
+            gradientColors={sessionId && post.sessionId === sessionId ? avatarColor : undefined}
           />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
