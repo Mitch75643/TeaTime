@@ -23,6 +23,7 @@ interface PostModalProps {
   defaultTags?: string[];
   promptText?: string;
   sectionTheme?: string;
+  postContext?: PostModalContext;
 }
 
 const categories = [
@@ -55,7 +56,7 @@ export function PostModal({
   promptText = "", 
   sectionTheme = "",
   postContext = { page: 'home' }
-}: PostModalProps & { postContext?: PostModalContext }) {
+}: PostModalProps) {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [tagsInput, setTagsInput] = useState("");
