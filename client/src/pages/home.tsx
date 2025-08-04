@@ -154,7 +154,7 @@ export default function Home() {
             
             {/* Fun Headlines */}
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {activeCategory === "all" ? "It's quiet in here... ☕" : `Still brewing in ${categories.find(c => c.id === activeCategory)?.label}...`}
+              {activeCategory === "all" ? "It's quiet in here..." : `Still brewing in ${categories.find(c => c.id === activeCategory)?.label}...`}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8 text-base">
               {activeCategory === "all" ? "No one's spilled yet... will you be the first?" : "Be bold—spill the first sip in this category!"}
