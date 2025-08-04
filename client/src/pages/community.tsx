@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { CommunityModal } from "@/components/ui/community-section-modal";
+import { NotificationLink } from "@/components/ui/notification-link";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
-import { Bell, BellOff, Settings, Check, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, BellOff, Settings } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { pushNotificationManager, type PushNotificationStatus } from "@/lib/pushNotifications";
 
 export function NotificationSettings() {
   const [status, setStatus] = useState<PushNotificationStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [subscribing, setSubscribing] = useState(false);
-  const [updating, setUpdating] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -32,107 +29,45 @@ export function NotificationSettings() {
     }
   };
 
-  const handleSubscribe = async () => {
-    setSubscribing(true);
+  const handleToggleNotifications = async (enabled: boolean) => {
+    setToggling(true);
     try {
-      await pushNotificationManager.subscribe(['daily_prompt', 'daily_debate']);
-      await loadNotificationStatus();
-      toast({
-        title: "Push notifications enabled!",
-        description: "You'll get notified when new prompts and debates go live.",
-      });
-    } catch (error: any) {
-      console.error("Failed to subscribe:", error);
-      toast({
-        title: "Failed to enable notifications",
-        description: error.message || "Please check your browser permissions.",
-        variant: "destructive",
-      });
-    } finally {
-      setSubscribing(false);
-    }
-  };
-
-  const handleUnsubscribe = async () => {
-    setSubscribing(true);
-    try {
-      await pushNotificationManager.unsubscribe();
-      await loadNotificationStatus();
-      toast({
-        title: "Push notifications disabled",
-        description: "You won't receive notifications anymore.",
-      });
-    } catch (error: any) {
-      console.error("Failed to unsubscribe:", error);
-      toast({
-        title: "Failed to disable notifications",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setSubscribing(false);
-    }
-  };
-
-  const handleUpdatePreferences = async (notificationTypes: string[]) => {
-    setUpdating(true);
-    try {
-      await pushNotificationManager.updatePreferences(notificationTypes);
-      await loadNotificationStatus();
-      toast({
-        title: "Preferences updated",
-        description: "Your notification settings have been saved.",
-      });
-    } catch (error: any) {
-      console.error("Failed to update preferences:", error);
-      toast({
-        title: "Failed to update preferences",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleToggleNotificationType = (type: string, enabled: boolean) => {
-    if (!status) return;
-
-    let newTypes = [...status.notificationTypes];
-    if (enabled) {
-      if (!newTypes.includes(type)) {
-        newTypes.push(type);
+      if (enabled) {
+        await pushNotificationManager.subscribe(['daily_prompt', 'daily_debate']);
+        await loadNotificationStatus();
+        toast({
+          title: "Push notifications enabled",
+          description: "You'll get notified when new Daily Prompts & Debates go live.",
+        });
+      } else {
+        await pushNotificationManager.unsubscribe();
+        await loadNotificationStatus();
+        toast({
+          title: "Push notifications disabled",
+          description: "You won't receive notifications anymore.",
+        });
       }
-    } else {
-      newTypes = newTypes.filter(t => t !== type);
-    }
-
-    handleUpdatePreferences(newTypes);
-  };
-
-  const showTestNotification = async () => {
-    try {
-      await pushNotificationManager.showTestNotification();
-      toast({
-        title: "Test notification sent!",
-        description: "Check if you received the notification.",
-      });
     } catch (error: any) {
+      console.error("Failed to toggle notifications:", error);
       toast({
-        title: "Failed to send test notification",
-        description: error.message,
+        title: enabled ? "Failed to enable notifications" : "Failed to disable notifications",
+        description: error.message || "Please check your browser permissions and try again.",
         variant: "destructive",
       });
+      // Reload status to revert any partial changes
+      await loadNotificationStatus();
+    } finally {
+      setToggling(false);
     }
   };
 
   if (!pushNotificationManager.isSupported()) {
     return (
-      <Card className="w-full max-w-md mx-auto">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BellOff className="h-5 w-5" />
-            Push Notifications
+            Notifications
           </CardTitle>
           <CardDescription>
             Push notifications are not supported in your browser.
@@ -144,148 +79,93 @@ export function NotificationSettings() {
 
   if (loading) {
     return (
-      <Card className="w-full max-w-md mx-auto">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5 animate-spin" />
-            Loading notification settings...
+            Notifications
           </CardTitle>
+          <CardDescription>Loading notification settings...</CardDescription>
         </CardHeader>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          {status?.isSubscribed ? (
-            <Bell className="h-5 w-5 text-orange-400" />
-          ) : (
-            <BellOff className="h-5 w-5 text-muted-foreground" />
-          )}
-          Push Notifications
+          <Bell className="h-5 w-5 text-orange-600" />
+          Notifications
         </CardTitle>
         <CardDescription>
-          Get notified when new Daily Prompts and Debates go live
+          Manage your push notification preferences
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Subscription Status */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Status:</span>
-            <Badge variant={status?.isSubscribed ? "default" : "secondary"}>
-              {status?.isSubscribed ? "Enabled" : "Disabled"}
-            </Badge>
+        {/* Main Toggle */}
+        <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center gap-3">
+            {status?.isSubscribed ? (
+              <Bell className="h-5 w-5 text-orange-400" />
+            ) : (
+              <BellOff className="h-5 w-5 text-muted-foreground" />
+            )}
+            <div>
+              <Label htmlFor="push-notifications" className="font-medium">
+                🔔 Enable Push Notifications for Daily Prompts & Debates
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Get notified when new content goes live every 24 hours
+              </p>
+            </div>
           </div>
-          
-          {status?.isSubscribed ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleUnsubscribe}
-              disabled={subscribing}
-              className="text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950"
-            >
-              {subscribing ? "Disabling..." : "Disable"}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              onClick={handleSubscribe}
-              disabled={subscribing}
-              className="bg-orange-400 hover:bg-orange-500 text-white"
-            >
-              {subscribing ? "Enabling..." : "Enable"}
-            </Button>
-          )}
+          <Switch
+            id="push-notifications"
+            checked={status?.isSubscribed || false}
+            onCheckedChange={handleToggleNotifications}
+            disabled={toggling}
+          />
         </div>
 
-        {/* Notification Type Preferences */}
+        {/* Status Info */}
         {status?.isSubscribed && (
-          <div className="space-y-3 pt-4 border-t">
-            <h4 className="text-sm font-medium">Notification Types:</h4>
+          <div className="space-y-3 pt-2">
+            <div className="text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950 p-3 rounded-lg">
+              ✓ Push notifications are enabled. You'll receive alerts when new Daily Prompts and Daily Debates go live.
+            </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="daily-prompt" className="text-sm">
-                  Daily Prompts
-                  <span className="text-xs text-muted-foreground block">
-                    New story prompts every 24 hours
-                  </span>
-                </Label>
-                <Switch
-                  id="daily-prompt"
-                  checked={status.notificationTypes.includes('daily_prompt')}
-                  onCheckedChange={(checked) => 
-                    handleToggleNotificationType('daily_prompt', checked)
-                  }
-                  disabled={updating}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="daily-debate" className="text-sm">
-                  Daily Debates
-                  <span className="text-xs text-muted-foreground block">
-                    New debate topics every 24 hours
-                  </span>
-                </Label>
-                <Switch
-                  id="daily-debate"
-                  checked={status.notificationTypes.includes('daily_debate')}
-                  onCheckedChange={(checked) => 
-                    handleToggleNotificationType('daily_debate', checked)
-                  }
-                  disabled={updating}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Test Notification */}
-        {status?.isSubscribed && (
-          <div className="pt-4 border-t">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={showTestNotification}
-              className="w-full"
-            >
-              Send Test Notification
-            </Button>
-          </div>
-        )}
-
-        {/* Stats */}
-        {status?.stats && (
-          <div className="pt-4 border-t">
-            <h4 className="text-sm font-medium mb-2">Statistics:</h4>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="text-center p-2 bg-muted rounded">
-                <div className="font-semibold text-orange-400">
-                  {status.stats.sentNotifications}
+            {/* Stats */}
+            {status.stats && (
+              <div className="bg-muted p-3 rounded-lg">
+                <h4 className="text-sm font-medium mb-2">Your Stats:</h4>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="text-center">
+                    <div className="font-semibold text-orange-400">
+                      {status.stats.sentNotifications}
+                    </div>
+                    <div className="text-muted-foreground">Notifications Received</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-orange-400">
+                      {status.stats.activeSubscriptions}
+                    </div>
+                    <div className="text-muted-foreground">Active Devices</div>
+                  </div>
                 </div>
-                <div className="text-muted-foreground">Sent</div>
               </div>
-              <div className="text-center p-2 bg-muted rounded">
-                <div className="font-semibold text-orange-400">
-                  {status.stats.activeSubscriptions}
-                </div>
-                <div className="text-muted-foreground">Active</div>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
         {/* Help Text */}
-        <div className="text-xs text-muted-foreground space-y-1 pt-2">
-          <p>• Notifications are sent when new content rotates every 24 hours</p>
-          <p>• You can disable notifications anytime in your browser settings</p>
-          <p>• Your device will need internet connection to receive notifications</p>
+        <div className="text-xs text-muted-foreground space-y-1 bg-muted p-3 rounded-lg">
+          <p><strong>How it works:</strong></p>
+          <p>• New prompts and debates rotate automatically every 24 hours</p>
+          <p>• You'll get a notification when fresh content is available</p>
+          <p>• Your data remains completely anonymous - notifications are tied to your session only</p>
+          <p>• You can turn this off anytime or manage permissions in your browser settings</p>
         </div>
       </CardContent>
     </Card>

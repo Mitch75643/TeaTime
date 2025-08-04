@@ -1,7 +1,6 @@
 import { User, Flame } from "lucide-react";
 import { Button } from "./button";
 import { NotificationsPanel } from "./notifications-panel";
-import { NotificationBadge } from "./notification-badge";
 import { AuthButton } from "../auth/AuthButton";
 import { getAvatarById } from "@/lib/avatars";
 import { useLocation } from "wouter";
@@ -31,9 +30,8 @@ export function Header() {
           />
           <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide -translate-x-0.5">Tfess</h1>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <MentalHealthQuickAccess />
-          <NotificationBadge />
           <NotificationsPanel />
           {user ? (
             <Button

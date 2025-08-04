@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Coffee, Plus, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Trophy, RefreshCw } from "lucide-react";
 import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { NotificationLink } from "@/components/ui/notification-link";
 import { useSmartFeed } from "@/hooks/use-smart-feed";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
@@ -379,11 +380,14 @@ export default function DailySpill() {
             </p>
             <Button
               onClick={() => setIsPostModalOpen(true)}
-              className="w-full bg-white text-red-600 hover:bg-gray-100 font-semibold shadow-sm"
+              className="w-full bg-white text-red-600 hover:bg-gray-100 font-semibold shadow-sm mb-3"
             >
               <Plus className="h-4 w-4 mr-2" />
               Spill Your Tea
             </Button>
+            <div className="text-center">
+              <NotificationLink />
+            </div>
           </CardContent>
         </Card>
       </div>
