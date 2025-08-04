@@ -46,7 +46,7 @@ export function Header() {
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',
-                      transform: 'scale(1.1)'
+                      transform: 'scale(1.5)'
                     }}
                     dangerouslySetInnerHTML={{ __html: currentAvatar.svg }}
                   />
