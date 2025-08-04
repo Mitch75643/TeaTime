@@ -52,7 +52,7 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             variant="outline"
             onClick={generateNew}
@@ -60,7 +60,8 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
             className="flex-1 min-w-0"
           >
             <Shuffle className={cn("h-4 w-4 mr-2 flex-shrink-0", isGenerating && "animate-spin")} />
-            <span className="truncate">{isGenerating ? "Generating..." : "Generate New"}</span>
+            <span className="hidden sm:inline">{isGenerating ? "Generating..." : "Generate New"}</span>
+            <span className="sm:hidden">{isGenerating ? "..." : "Generate"}</span>
           </Button>
           
           <Button
@@ -69,7 +70,8 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
             className="flex-1 min-w-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
           >
             <Check className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span className="truncate">{isCurrentUsername ? "Current" : "Keep This"}</span>
+            <span className="hidden sm:inline">{isCurrentUsername ? "Current" : "Keep This"}</span>
+            <span className="sm:hidden">{isCurrentUsername ? "Current" : "Keep"}</span>
           </Button>
         </div>
 
