@@ -83,7 +83,7 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
             className
           )}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-6 w-6" />
           {unreadCount > 0 && (
             <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
               {unreadCount > 9 ? "9+" : unreadCount}
