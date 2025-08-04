@@ -12,16 +12,16 @@ export const avatarColorOptions = [
   { name: 'Rose Gold', value: 'from-pink-400 to-yellow-300' },
   
   { name: 'Deep Purple', value: 'from-indigo-600 to-purple-600' },
-  { name: 'Aqua Marine', value: 'from-teal-500 to-blue-400' },
+  { name: 'Pure White', value: 'from-white to-gray-100' },
   { name: 'Fire Red', value: 'from-orange-500 to-red-600' },
-  { name: 'Electric Blue', value: 'from-cyan-400 to-blue-600' },
+  { name: 'Dark Red', value: 'from-red-800 to-red-900' },
   { name: 'Neon Green', value: 'from-lime-400 to-green-500' },
   
   { name: 'Cotton Candy', value: 'from-pink-300 to-purple-400' },
   { name: 'Golden Hour', value: 'from-amber-400 to-orange-400' },
   { name: 'Midnight Blue', value: 'from-slate-600 to-blue-800' },
   { name: 'Spring Fresh', value: 'from-emerald-400 to-cyan-300' },
-  { name: 'Lavender Dream', value: 'from-violet-400 to-pink-300' },
+  { name: 'Pure Black', value: 'from-gray-900 to-black' },
 ];
 
 export function useAvatarColor() {
