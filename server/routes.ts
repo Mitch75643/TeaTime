@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create post
-  app.post("/api/posts", strictBanCheckMiddleware, async (req, res) => {
+  app.post("/api/posts", checkDeviceBanMiddleware, async (req, res) => {
     try {
       const validatedData = insertPostSchema.parse(req.body);
       
@@ -182,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create comment
-  app.post("/api/posts/:postId/comments", strictBanCheckMiddleware, async (req, res) => {
+  app.post("/api/posts/:postId/comments", checkDeviceBanMiddleware, async (req, res) => {
     try {
       const validatedData = insertCommentSchema.parse({
         ...req.body,
