@@ -27,6 +27,7 @@ The architecture prioritizes anonymous user interaction, real-time-feeling updat
 - **Home Page UI/UX**: Enhanced modal UX, branding, mobile responsiveness, and category filtering with visual active states.
 - **AI Moderation & Mental Health Safety**: Integrates OpenAI moderation API for real-time content scanning with a severity-based flagging system. It includes UI components for displaying mental health resources and crisis intervention information, prioritizing user anonymity.
 - **Automated Content Rotation System**: A comprehensive in-memory system for automatically rotating daily prompts, weekly themes, trending feeds, and leaderboards without manual intervention. It includes configurable rotation intervals, multi-type content support, dynamic leaderboard generation based on engagement metrics, and a privacy-preserving scoring algorithm.
+- **Push Notification System**: Complete web-push integration that automatically sends notifications when Daily Prompts and Daily Debates rotate every 24 hours. Features centralized Settings page control with user-friendly toggle, VAPID key security, service worker implementation, and maintains complete user anonymity by tying notifications only to anonymous sessions.
 
 ## External Dependencies
 - **Database**: Neon Database (@neondatabase/serverless) for PostgreSQL hosting.
