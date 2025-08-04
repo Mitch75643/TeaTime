@@ -59,6 +59,7 @@ export const comments = pgTable("comments", {
   content: text("content").notNull(),
   alias: varchar("alias").notNull(),
   avatarId: varchar("avatar_id").default("happy-face"),
+  sessionId: varchar("session_id").notNull(), // Track which session created this comment
   reactions: jsonb("reactions").default({
     thumbsUp: 0,
     thumbsDown: 0,

@@ -12,7 +12,7 @@ export interface IStorage {
   deletePost(postId: string, sessionId?: string): Promise<void>;
   
   // Comments
-  createComment(comment: InsertComment, alias: string): Promise<Comment>;
+  createComment(comment: InsertComment, alias: string, sessionId: string): Promise<Comment>;
   getComments(postId: string): Promise<Comment[]>;
   updateCommentReactions(commentId: string, reactions: Record<string, number>): Promise<void>;
   
@@ -89,7 +89,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
       postContext: insertPost.postContext || 'home',
-      communitySection: insertPost.communitySection || undefined,
+      communitySection: insertPost.communitySection || null,
       reportCount: 0,
       isRemoved: false,
       postType: insertPost.postType || 'standard',
@@ -181,13 +181,14 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async createComment(insertComment: InsertComment, alias: string): Promise<Comment> {
+  async createComment(insertComment: InsertComment, alias: string, sessionId: string): Promise<Comment> {
     const id = randomUUID();
     const comment: Comment = {
       ...insertComment,
       id,
       alias,
       avatarId: 'happy-face',
+      sessionId,
       parentCommentId: insertComment.parentCommentId || null,
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
       createdAt: new Date(),
@@ -554,6 +555,9 @@ export class MemStorage implements IStorage {
       passphraseHash: null,
       email: null,
       emailVerified: false,
+      biometricEnabled: false,
+      secureTokenHash: null,
+      biometricDevices: [],
       preferences: {},
       postCount: 0,
       totalReactions: 0,

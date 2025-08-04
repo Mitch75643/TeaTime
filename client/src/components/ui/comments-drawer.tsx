@@ -255,14 +255,19 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                       {/* Reply Input (if replying to this comment) */}
                       {replyingTo === comment.id && (
-                        <div className="ml-4 sm:ml-11 mt-3 space-y-3">
+                        <div className="ml-4 sm:ml-11 mt-3 space-y-3 bg-white dark:bg-gray-800 p-3 rounded-lg">
                           <Textarea
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
                             placeholder={`Reply to ${comment.alias}...`}
-                            className="resize-none text-sm bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-500 w-full"
+                            className="resize-none text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 w-full min-h-[2.5rem] max-h-20"
                             maxLength={300}
                             rows={2}
+                            style={{ 
+                              fontSize: '16px', // Prevents zoom on iOS
+                              zIndex: 10,
+                              position: 'relative'
+                            }}
                           />
                           <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
                             <span className="text-xs text-gray-500 order-2 sm:order-1">
@@ -359,8 +364,8 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
           {/* Comment Input */}
           {!replyingTo && (
-            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-600 pt-4 pb-2">
-              <div className="flex space-x-3">
+            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-600 pt-4 pb-safe-area-inset-bottom bg-white dark:bg-gray-800">
+              <div className="flex space-x-3 px-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {getAvatarById(userAvatarId) ? (
                     <div 
@@ -376,9 +381,14 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Add a comment..."
-                    className="resize-none w-full"
+                    className="resize-none w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 min-h-[2.5rem] max-h-24"
                     maxLength={300}
-                    rows={3}
+                    rows={2}
+                    style={{ 
+                      fontSize: '16px', // Prevents zoom on iOS
+                      zIndex: 10,
+                      position: 'relative'
+                    }}
                   />
                   <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
                     <span className="text-xs text-gray-500 order-2 sm:order-1">

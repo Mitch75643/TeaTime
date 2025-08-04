@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { PostCard } from "@/components/ui/post-card";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -243,6 +243,7 @@ export default function DailySpill() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [hasSpilledToday, setHasSpilledToday] = useState(false); // Would track user's daily participation
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const queryClient = useQueryClient();
   const todayPrompt = getDailyPrompt();
   const dateString = getDateString();
   const currentTheme = getCurrentWeekTheme();
@@ -267,6 +268,9 @@ export default function DailySpill() {
     
     // Trigger weekly theme animation
     triggerAnimation(currentTheme.name);
+    
+    // Refresh the posts feed to show new post immediately
+    queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
     
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };

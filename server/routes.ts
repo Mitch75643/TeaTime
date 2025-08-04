@@ -115,13 +115,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Content contains inappropriate language" });
       }
 
-      const alias = generateAlias();
       const sessionId = req.session.id!;
+      
+      // Get user's current username from their anonymous profile
+      const user = await storage.getAnonymousUserBySession(sessionId);
+      const alias = user?.alias || generateAlias();
+      
       const postContext = req.body.postContext || 'home';
       const communitySection = req.body.communitySection;
       
-      // Get user's avatar from request body or session  
-      const avatarId = req.body.avatarId || req.session.avatarId || 'happy-face';
+      // Get user's avatar from request body or user profile
+      const avatarId = req.body.avatarId || user?.avatarId || 'happy-face';
       
       const postData = {
         ...validatedData,
@@ -164,8 +168,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const sessionId = req.session.id!;
-      const alias = generateAlias();
-      const comment = await storage.createComment(validatedData, alias);
+      
+      // Get user's current username from their anonymous profile
+      const user = await storage.getAnonymousUserBySession(sessionId);
+      const alias = user?.alias || generateAlias();
+      
+      const comment = await storage.createComment(validatedData, alias, sessionId);
       
       // Create notification for post owner or parent comment owner
       try {
