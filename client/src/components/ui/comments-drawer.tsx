@@ -14,6 +14,7 @@ import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
 import { useAvatarColor } from "@/hooks/use-avatar-color";
 import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
+import { getAvatarById } from "@/lib/avatars";
 import type { Comment, InsertComment } from "@shared/schema";
 
 interface CommentsDrawerProps {

@@ -575,16 +575,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const sessionId = req.session.id!;
-      const user = await storage.getAnonymousUserBySession(sessionId);
       
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      // Try to update by session directly, creating user if needed
+      try {
+        await storage.updateUserAvatarColorBySession(sessionId, avatarColor);
+        res.json({ success: true, avatarColor });
+      } catch (userNotFoundError) {
+        // If user doesn't exist, create one automatically
+        try {
+          const newUser = await storage.createAnonymousUser({
+            alias: `AnonUser${Math.floor(Math.random() * 1000)}`,
+            avatarId: 'happy-face',
+            avatarColor: avatarColor,
+            deviceFingerprint: req.body.deviceFingerprint || null
+          }, sessionId);
+          
+          res.json({ success: true, avatarColor, userCreated: true });
+        } catch (createError) {
+          console.error("Failed to create user for avatar color update:", createError);
+          res.status(500).json({ message: "Failed to update avatar color" });
+        }
       }
-      
-      // Update user avatar color
-      await storage.updateUserAvatarColor(user.id, avatarColor);
-      
-      res.json({ success: true, avatarColor });
     } catch (error) {
       console.error("Failed to update avatar color:", error);
       res.status(500).json({ message: "Failed to update avatar color" });

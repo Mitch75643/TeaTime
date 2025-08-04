@@ -773,6 +773,16 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async updateUserAvatarColorBySession(sessionId: string, avatarColor: string): Promise<void> {
+    const user = Array.from(this.anonymousUsers.values()).find(u => u.sessionId === sessionId);
+    if (user) {
+      user.avatarColor = avatarColor;
+      this.anonymousUsers.set(user.id, user);
+    } else {
+      throw new Error('User not found');
+    }
+  }
+
   async createDeviceSession(anonUserId: string, sessionId: string, deviceFingerprint?: string): Promise<DeviceSession> {
     const id = randomUUID();
     const session: DeviceSession = {
