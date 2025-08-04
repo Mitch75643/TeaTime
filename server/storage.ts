@@ -5,7 +5,8 @@ import { createHash } from "crypto";
 export interface IStorage {
   // Posts
   createPost(post: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post>;
-  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string): Promise<Post[]>;
+  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string, hotTopicFilter?: string, page?: number, limit?: number): Promise<Post[]>;
+  getPostsCount(category?: string, tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<number>;
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
@@ -176,7 +177,41 @@ export class MemStorage implements IStorage {
     return post;
   }
 
-  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string, hotTopicFilter?: string): Promise<Post[]> {
+  async getPostsCount(category?: string, tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<number> {
+    let posts = Array.from(this.posts.values());
+    
+    // Filter out removed posts
+    posts = posts.filter(post => !post.isRemoved);
+    
+    // Filter by user session if requested
+    if (userSessionId) {
+      posts = posts.filter(post => post.sessionId === userSessionId);
+    }
+    
+    // Filter by post context (home, daily, community)
+    if (postContext) {
+      posts = posts.filter(post => post.postContext === postContext);
+    }
+    
+    // Filter by community section
+    if (section) {
+      posts = posts.filter(post => post.communitySection === section);
+    }
+    
+    if (category && category !== 'all') {
+      posts = posts.filter(post => post.category === category);
+    }
+    
+    if (tags) {
+      posts = posts.filter(post => 
+        post.tags && post.tags.some(tag => tag === tags)
+      );
+    }
+    
+    return posts.length;
+  }
+
+  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string, hotTopicFilter?: string, page: number = 0, limit: number = 25): Promise<Post[]> {
     let posts = Array.from(this.posts.values());
     
     // Filter out removed posts
@@ -231,7 +266,11 @@ export class MemStorage implements IStorage {
       posts.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
     }
     
-    return posts;
+    // Apply pagination
+    const startIndex = page * limit;
+    const endIndex = startIndex + limit;
+    
+    return posts.slice(startIndex, endIndex);
   }
 
   async getPost(id: string): Promise<Post | undefined> {
@@ -794,7 +833,7 @@ export class MemStorage implements IStorage {
       bannedBy: banData.bannedBy || null,
       banReason: banData.banReason || null,
       isTemporary: banData.isTemporary || false,
-      expiresAt: banData.expiresAt || null,
+      expiresAt: banData.expiresAt ? new Date(banData.expiresAt) : null,
       deviceMetadata: banData.deviceMetadata || {},
       createdAt: new Date(),
     };

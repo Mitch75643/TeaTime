@@ -30,7 +30,8 @@ interface SmartFeedActions {
 }
 
 const BATCH_SIZE = 25;
-const AUTO_REFRESH_INTERVAL = 25000; // 25 seconds
+const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
+const MIN_POSTS_FOR_THROTTLING = 10; // Only apply throttling if 10+ posts
 
 export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartFeedActions {
   const {
@@ -49,6 +50,7 @@ export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartF
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [showNewPostsBanner, setShowNewPostsBanner] = useState(false);
+  const [totalPostsCount, setTotalPostsCount] = useState(0);
   const lastFetchTime = useRef<number>(Date.now());
   const autoRefreshTimer = useRef<NodeJS.Timeout>();
 
@@ -70,26 +72,44 @@ export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartF
     return params.toString();
   }, [queryParams, batchSize, postContext]);
 
-  // Fetch initial posts
+  // Fetch initial posts with smart batching based on total count
   const { data: initialData = [], isLoading } = useQuery<Post[]>({
     queryKey: [...queryKey, currentPage, batchSize],
     queryFn: async () => {
-      const params = buildQueryParams(0, batchSize);
+      // First, get total count to determine if we should apply throttling
+      const countParams = new URLSearchParams({ ...queryParams, count_only: "true" });
+      if (postContext) countParams.append("postContext", postContext);
+      
+      const countResponse = await fetch(`${apiEndpoint}?${countParams}`);
+      const countData = await countResponse.json();
+      const totalCount = countData.total || 0;
+      setTotalPostsCount(totalCount);
+      
+      // If fewer than MIN_POSTS_FOR_THROTTLING posts, fetch all at once
+      const shouldApplyThrottling = totalCount >= MIN_POSTS_FOR_THROTTLING;
+      const fetchLimit = shouldApplyThrottling ? Math.min(batchSize, 30) : totalCount;
+      
+      const params = buildQueryParams(0, fetchLimit);
       const response = await fetch(`${apiEndpoint}?${params}`);
       if (!response.ok) throw new Error("Failed to fetch posts");
       const posts = await response.json();
       
       setAllPosts(posts);
-      setHasMore(posts.length === batchSize);
+      setHasMore(shouldApplyThrottling && posts.length === fetchLimit);
       lastFetchTime.current = Date.now();
       
       return posts;
     },
   });
 
-  // Check for new posts in the background
+  // Check for new posts in the background (only if throttling is active)
   const checkForNewPosts = useCallback(async () => {
     try {
+      // Only check for new posts if we have enough posts to warrant throttling
+      if (totalPostsCount < MIN_POSTS_FOR_THROTTLING) {
+        return; // Skip background checks for small feeds
+      }
+      
       const params = buildQueryParams(0, batchSize);
       const response = await fetch(`${apiEndpoint}?${params}&since=${lastFetchTime.current}`);
       if (!response.ok) return;
@@ -107,26 +127,29 @@ export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartF
     } catch (error) {
       console.warn("Failed to check for new posts:", error);
     }
-  }, [apiEndpoint, buildQueryParams, allPosts, newPosts, batchSize]);
+  }, [apiEndpoint, buildQueryParams, allPosts, newPosts, batchSize, totalPostsCount]);
 
-  // Auto-refresh setup
+  // Auto-refresh setup (only for throttled feeds)
   useEffect(() => {
     if (autoRefreshTimer.current) {
       clearInterval(autoRefreshTimer.current);
     }
     
-    autoRefreshTimer.current = setInterval(checkForNewPosts, autoRefreshInterval);
+    // Only set up background refresh for feeds that need throttling
+    if (totalPostsCount >= MIN_POSTS_FOR_THROTTLING) {
+      autoRefreshTimer.current = setInterval(checkForNewPosts, autoRefreshInterval);
+    }
     
     return () => {
       if (autoRefreshTimer.current) {
         clearInterval(autoRefreshTimer.current);
       }
     };
-  }, [checkForNewPosts, autoRefreshInterval]);
+  }, [checkForNewPosts, autoRefreshInterval, totalPostsCount]);
 
-  // Load more posts
+  // Load more posts (only available for throttled feeds)
   const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) return;
+    if (isLoadingMore || !hasMore || totalPostsCount < MIN_POSTS_FOR_THROTTLING) return;
     
     setIsLoadingMore(true);
     try {
@@ -151,9 +174,9 @@ export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartF
     } finally {
       setIsLoadingMore(false);
     }
-  }, [isLoadingMore, hasMore, allPosts, batchSize, buildQueryParams, apiEndpoint, queryClient, queryKey, currentPage, toast]);
+  }, [isLoadingMore, hasMore, allPosts, batchSize, buildQueryParams, apiEndpoint, queryClient, queryKey, currentPage, toast, totalPostsCount]);
 
-  // Refresh posts
+  // Refresh posts (intelligent batching based on total count)
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -165,16 +188,30 @@ export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartF
       setNewPosts([]);
       setShowNewPostsBanner(false);
       
-      // Force fresh fetch
+      // Force fresh fetch with count check
       await queryClient.invalidateQueries({ queryKey });
-      const params = buildQueryParams(0, batchSize);
+      
+      // Get updated total count
+      const countParams = new URLSearchParams({ ...queryParams, count_only: "true" });
+      if (postContext) countParams.append("postContext", postContext);
+      
+      const countResponse = await fetch(`${apiEndpoint}?${countParams}`);
+      const countData = await countResponse.json();
+      const totalCount = countData.total || 0;
+      setTotalPostsCount(totalCount);
+      
+      // Smart batching: fetch all if < MIN_POSTS_FOR_THROTTLING, otherwise batch
+      const shouldApplyThrottling = totalCount >= MIN_POSTS_FOR_THROTTLING;
+      const fetchLimit = shouldApplyThrottling ? Math.min(batchSize, 30) : totalCount;
+      
+      const params = buildQueryParams(0, fetchLimit);
       const response = await fetch(`${apiEndpoint}?${params}`);
       
       if (!response.ok) throw new Error("Failed to refresh posts");
       
       const freshPosts = await response.json();
       setAllPosts(freshPosts);
-      setHasMore(freshPosts.length === batchSize);
+      setHasMore(shouldApplyThrottling && freshPosts.length === fetchLimit);
       lastFetchTime.current = Date.now();
       
       toast({
@@ -190,7 +227,7 @@ export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartF
     } finally {
       setIsRefreshing(false);
     }
-  }, [queryClient, queryKey, buildQueryParams, apiEndpoint, batchSize, toast]);
+  }, [queryClient, queryKey, buildQueryParams, apiEndpoint, batchSize, toast, queryParams, postContext]);
 
   // Accept new posts
   const acceptNewPosts = useCallback(() => {
@@ -213,9 +250,9 @@ export function useSmartFeed(options: SmartFeedOptions): SmartFeedState & SmartF
     isLoading,
     isLoadingMore,
     isRefreshing,
-    hasMore,
+    hasMore: totalPostsCount >= MIN_POSTS_FOR_THROTTLING && hasMore, // Only show "load more" for throttled feeds
     newPostsCount: newPosts.length,
-    showNewPostsBanner,
+    showNewPostsBanner: totalPostsCount >= MIN_POSTS_FOR_THROTTLING && showNewPostsBanner, // Only show banner for throttled feeds
     loadMore,
     refresh,
     acceptNewPosts,

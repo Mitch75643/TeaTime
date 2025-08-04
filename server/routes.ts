@@ -47,8 +47,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get posts
   app.get("/api/posts", async (req, res) => {
     try {
-      const { category, sortBy = 'new', tags, userOnly, postContext, section } = req.query;
+      const { 
+        category, 
+        sortBy = 'new', 
+        tags, 
+        userOnly, 
+        postContext, 
+        section,
+        count_only,
+        page = '0',
+        limit = '25'
+      } = req.query;
       const sessionId = req.session.id!;
+      
+      // Handle count-only requests for intelligent throttling
+      if (count_only === 'true') {
+        const count = await storage.getPostsCount(
+          category as string,
+          tags as string,
+          userOnly === 'true' ? sessionId : undefined,
+          postContext as string,
+          section as string
+        );
+        return res.json({ total: count });
+      }
       
       const posts = await storage.getPosts(
         category as string,
@@ -56,7 +78,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tags as string,
         userOnly === 'true' ? sessionId : undefined,
         postContext as string,
-        section as string
+        section as string,
+        undefined, // storyCategory
+        undefined, // hotTopicFilter
+        parseInt(page as string),
+        parseInt(limit as string)
       );
       res.json(posts);
     } catch (error) {
@@ -79,7 +105,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         postContext as string,
         topicId, // section
         storyCategory as string, // storyCategory
-        hotTopicFilter as string // hotTopicFilter
+        hotTopicFilter as string, // hotTopicFilter
+        0, // page
+        25 // limit
       );
       res.json(posts);
     } catch (error) {
@@ -103,7 +131,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         postContext as string,
         topicId, // section
         storyCategory as string, // storyCategory
-        hotTopicFilter as string // hotTopicFilter
+        hotTopicFilter as string, // hotTopicFilter
+        0, // page
+        25 // limit
       );
       res.json(posts);
     } catch (error) {
