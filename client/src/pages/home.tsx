@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { FeedToggle } from "@/components/ui/feed-toggle";
-import { FloatingPostButton } from "@/components/ui/floating-post-button";
+
 import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -202,7 +202,6 @@ export default function Home() {
         </div>
       </main>
 
-      <FloatingPostButton />
       <BottomNav />
 
       <PostModal
