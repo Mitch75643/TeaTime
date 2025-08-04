@@ -25,6 +25,7 @@ const categories = [
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [feedType, setFeedType] = useState<"new" | "trending">("new");
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -161,13 +162,7 @@ export default function Home() {
 
             {/* Call-to-Action Button */}
             <button
-              onClick={() => {
-                // Trigger the floating post button action
-                const floatingButton = document.querySelector('[data-floating-post-button]') as HTMLButtonElement;
-                if (floatingButton) {
-                  floatingButton.click();
-                }
-              }}
+              onClick={() => setIsPostModalOpen(true)}
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ease-out"
             >
               <span className="mr-2">✨</span>
@@ -193,6 +188,12 @@ export default function Home() {
 
       <FloatingPostButton />
       <BottomNav />
+
+      <PostModal
+        isOpen={isPostModalOpen}
+        onClose={() => setIsPostModalOpen(false)}
+        postContext={{ page: 'home' }}
+      />
     </div>
   );
 }
