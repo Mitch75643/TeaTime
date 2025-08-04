@@ -81,7 +81,10 @@ export function PostCreationModal({ trigger, onPostCreated }: PostCreationModalP
       
       <DialogContent className="max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-center">Share Your Tea ☕</DialogTitle>
+          <DialogTitle className="text-center flex items-center justify-center gap-2">
+            Share Your Tea 
+            <span className="inline-block" style={{ fontSize: '1.25rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+          </DialogTitle>
           <p className="text-sm text-gray-600 text-center">
             Post anonymously to the Tfess community
           </p>

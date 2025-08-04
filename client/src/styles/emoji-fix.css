@@ -1,0 +1,33 @@
+/* Coffee Emoji Styling Fix */
+.coffee-emoji {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Color', 'Twemoji Mozilla', system-ui, sans-serif;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  font-variant-emoji: emoji;
+  line-height: 1;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent stretching in flex containers */
+.coffee-emoji-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .coffee-emoji {
+    font-size: inherit;
+    transform: scale(1);
+  }
+}
+
+/* Dark mode compatibility */
+@media (prefers-color-scheme: dark) {
+  .coffee-emoji {
+    filter: brightness(1.1) contrast(1.05);
+  }
+}

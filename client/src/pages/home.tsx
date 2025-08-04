@@ -141,7 +141,9 @@ export default function Home() {
           <div className="relative text-center min-h-[60vh] flex flex-col items-center justify-center">
             {/* Animated Tea Cup Icon */}
             <div className="relative mb-6">
-              <div className="text-6xl mb-2 animate-pulse">☕</div>
+              <div className="text-6xl mb-2 animate-pulse leading-none flex items-center justify-center w-16 h-16 mx-auto">
+                <span className="block" style={{ fontSize: '3.5rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+              </div>
               {/* Steam Animation */}
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2">
                 <div className="flex space-x-1">

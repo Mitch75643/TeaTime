@@ -271,7 +271,10 @@ export function PostModal({
           <DialogTitle>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <span>Spill the Tea ☕</span>
+                <span className="flex items-center gap-2">
+                  Spill the Tea 
+                  <span className="inline-block" style={{ fontSize: '1.1rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+                </span>
                 {hasDraft() && (
                   <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded-full">
                     Draft saved

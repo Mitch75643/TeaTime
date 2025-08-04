@@ -193,7 +193,13 @@ function SpillStreak() {
     if (days < 3) return `${days}-day streak! Keep going!`;
     if (days < 7) return `${days}-day streak! You're on fire! 🔥`;
     if (days < 14) return `${days}-day streak! Legendary spiller! 👑`;
-    return `${days}-day streak! Tea master! ☕👑`;
+    return (
+      <span className="flex items-center gap-1">
+        {days}-day streak! Tea master! 
+        <span className="inline-block" style={{ fontSize: '0.875rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+        👑
+      </span>
+    );
   };
 
   const getStreakIcon = (days: number) => {
@@ -341,7 +347,10 @@ export default function DailySpill() {
               <CountdownTimer />
             </div>
             <CardTitle className="text-xl font-bold flex items-center space-x-2">
-              <span>☕ Daily Spill</span>
+              <span className="flex items-center gap-2">
+                <span className="inline-block" style={{ fontSize: '1.25rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+                Daily Spill
+              </span>
               {spillOfTheDay && (
                 <div className="text-sm bg-white/20 rounded-full px-2 py-1">
                   🏆 Featured

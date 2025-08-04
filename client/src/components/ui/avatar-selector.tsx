@@ -83,7 +83,9 @@ export function AvatarSelector({ currentAvatarId, onSelect, className }: AvatarS
               <TabsTrigger value="animals" className="text-xs">🐱 Animals</TabsTrigger>
             </TabsList>
             <TabsList className="grid w-full grid-cols-2 gap-1 mt-1">
-              <TabsTrigger value="objects" className="text-xs">☕ Objects</TabsTrigger>
+              <TabsTrigger value="objects" className="text-xs coffee-emoji-container">
+                <span className="coffee-emoji">☕</span> Objects
+              </TabsTrigger>
               <TabsTrigger value="characters" className="text-xs">👽 Characters</TabsTrigger>
             </TabsList>
             

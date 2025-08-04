@@ -75,7 +75,10 @@ export default function PostCreation() {
       <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-center">Share Your Tea ☕</CardTitle>
+            <CardTitle className="text-center flex items-center justify-center gap-2">
+              Share Your Tea 
+              <span className="inline-block" style={{ fontSize: '1.25rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+            </CardTitle>
             <p className="text-sm text-gray-600 text-center">
               Post anonymously to the Tfess community
             </p>

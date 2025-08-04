@@ -50,7 +50,10 @@ export default function Trending() {
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            Spill the Tea ☕
+            <span className="flex items-center justify-center gap-3">
+              Spill the Tea 
+              <span className="inline-block" style={{ fontSize: '2rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+            </span>
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
             Share your anonymous stories and connect with the community

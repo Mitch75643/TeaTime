@@ -542,7 +542,6 @@ export default function Profile() {
                       </DialogHeader>
                       <BiometricSetup 
                         onComplete={handleBiometricComplete}
-                        userId={user?.anonId || ''}
                       />
                     </DialogContent>
                   </Dialog>
