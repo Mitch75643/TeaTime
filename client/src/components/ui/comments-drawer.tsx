@@ -210,10 +210,12 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                   <div key={comment.id} className="space-y-2">
                     {/* Main Comment */}
                     <div className={cn(
-                      "rounded-lg p-3 space-y-2",
+                      "rounded-lg p-3 space-y-2 transition-all duration-200",
                       isDrama 
                         ? "bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200"
-                        : "bg-gray-50 border border-gray-200"
+                        : "bg-gray-50 border border-gray-200",
+                      // Highlight when this comment is being replied to
+                      replyingTo === comment.id && "ring-2 ring-orange-300 bg-orange-25 border-orange-300"
                     )}>
                       <div className="flex items-start space-x-3">
                         <AvatarDisplay
@@ -271,11 +273,28 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                       {/* Reply Input (if replying to this comment) */}
                       {replyingTo === comment.id && (
-                        <div className="ml-4 sm:ml-11 mt-3 space-y-3 bg-white dark:bg-gray-800 p-3 rounded-lg">
+                        <div className="ml-4 sm:ml-11 mt-3 space-y-3 bg-white dark:bg-gray-800 p-3 rounded-lg border-l-4 border-orange-300">
+                          {/* Reply Context Header */}
+                          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded-md">
+                            <Reply className="h-3 w-3" />
+                            <span>Replying to</span>
+                            <div className="flex items-center space-x-2">
+                              <AvatarDisplay
+                                avatarId={comment.sessionId === sessionId ? userAvatarId : (comment.avatarId || 'mask-anonymous')}
+                                size="xs"
+                                showBorder={false}
+                                gradientColors={comment.sessionId === sessionId ? avatarColor : undefined}
+                              />
+                              <span className="font-medium text-gray-800 dark:text-gray-200">
+                                {comment.sessionId === sessionId ? userAlias : (comment.alias || "Anonymous")}
+                              </span>
+                            </div>
+                          </div>
+                          
                           <Textarea
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
-                            placeholder={`Reply to ${comment.alias}...`}
+                            placeholder={`Reply to ${comment.sessionId === sessionId ? userAlias : (comment.alias || "Anonymous")}...`}
                             className="resize-none text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 w-full min-h-[2.5rem] max-h-20"
                             maxLength={300}
                             rows={2}
@@ -296,7 +315,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                                 onClick={cancelReply}
                                 className="text-xs flex-1 sm:flex-none"
                               >
-                                Cancel
+                                Cancel Reply
                               </Button>
                               <Button
                                 onClick={handleSubmit}
@@ -317,10 +336,13 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                     {/* Replies */}
                     {(comment as any).replies && (comment as any).replies.length > 0 && (
-                      <div className="ml-4 sm:ml-8 space-y-2">
+                      <div className="ml-4 sm:ml-8 space-y-2 relative">
+                        {/* Threading line */}
+                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-300 to-transparent"></div>
+                        
                         {(comment as any).replies.map((reply: any) => (
                           <div key={reply.id} className={cn(
-                            "rounded-lg p-3 space-y-2",
+                            "rounded-lg p-3 space-y-2 relative pl-4",
                             isDrama 
                               ? "bg-gradient-to-br from-orange-50/30 to-red-50/30 border border-orange-100"
                               : "bg-white border border-gray-200"
@@ -379,19 +401,36 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
           </ScrollArea>
 
           {/* Comment Input */}
-          {!replyingTo && (
-            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-600 pt-4 pb-safe-area-inset-bottom bg-white dark:bg-gray-800">
-              <div className="flex space-x-3 px-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {getAvatarById(userAvatarId) ? (
-                    <div 
-                      className="w-full h-full"
-                      dangerouslySetInnerHTML={{ __html: getAvatarById(userAvatarId)?.svg || '' }}
-                    />
-                  ) : (
-                    <span className="text-white text-xs font-bold">Y</span>
-                  )}
+          <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-600 pt-4 pb-safe-area-inset-bottom bg-white dark:bg-gray-800">
+            {/* Reply Mode Header */}
+            {replyingTo && (
+              <div className="px-2 mb-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-sm text-orange-700 dark:text-orange-300">
+                    <Reply className="h-3 w-3" />
+                    <span>Reply mode active</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={cancelReply}
+                    className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-200 h-6 px-2 text-xs"
+                  >
+                    Cancel Reply
+                  </Button>
                 </div>
+              </div>
+            )}
+            
+            {!replyingTo && (
+              <div className="flex space-x-3 px-2">
+                <AvatarDisplay
+                  avatarId={userAvatarId}
+                  size="sm"
+                  showBorder={false}
+                  gradientColors={avatarColor}
+                  isCurrentUser={true}
+                />
                 <div className="flex-1 space-y-3">
                   <Textarea
                     value={comment}
@@ -431,8 +470,8 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
