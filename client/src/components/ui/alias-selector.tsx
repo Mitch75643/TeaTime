@@ -57,19 +57,19 @@ export function AliasSelector({ currentAlias, onSelect, className }: AliasSelect
             variant="outline"
             onClick={generateNew}
             disabled={isGenerating}
-            className="flex-1"
+            className="flex-1 min-w-0"
           >
-            <Shuffle className={cn("h-4 w-4 mr-2", isGenerating && "animate-spin")} />
-            {isGenerating ? "Generating..." : "Generate New"}
+            <Shuffle className={cn("h-4 w-4 mr-2 flex-shrink-0", isGenerating && "animate-spin")} />
+            <span className="truncate">{isGenerating ? "Generating..." : "Generate New"}</span>
           </Button>
           
           <Button
             onClick={keepUsername}
             disabled={isCurrentUsername}
-            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+            className="flex-1 min-w-0 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
           >
-            <Check className="h-4 w-4 mr-2" />
-            {isCurrentUsername ? "Current" : "Keep This"}
+            <Check className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="truncate">{isCurrentUsername ? "Current" : "Keep This"}</span>
           </Button>
         </div>
 
