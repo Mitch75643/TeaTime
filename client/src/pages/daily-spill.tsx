@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { PostCard } from "@/components/ui/post-card";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { WeeklyThemeAnimation, useWeeklyThemeAnimation } from "@/components/ui/weekly-theme-animations";
+import { useSmartFeed } from "@/hooks/use-smart-feed";
+import { 
+  NewPostsBanner, 
+  StickyRefreshHeader, 
+  LoadMoreButton, 
+  FeedSkeleton, 
+  SmartFeedContainer 
+} from "@/components/ui/smart-feed-ui";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -249,7 +256,6 @@ export default function DailySpill() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [hasSpilledToday, setHasSpilledToday] = useState(false); // Would track user's daily participation
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const queryClient = useQueryClient();
   const todayPrompt = getDailyPrompt();
   const dateString = getDateString();
   const currentTheme = getCurrentWeekTheme();
@@ -257,15 +263,32 @@ export default function DailySpill() {
   // Weekly theme animation hook
   const { animation, triggerAnimation, completeAnimation } = useWeeklyThemeAnimation();
 
-  // Get posts with daily spill category and context
-  const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }],
-    queryFn: async () => {
-      const response = await fetch("/api/posts?category=daily&sortBy=new&postContext=daily");
-      if (!response.ok) throw new Error("Failed to fetch posts");
-      return response.json();
+  // Smart feed hook with batching and auto-refresh
+  const smartFeed = useSmartFeed({
+    queryKey: ["/api/posts", "daily", "new"],
+    apiEndpoint: "/api/posts",
+    queryParams: {
+      category: "daily",
+      sortBy: "new",
     },
+    postContext: "daily",
+    batchSize: 25,
+    autoRefreshInterval: 25000, // 25 seconds
   });
+
+  const {
+    posts,
+    isLoading,
+    isLoadingMore,
+    isRefreshing,
+    hasMore,
+    newPostsCount,
+    showNewPostsBanner,
+    loadMore,
+    refresh,
+    acceptNewPosts,
+    dismissNewPosts,
+  } = smartFeed;
 
   // Handle post submission success
   const handlePostSuccess = () => {
@@ -276,7 +299,7 @@ export default function DailySpill() {
     triggerAnimation(currentTheme.name);
     
     // Refresh the posts feed to show new post immediately
-    queryClient.invalidateQueries({ queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }] });
+    refresh();
     
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };
@@ -399,34 +422,27 @@ export default function DailySpill() {
         </div>
       )}
 
-      {/* Posts Feed */}
-      <main className="px-4 pb-20 space-y-4">
-        {/* Feed Header */}
-        {posts.length > 0 && (
-          <div className="flex items-center justify-between pb-2">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Today's Spills ({posts.length})
-            </h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                queryClient.invalidateQueries({ queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }] });
-              }}
-              className="text-orange-600 border-orange-200 hover:bg-orange-50"
-            >
-              Refresh
-            </Button>
-          </div>
-        )}
-        {isLoading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-            <p className="text-gray-500 mt-2">Loading today's spills...</p>
-          </div>
-        )}
+      {/* New Posts Banner */}
+      <NewPostsBanner
+        count={newPostsCount}
+        onAccept={acceptNewPosts}
+        onDismiss={dismissNewPosts}
+        show={showNewPostsBanner}
+      />
 
-        {!isLoading && posts.length === 0 && (
+      {/* Sticky Header */}
+      <StickyRefreshHeader
+        title={`Today's Spills${posts.length > 0 ? ` (${posts.length})` : ''}`}
+        subtitle={dateString}
+        onRefresh={refresh}
+        isRefreshing={isRefreshing}
+        className="top-16"
+      />
+
+      <SmartFeedContainer>
+        {isLoading ? (
+          <FeedSkeleton count={5} />
+        ) : posts.length === 0 ? (
           <div className="text-center py-12">
             <Coffee className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
@@ -443,15 +459,24 @@ export default function DailySpill() {
               Share Your Story
             </Button>
           </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {posts.map((post: Post) => (
+                <PostCard 
+                  key={post.id} 
+                  post={post} 
+                />
+              ))}
+            </div>
+            <LoadMoreButton
+              onLoadMore={loadMore}
+              isLoading={isLoadingMore}
+              hasMore={hasMore}
+            />
+          </>
         )}
-
-        {posts.map((post: Post) => (
-          <PostCard 
-            key={post.id} 
-            post={post} 
-          />
-        ))}
-      </main>
+      </SmartFeedContainer>
 
       <SectionPostModal 
         isOpen={isPostModalOpen}
