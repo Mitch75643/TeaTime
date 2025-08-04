@@ -138,15 +138,43 @@ export default function Home() {
             ))}
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🤷‍♀️</div>
+          <div className="relative text-center py-12">
+            {/* Animated Tea Cup Icon */}
+            <div className="relative mb-6">
+              <div className="text-6xl mb-2 animate-pulse">☕</div>
+              {/* Steam Animation */}
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2">
+                <div className="flex space-x-1">
+                  <div className="w-0.5 h-4 bg-gray-300 dark:bg-gray-600 rounded-full opacity-60 animate-bounce" style={{ animationDelay: '0ms', animationDuration: '2s' }}></div>
+                  <div className="w-0.5 h-3 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50 animate-bounce" style={{ animationDelay: '200ms', animationDuration: '2s' }}></div>
+                  <div className="w-0.5 h-4 bg-gray-300 dark:bg-gray-600 rounded-full opacity-40 animate-bounce" style={{ animationDelay: '400ms', animationDuration: '2s' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Fun Headlines */}
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {activeCategory === "all" ? "No posts yet" : `No posts in ${categories.find(c => c.id === activeCategory)?.label} yet`}
+              {activeCategory === "all" ? "It's quiet in here... ☕" : `Still brewing in ${categories.find(c => c.id === activeCategory)?.label}...`}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {activeCategory === "all" ? "Be the first to spill some tea!" : "Be the first to spill the tea in this category!"}
+            <p className="text-gray-600 dark:text-gray-400 mb-8 text-base">
+              {activeCategory === "all" ? "No one's spilled yet... will you be the first?" : "Be bold—spill the first sip in this category!"}
             </p>
 
+            {/* Call-to-Action Button */}
+            <button
+              onClick={() => setIsPostModalOpen(true)}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ease-out"
+            >
+              <span className="mr-2">✨</span>
+              Start the conversation
+            </button>
+            
+            {/* Subtle Background Decoration */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-orange-200 dark:bg-orange-800 rounded-full opacity-20 animate-ping" style={{ animationDelay: '1s', animationDuration: '3s' }}></div>
+              <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-orange-300 dark:bg-orange-700 rounded-full opacity-30 animate-ping" style={{ animationDelay: '2s', animationDuration: '4s' }}></div>
+              <div className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-orange-200 dark:bg-orange-800 rounded-full opacity-25 animate-ping" style={{ animationDelay: '0.5s', animationDuration: '2.5s' }}></div>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
