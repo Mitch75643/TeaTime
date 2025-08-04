@@ -9,7 +9,9 @@ import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { useSmartFeed } from "@/hooks/use-smart-feed";
 import type { Post } from "@shared/schema";
 
 const categories = [
@@ -27,10 +29,8 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [feedType, setFeedType] = useState<"new" | "trending">("new");
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   // Check for focus parameter in URL (from notifications)
   useEffect(() => {
@@ -56,6 +56,15 @@ export default function Home() {
     }
   }, []);
 
+  // Initialize smart feed
+  const smartFeed = useSmartFeed({
+    queryKey: ["/api/posts", activeCategory, feedType],
+    apiEndpoint: "/api/posts",
+    category: activeCategory,
+    sortBy: feedType,
+    postContext: "home",
+  });
+
   const { data: allPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
     queryFn: async () => {
@@ -73,33 +82,8 @@ export default function Home() {
     },
   });
 
-  // Use all posts directly - no filtering needed for "new" mode
-  const posts = allPosts;
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      // Invalidate queries to force a fresh fetch
-      await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/posts"] });
-      
-      // Smooth scroll to top
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      
-      toast({
-        title: "Posts refreshed!",
-        description: "Latest content has been loaded.",
-      });
-    } catch (error) {
-      toast({
-        title: "Refresh failed",
-        description: "Unable to load latest posts. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  // Apply smart feed batching
+  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -131,16 +115,24 @@ export default function Home() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
+              onClick={smartFeed.handleRefresh}
+              disabled={smartFeed.isRefreshing}
               className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
             >
-              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 ${smartFeed.isRefreshing ? 'animate-spin' : ''}`} />
               <span className="text-xs">Refresh</span>
             </Button>
           </div>
         </div>
       </div>
+
+      {/* New Posts Banner */}
+      {smartFeed.showNewPostsBanner && (
+        <SmartFeedBanner
+          newPostsCount={smartFeed.newPostsCount}
+          onLoadNewPosts={smartFeed.handleLoadNewPosts}
+        />
+      )}
 
       <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
         <div className="space-y-6">
@@ -200,6 +192,14 @@ export default function Home() {
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
+            
+            {/* Load More Button */}
+            {hasMorePosts && (
+              <LoadMoreButton
+                onLoadMore={smartFeed.handleLoadMore}
+                remainingCount={allPosts.length - posts.length}
+              />
+            )}
           </div>
         )}
         </div>

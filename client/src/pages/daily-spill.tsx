@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Coffee, Plus, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Trophy } from "lucide-react";
+import { Coffee, Plus, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Trophy, RefreshCw } from "lucide-react";
+import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { useSmartFeed } from "@/hooks/use-smart-feed";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -257,15 +260,27 @@ export default function DailySpill() {
   // Weekly theme animation hook
   const { animation, triggerAnimation, completeAnimation } = useWeeklyThemeAnimation();
 
+  // Initialize smart feed for daily spills
+  const smartFeed = useSmartFeed({
+    queryKey: ["/api/posts", "daily", "new"],
+    apiEndpoint: "/api/posts",
+    category: "daily",
+    sortBy: "new",
+    postContext: "daily",
+  });
+
   // Get posts with daily spill category and context
-  const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }],
+  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
+    queryKey: ["/api/posts", "daily", "new"],
     queryFn: async () => {
       const response = await fetch("/api/posts?category=daily&sortBy=new&postContext=daily");
       if (!response.ok) throw new Error("Failed to fetch posts");
       return response.json();
     },
   });
+
+  // Apply smart feed batching
+  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
 
   // Handle post submission success
   const handlePostSuccess = () => {
@@ -276,7 +291,7 @@ export default function DailySpill() {
     triggerAnimation(currentTheme.name);
     
     // Refresh the posts feed to show new post immediately
-    queryClient.invalidateQueries({ queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }] });
+    queryClient.invalidateQueries({ queryKey: ["/api/posts", "daily", "new"] });
     
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };
@@ -284,8 +299,8 @@ export default function DailySpill() {
   // Get "Spill of the Day" - highest reacted post
   const spillOfTheDay = posts.length > 0 
     ? posts.reduce((best, current) => {
-        const currentReactions = Object.values(current.reactions || {}).reduce((sum, count) => sum + count, 0);
-        const bestReactions = Object.values(best.reactions || {}).reduce((sum, count) => sum + count, 0);
+        const currentReactions = Object.values(current.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
+        const bestReactions = Object.values(best.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
         return currentReactions > bestReactions ? current : best;
       })
     : null;
@@ -399,26 +414,37 @@ export default function DailySpill() {
         </div>
       )}
 
-      {/* Posts Feed */}
-      <main className="px-4 pb-20 space-y-4">
-        {/* Feed Header */}
-        {posts.length > 0 && (
-          <div className="flex items-center justify-between pb-2">
+      {/* New Posts Banner */}
+      {smartFeed.showNewPostsBanner && (
+        <SmartFeedBanner
+          newPostsCount={smartFeed.newPostsCount}
+          onLoadNewPosts={smartFeed.handleLoadNewPosts}
+        />
+      )}
+
+      {/* Sticky Feed Header */}
+      <div className="sticky top-16 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Today's Spills ({posts.length})
+              Today's Spills ({allPosts.length})
             </h2>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => {
-                queryClient.invalidateQueries({ queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }] });
-              }}
-              className="text-orange-600 border-orange-200 hover:bg-orange-50"
+              onClick={smartFeed.handleRefresh}
+              disabled={smartFeed.isRefreshing}
+              className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
             >
-              Refresh
+              <RefreshCw className={`h-3 w-3 ${smartFeed.isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-xs">Refresh</span>
             </Button>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Posts Feed */}
+      <main className="px-4 pb-20 space-y-4 pt-4">
         {isLoading && (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
@@ -445,12 +471,22 @@ export default function DailySpill() {
           </div>
         )}
 
-        {posts.map((post: Post) => (
-          <PostCard 
-            key={post.id} 
-            post={post} 
-          />
-        ))}
+        <div className="space-y-4">
+          {posts.map((post: Post) => (
+            <PostCard 
+              key={post.id} 
+              post={post} 
+            />
+          ))}
+          
+          {/* Load More Button */}
+          {hasMorePosts && (
+            <LoadMoreButton
+              onLoadMore={smartFeed.handleLoadMore}
+              remainingCount={allPosts.length - posts.length}
+            />
+          )}
+        </div>
       </main>
 
       <SectionPostModal 
