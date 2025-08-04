@@ -255,18 +255,19 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                       {/* Reply Input (if replying to this comment) */}
                       {replyingTo === comment.id && (
-                        <div className="ml-4 sm:ml-11 mt-3 space-y-3 bg-white dark:bg-gray-800 p-3 rounded-lg">
+                        <div className="ml-0 sm:ml-11 mt-3 space-y-3 bg-white dark:bg-gray-800 p-3 rounded-lg relative z-50">
                           <Textarea
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
                             placeholder={`Reply to ${comment.alias}...`}
-                            className="resize-none text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 w-full min-h-[2.5rem] max-h-20"
+                            className="resize-none text-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 w-full min-h-[2.5rem] max-h-20 relative z-50"
                             maxLength={300}
                             rows={2}
                             style={{ 
                               fontSize: '16px', // Prevents zoom on iOS
-                              zIndex: 10,
-                              position: 'relative'
+                              zIndex: 100,
+                              position: 'relative',
+                              backgroundColor: 'white'
                             }}
                           />
                           <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
