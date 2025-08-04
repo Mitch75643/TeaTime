@@ -173,12 +173,17 @@ export class MemStorage implements IStorage {
       posts = posts.filter(post => post.sessionId === userSessionId);
     }
     
-    // Filter by post context (home, daily, community)
+    // STRICT POST ISOLATION: Filter by post context (home, daily, community)
     if (postContext) {
       posts = posts.filter(post => post.postContext === postContext);
     }
     
-    // Filter by community section
+    // STRICT ISOLATION: When requesting HOME posts, explicitly exclude community posts
+    if (postContext === 'home') {
+      posts = posts.filter(post => !post.communitySection || post.communitySection === null);
+    }
+    
+    // STRICT ISOLATION: When requesting community posts, only show posts from that specific section
     if (section) {
       posts = posts.filter(post => post.communitySection === section);
     }

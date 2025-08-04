@@ -131,9 +131,9 @@ export class MemoryStoryRecommendationEngine implements RecommendationEngine {
     const userInteractions = this.userInteractions.get(sessionId) || [];
     const allPosts = await this.storage.getAllPosts();
     
-    // Filter to story posts only
+    // Filter to Story Time community posts only (strict isolation)
     const storyPosts = allPosts.filter(post => 
-      post.category === "story" && 
+      post.communitySection === "story-time" && 
       post.storyType && 
       !post.isRemoved && 
       !post.isHidden
@@ -381,7 +381,7 @@ export class MemoryStoryRecommendationEngine implements RecommendationEngine {
     const allPosts = await this.storage.getAllPosts();
     
     return allPosts
-      .filter(post => post.category === "story" && post.storyType && !post.isRemoved && !post.isHidden)
+      .filter(post => post.communitySection === "story-time" && post.storyType && !post.isRemoved && !post.isHidden)
       .sort((a, b) => this.getTrendingScore(b) - this.getTrendingScore(a))
       .slice(0, limit);
   }
@@ -397,7 +397,7 @@ export class MemoryStoryRecommendationEngine implements RecommendationEngine {
     return allPosts
       .filter(post => 
         post.id !== postId &&
-        post.category === "story" && 
+        post.communitySection === "story-time" && 
         post.storyType === targetPost.storyType &&
         !post.isRemoved && 
         !post.isHidden
