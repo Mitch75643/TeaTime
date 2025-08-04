@@ -2,12 +2,13 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
-import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, banDeviceSchema, checkBanSchema, pushSubscriptionSchema, updatePushPreferencesSchema, type ModerationResponse } from "@shared/schema";
+import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, banDeviceSchema, checkBanSchema, pushSubscriptionSchema, updatePushPreferencesSchema, insertUserInteractionSchema, updateStoryPreferencesSchema, type ModerationResponse } from "@shared/schema";
 import { comprehensiveModeration } from "./moderation";
 import { checkDeviceBanMiddleware, strictBanCheckMiddleware, banSystem, startBanCleanupScheduler } from "./banMiddleware";
 import { memAutoRotationService } from "./memAutoRotationService";
 import { pushNotificationService } from "./pushNotificationService";
 import { addTestRoute } from "./testRoute";
+import { memoryStoryRecommendationEngine } from "./storyRecommendationEngine";
 
 declare module 'express-session' {
   interface SessionData {
@@ -759,6 +760,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to get push status:", error);
       res.status(500).json({ message: "Failed to get push notification status" });
+    }
+  });
+
+  // Story Recommendation System Routes
+  
+  // Track user interaction with story
+  app.post("/api/stories/track-interaction", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const interaction = insertUserInteractionSchema.parse(req.body);
+      const sessionId = req.session.id || req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      await memoryStoryRecommendationEngine.trackInteraction(sessionId, interaction);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track interaction:", error);
+      res.status(500).json({ message: "Failed to track interaction" });
+    }
+  });
+
+  // Get personalized story recommendations
+  app.get("/api/stories/recommendations", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const sessionId = req.session.id || req.headers['x-session-id'] as string;
+      const limit = parseInt(req.query.limit as string) || 5;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      const recommendations = await memoryStoryRecommendationEngine.getRecommendations(sessionId, limit);
+      
+      // Get the actual post data for recommendations
+      const recommendedPosts = await Promise.all(
+        recommendations.map(async (rec) => {
+          const post = await storage.getPostById(rec.recommendedPostId);
+          return {
+            ...rec,
+            post,
+          };
+        })
+      );
+
+      res.json(recommendedPosts.filter(rec => rec.post)); // Filter out any null posts
+    } catch (error) {
+      console.error("Failed to get recommendations:", error);
+      res.status(500).json({ message: "Failed to get recommendations" });
+    }
+  });
+
+  // Get trending stories
+  app.get("/api/stories/trending", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const trendingStories = await memoryStoryRecommendationEngine.getTrendingStories(limit);
+      res.json(trendingStories);
+    } catch (error) {
+      console.error("Failed to get trending stories:", error);
+      res.status(500).json({ message: "Failed to get trending stories" });
+    }
+  });
+
+  // Get similar stories
+  app.get("/api/stories/:postId/similar", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 5;
+      
+      const similarStories = await memoryStoryRecommendationEngine.getSimilarStories(postId, limit);
+      res.json(similarStories);
+    } catch (error) {
+      console.error("Failed to get similar stories:", error);
+      res.status(500).json({ message: "Failed to get similar stories" });
+    }
+  });
+
+  // Update user story preferences
+  app.put("/api/stories/preferences", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const preferences = updateStoryPreferencesSchema.parse(req.body);
+      const sessionId = req.session.id || req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      await memoryStoryRecommendationEngine.updatePreferences(sessionId, preferences);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to update preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  // Get user story preferences
+  app.get("/api/stories/preferences", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const sessionId = req.session.id || req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      const preferences = memoryStoryRecommendationEngine.getUserPreferences(sessionId);
+      res.json(preferences || {});
+    } catch (error) {
+      console.error("Failed to get preferences:", error);
+      res.status(500).json({ message: "Failed to get preferences" });
+    }
+  });
+
+  // Mark recommendation as viewed
+  app.post("/api/stories/recommendations/:postId/viewed", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const sessionId = req.session.id || req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      await memoryStoryRecommendationEngine.markRecommendationViewed(sessionId, postId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to mark recommendation as viewed:", error);
+      res.status(500).json({ message: "Failed to mark recommendation as viewed" });
+    }
+  });
+
+  // Mark recommendation as interacted
+  app.post("/api/stories/recommendations/:postId/interacted", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const sessionId = req.session.id || req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      await memoryStoryRecommendationEngine.markRecommendationInteracted(sessionId, postId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to mark recommendation as interacted:", error);
+      res.status(500).json({ message: "Failed to mark recommendation as interacted" });
+    }
+  });
+
+  // Get recommendation stats
+  app.get("/api/stories/stats", strictBanCheckMiddleware, async (req, res) => {
+    try {
+      const sessionId = req.session.id || req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      const stats = memoryStoryRecommendationEngine.getRecommendationStats(sessionId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Failed to get recommendation stats:", error);
+      res.status(500).json({ message: "Failed to get recommendation stats" });
     }
   });
 

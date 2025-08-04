@@ -6,6 +6,8 @@ import { PostCard } from "@/components/ui/post-card";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { CelebrityTeaFeatures } from "@/components/ui/celebrity-tea-features";
 import { StoryTimeFeatures } from "@/components/ui/story-time-features";
+import { StoryRecommendations } from "@/components/ui/story-recommendations";
+import { TrendingStories } from "@/components/ui/trending-stories";
 import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
 import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
@@ -339,9 +341,12 @@ export default function TopicFeed() {
 
       {/* Posts Section with Tabs */}
       <div className="container mx-auto px-4 py-6 pb-20">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Story Category Filter Bar - Only for Story Time */}
-          {topicId === "story-time" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Posts Section */}
+          <div className="lg:col-span-2">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {/* Story Category Filter Bar - Only for Story Time */}
+              {topicId === "story-time" && (
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by story type:</span>
@@ -399,8 +404,8 @@ export default function TopicFeed() {
             </div>
           )}
 
-          {/* Hot Topics Filter Bar - Only for Hot Topics */}
-          {topicId === "hot-topics" && (
+              {/* Hot Topics Filter Bar - Only for Hot Topics */}
+              {topicId === "hot-topics" && (
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by hot topic:</span>
@@ -457,7 +462,7 @@ export default function TopicFeed() {
               </div>
             </div>
           )}
-          
+
           {/* Tab Headers */}
           <div className="flex border-b border-gray-200 dark:border-gray-700">
             <button
@@ -606,8 +611,29 @@ export default function TopicFeed() {
               </div>
             )}
           </div>
+            </div>
+          
+          {/* Sidebar with Recommendations - Only for Story Time */}
+          {topicId === "story-time" && (
+            <div className="lg:col-span-1 space-y-6">
+              {/* Story Recommendations */}
+              <StoryRecommendations 
+                limit={6}
+                showPreferences={true}
+                className="sticky top-6"
+              />
+              
+              {/* Trending Stories */}
+              <TrendingStories 
+                limit={5}
+                showEngagement={true}
+                className="sticky top-6"
+              />
+            </div>
+          )}
         </div>
       </div>
+    </div>
 
       {/* Floating Add Button */}
       <Button

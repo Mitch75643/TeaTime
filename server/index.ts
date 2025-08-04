@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { memAutoRotationService } from "./memAutoRotationService";
+import { initializeStoryRecommendationEngine } from "./storyRecommendationEngine";
+import { storage } from "./storage";
 
 const app = express();
 app.use(express.json());
@@ -38,7 +40,21 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize story recommendation engine
+  initializeStoryRecommendationEngine(storage);
+  
   const server = await registerRoutes(app);
+  
+  // Seed sample story data in development
+  if (process.env.NODE_ENV === 'development') {
+    const { seedSampleStoryData, shouldSeedSampleData } = await import("./sampleStoryData");
+    if (shouldSeedSampleData()) {
+      // Delay seeding to ensure everything is initialized
+      setTimeout(() => {
+        seedSampleStoryData(storage).catch(console.error);
+      }, 2000);
+    }
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

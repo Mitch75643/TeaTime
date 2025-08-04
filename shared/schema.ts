@@ -239,6 +239,47 @@ export const pushNotificationLog = pgTable("push_notification_log", {
   sentAt: timestamp("sent_at").defaultNow(),
 });
 
+// Story Recommendation System
+export const userInteractions = pgTable("user_interactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull(),
+  postId: varchar("post_id").notNull().references(() => posts.id),
+  interactionType: varchar("interaction_type").notNull(), // view, reaction, comment, share
+  storyType: varchar("story_type"), // horror, funny, weird, romantic, embarrassing
+  category: varchar("category").notNull(), // story, celebrity, hot, etc.
+  tags: text("tags").array().default([]),
+  timeSpent: integer("time_spent").default(0), // seconds spent viewing
+  deviceType: varchar("device_type").default("unknown"), // mobile, desktop
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const storyRecommendations = pgTable("story_recommendations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull(),
+  recommendedPostId: varchar("recommended_post_id").notNull().references(() => posts.id),
+  recommendationType: varchar("recommendation_type").notNull(), // similar_stories, trending, personalized, new_user
+  confidence: integer("confidence").default(50), // 0-100 confidence score
+  reasons: text("reasons").array().default([]), // why recommended: ["similar_story_type", "high_engagement", "trending"]
+  position: integer("position").default(0), // position in recommendation list
+  wasViewed: boolean("was_viewed").default(false),
+  wasInteracted: boolean("was_interacted").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  viewedAt: timestamp("viewed_at"),
+  interactedAt: timestamp("interacted_at"),
+});
+
+export const storyPreferences = pgTable("story_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull().unique(),
+  favoriteStoryTypes: text("favorite_story_types").array().default([]), // horror, funny, weird, romantic, embarrassing
+  favoriteCategories: text("favorite_categories").array().default([]), // story, celebrity, hot, etc.
+  favoriteTags: text("favorite_tags").array().default([]),
+  preferredTimeOfDay: varchar("preferred_time_of_day"), // morning, afternoon, evening, night
+  engagementStyle: varchar("engagement_style"), // reader, commenter, reactor
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
@@ -422,6 +463,53 @@ export const updatePushPreferencesSchema = z.object({
   notificationTypes: z.array(z.enum(["daily_prompt", "daily_debate"])),
 });
 
+// Story recommendation schemas
+export const insertUserInteractionSchema = createInsertSchema(userInteractions).pick({
+  postId: true,
+  interactionType: true,
+  storyType: true,
+  category: true,
+  tags: true,
+  timeSpent: true,
+  deviceType: true,
+}).extend({
+  postId: z.string(),
+  interactionType: z.enum(["view", "reaction", "comment", "share"]),
+  storyType: z.enum(["horror", "funny", "weird", "romantic", "embarrassing"]).optional(),
+  category: z.string(),
+  tags: z.array(z.string()).optional().default([]),
+  timeSpent: z.number().min(0).optional().default(0),
+  deviceType: z.enum(["mobile", "desktop", "tablet", "unknown"]).optional().default("unknown"),
+});
+
+export const insertStoryRecommendationSchema = createInsertSchema(storyRecommendations).pick({
+  recommendedPostId: true,
+  recommendationType: true,
+  confidence: true,
+  reasons: true,
+  position: true,
+}).extend({
+  recommendedPostId: z.string(),
+  recommendationType: z.enum(["similar_stories", "trending", "personalized", "new_user"]),
+  confidence: z.number().min(0).max(100).optional().default(50),
+  reasons: z.array(z.string()).optional().default([]),
+  position: z.number().min(0).optional().default(0),
+});
+
+export const updateStoryPreferencesSchema = createInsertSchema(storyPreferences).pick({
+  favoriteStoryTypes: true,
+  favoriteCategories: true,
+  favoriteTags: true,
+  preferredTimeOfDay: true,
+  engagementStyle: true,
+}).extend({
+  favoriteStoryTypes: z.array(z.enum(["horror", "funny", "weird", "romantic", "embarrassing"])).optional().default([]),
+  favoriteCategories: z.array(z.string()).optional().default([]),
+  favoriteTags: z.array(z.string()).optional().default([]),
+  preferredTimeOfDay: z.enum(["morning", "afternoon", "evening", "night"]).optional(),
+  engagementStyle: z.enum(["reader", "commenter", "reactor"]).optional(),
+});
+
 // All types consolidated
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 
@@ -452,3 +540,11 @@ export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = z.infer<typeof pushSubscriptionSchema>;
 export type UpdatePushPreferences = z.infer<typeof updatePushPreferencesSchema>;
 export type PushNotificationLog = typeof pushNotificationLog.$inferSelect;
+
+// Story recommendation types
+export type UserInteraction = typeof userInteractions.$inferSelect;
+export type InsertUserInteraction = z.infer<typeof insertUserInteractionSchema>;
+export type StoryRecommendation = typeof storyRecommendations.$inferSelect;
+export type InsertStoryRecommendation = z.infer<typeof insertStoryRecommendationSchema>;
+export type StoryPreferences = typeof storyPreferences.$inferSelect;
+export type UpdateStoryPreferences = z.infer<typeof updateStoryPreferencesSchema>;

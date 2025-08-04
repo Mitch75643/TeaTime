@@ -21,6 +21,7 @@ export interface IStorage {
   updateCommentReactions(commentId: string, reactions: Record<string, number>): Promise<void>;
   
   // Reactions
+  createReaction(reaction: ReactionInput, sessionId: string): Promise<Reaction>;
   addReaction(reaction: ReactionInput, sessionId: string): Promise<void>;
   removeReaction(reaction: ReactionInput, sessionId: string): Promise<void>;
   hasUserReacted(postId: string | undefined, commentId: string | undefined, type: string, sessionId: string): Promise<boolean>;
@@ -284,6 +285,20 @@ export class MemStorage implements IStorage {
       comment.reactions = reactions;
       this.comments.set(commentId, comment);
     }
+  }
+
+  async createReaction(reaction: ReactionInput, sessionId: string): Promise<Reaction> {
+    const id = randomUUID();
+    const newReaction: Reaction = {
+      id,
+      postId: reaction.postId || null,
+      commentId: reaction.commentId || null,
+      type: reaction.type,
+      sessionId,
+      createdAt: new Date(),
+    };
+    this.reactions.set(id, newReaction);
+    return newReaction;
   }
 
   async addReaction(reaction: ReactionInput, sessionId: string): Promise<void> {
