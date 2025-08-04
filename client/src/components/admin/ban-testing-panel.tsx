@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
 import { apiRequest } from "@/lib/queryClient";
-import { Shield, AlertTriangle, Clock, RefreshCw } from "lucide-react";
+import { Shield, AlertTriangle, Clock, RefreshCw, Monitor, Settings, Zap, TestTube, Lock, Unlock } from "lucide-react";
 
 export function BanTestingPanel() {
   const [banReason, setBanReason] = useState("Testing ban system");
@@ -148,152 +149,243 @@ export function BanTestingPanel() {
   const currentFingerprint = getFingerprint();
 
   return (
-    <div className="space-y-6 p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="flex items-center justify-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
+            <Shield className="w-8 h-8 text-orange-500" />
             Device Ban Testing Panel
-          </CardTitle>
-          <CardDescription>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 text-sm italic">
             Test the device fingerprinting and ban system functionality
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Current Status */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg">
-            <h4 className="font-medium mb-2">Current Device Status</h4>
-            <div className="space-y-2 text-sm">
-              <div>Fingerprint: <code className="text-xs bg-gray-200 dark:bg-gray-800 px-1 rounded">{currentFingerprint?.slice(0, 16)}...</code></div>
-              <div className="flex items-center gap-2">
-                Ban Status: 
-                <Badge variant={banInfo?.banned ? "destructive" : "secondary"}>
-                  {banInfo?.banned ? (
-                    <>
-                      <AlertTriangle className="w-3 h-3 mr-1" />
-                      {banInfo.isTemporary ? "Temporarily Banned" : "Permanently Banned"}
-                    </>
-                  ) : (
-                    "Not Banned"
-                  )}
-                </Badge>
-              </div>
-              {banInfo?.banned && banInfo.banReason && (
-                <div>Reason: <span className="text-red-600 dark:text-red-400">{banInfo.banReason}</span></div>
-              )}
-            </div>
-          </div>
+          </p>
+        </div>
 
-          {/* Ban Controls */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <Label htmlFor="banReason">Ban Reason</Label>
-              <Textarea
-                id="banReason"
-                value={banReason}
-                onChange={(e) => setBanReason(e.target.value)}
-                placeholder="Enter reason for ban..."
-                className="h-20"
-              />
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="temporary"
-                  checked={isTemporary}
-                  onCheckedChange={setIsTemporary}
-                />
-                <Label htmlFor="temporary">Temporary Ban</Label>
-              </div>
-
-              {isTemporary && (
-                <div>
-                  <Label htmlFor="hours">Expiration (hours)</Label>
-                  <Input
-                    id="hours"
-                    type="number"
-                    min="1"
-                    max="72"
-                    value={expirationHours}
-                    onChange={(e) => setExpirationHours(parseInt(e.target.value) || 1)}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <h4 className="font-medium">Actions</h4>
-              <div className="space-y-2">
-                <Button
-                  onClick={testBanDevice}
-                  disabled={isLoading || banInfo?.banned}
-                  className="w-full"
-                  variant="destructive"
-                >
-                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Shield className="w-4 h-4 mr-2" />}
-                  Ban This Device
-                </Button>
-
-                <Button
-                  onClick={testUnbanDevice}
-                  disabled={isLoading || !banInfo?.banned}
-                  className="w-full"
-                  variant="outline"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Unban This Device
-                </Button>
-
-                <Button
-                  onClick={testPostAction}
-                  className="w-full"
-                  variant="secondary"
-                  size="sm"
-                >
-                  Test Post Permission
-                </Button>
-
-                <Button
-                  onClick={testCommentAction}
-                  className="w-full"
-                  variant="secondary"
-                  size="sm"
-                >
-                  Test Comment Permission
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Test Results */}
-          {testResults.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-2">Test Results</h4>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {testResults.map((result, index) => (
-                  <div
-                    key={index}
-                    className={`p-2 rounded text-xs ${
-                      result.success
-                        ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200"
-                        : "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200"
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <span className="font-medium">{result.action}</span>
-                      <span className="text-gray-500">{result.timestamp}</span>
-                    </div>
-                    <div>{result.details}</div>
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Status & Settings */}
+          <div className="space-y-6">
+            {/* Current Device Status */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Monitor className="w-5 h-5 text-blue-500" />
+                  Current Device Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Fingerprint:</span>
+                    <code className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded font-mono">
+                      {currentFingerprint?.slice(0, 16)}...
+                    </code>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Ban Status:</span>
+                    <Badge 
+                      variant={banInfo?.banned ? "destructive" : "secondary"}
+                      className={banInfo?.banned ? "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200" : "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200"}
+                    >
+                      {banInfo?.banned ? (
+                        <>
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          {banInfo.isTemporary ? "Temporarily Banned" : "Permanently Banned"}
+                        </>
+                      ) : (
+                        <>
+                          🟢 Not Banned
+                        </>
+                      )}
+                    </Badge>
+                  </div>
+                  {banInfo?.banned && banInfo.banReason && (
+                    <>
+                      <Separator />
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <p className="text-sm text-red-800 dark:text-red-200">
+                          <strong>Reason:</strong> {banInfo.banReason}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-          <div className="text-xs text-gray-500 dark:text-gray-400 border-t pt-2">
-            <p><strong>Note:</strong> This is a testing interface for the ban system. In production, only authorized administrators would have access to ban/unban functionality.</p>
+            {/* Ban Settings */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Settings className="w-5 h-5 text-purple-500" />
+                  Ban Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="banReason" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Ban Reason
+                    </Label>
+                    <Textarea
+                      id="banReason"
+                      value={banReason}
+                      onChange={(e) => setBanReason(e.target.value)}
+                      placeholder="Enter reason for ban..."
+                      className="mt-1 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 h-20"
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="temporary"
+                        checked={isTemporary}
+                        onCheckedChange={setIsTemporary}
+                        className="data-[state=checked]:bg-orange-500"
+                      />
+                      <Label htmlFor="temporary" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                        🔁 Temporary Ban
+                      </Label>
+                    </div>
+                  </div>
+
+                  {isTemporary && (
+                    <div className="pl-6 space-y-2">
+                      <Label htmlFor="hours" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Expiration (hours)
+                      </Label>
+                      <Input
+                        id="hours"
+                        type="number"
+                        min="1"
+                        max="72"
+                        value={expirationHours}
+                        onChange={(e) => setExpirationHours(parseInt(e.target.value) || 1)}
+                        className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 w-24"
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Right Column - Actions & Tests */}
+          <div className="space-y-6">
+            {/* Actions */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Zap className="w-5 h-5 text-orange-500" />
+                  Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-3">
+                  <Button
+                    onClick={testBanDevice}
+                    disabled={isLoading || banInfo?.banned}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <Lock className="w-4 h-4 mr-2" />
+                    )}
+                    🔒 Ban This Device
+                  </Button>
+
+                  <Button
+                    onClick={testUnbanDevice}
+                    disabled={isLoading || !banInfo?.banned}
+                    className="w-full bg-gray-600 hover:bg-gray-700 text-white border-0 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    size="lg"
+                  >
+                    <Unlock className="w-4 h-4 mr-2" />
+                    🔓 Unban This Device
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Test Permissions */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <TestTube className="w-5 h-5 text-green-500" />
+                  Test Permissions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-3">
+                  <Button
+                    onClick={testPostAction}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg"
+                    size="lg"
+                  >
+                    🧪 Test Post Permission
+                  </Button>
+
+                  <Button
+                    onClick={testCommentAction}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-lg"
+                    size="lg"
+                  >
+                    🧪 Test Comment Permission
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Test Results */}
+            {testResults.length > 0 && (
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Test Results</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {testResults.map((result, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 rounded-lg border text-sm ${
+                          result.success
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
+                            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-medium">{result.action}</span>
+                          <span className="text-xs opacity-70">{result.timestamp}</span>
+                        </div>
+                        <div className="text-xs">{result.details}</div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Footer Note */}
+        <Card className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+          <CardContent className="pt-4">
+            <div className="text-center">
+              <p className="text-sm text-orange-800 dark:text-orange-200">
+                <strong>Note:</strong> This is a testing interface for the ban system.<br />
+                Only authorized administrators should have access to ban/unban functionality.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
