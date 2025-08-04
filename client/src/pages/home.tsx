@@ -121,9 +121,6 @@ export default function Home() {
 
       <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
         <div className="space-y-6">
-
-
-
         {/* Sticky Latest Posts Header */}
         <div className="sticky top-32 z-30 bg-gray-50 dark:bg-gray-900 -mx-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 mb-4">
           <div className="flex items-center justify-between">
@@ -188,9 +185,6 @@ export default function Home() {
             <p className="text-gray-600 dark:text-gray-400 mb-8 text-base">
               {activeCategory === "all" ? "No one's spilled yet... will you be the first?" : "Be bold—spill the first sip in this category!"}
             </p>
-
-
-            
             {/* Subtle Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-orange-200 dark:bg-orange-800 rounded-full opacity-20 animate-ping" style={{ animationDelay: '1s', animationDuration: '3s' }}></div>
