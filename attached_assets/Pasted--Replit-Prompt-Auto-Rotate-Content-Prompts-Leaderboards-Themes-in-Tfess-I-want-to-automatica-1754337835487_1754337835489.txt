@@ -1,0 +1,92 @@
+📋 Replit Prompt — Auto-Rotate Content (Prompts, Leaderboards, Themes) in Tfess
+I want to automatically rotate time-sensitive content in the Tfess app — including prompts, debates, trending posts, and leaderboards — on a daily, weekly, or every-3-days basis. It should require no manual updates, and ensure prompts never repeat.
+
+✅ Content to Auto-Rotate
+🏠 Home Page
+Show a Trending Feed that resets every 3 days.
+
+Based on most liked or commented posts in the last 72 hours.
+
+After reset, recalculate new top 10 from current data.
+
+🧠 Daily Spill Page
+Display a Daily Prompt that updates every 24 hours.
+
+Pull from a master list of pre-written prompts.
+
+Each prompt must be unique and never reused — even across weeks or months.
+
+When the list runs low, fallback behavior can be:
+
+Stop showing new prompts and display a message.
+
+Or allow admins to inject more prompts.
+
+Display a Weekly Theme that changes every 7 days.
+
+Example: “Friendship Week”, “Embarrassing Moments Week”
+
+Resets on a rolling 7-day cycle or every Monday at midnight.
+
+👥 Community Page
+🎤 Celebrity Tea
+Show a Weekly Top 5 Celebrity Leaderboard.
+
+Based on mentions or tagged posts from past 7 days.
+
+Reset every week with a new leaderboard.
+
+Repetition of celeb names over weeks is okay.
+
+🔥 Hot Topics
+Show a Weekly Top 5 Discussions Leaderboard.
+
+Based on top-performing posts in the Hot Topics section.
+
+Resets every 7 days automatically.
+
+⚖️ Daily Debates
+Show a new Daily Debate Prompt every 24 hours.
+
+Pull from a list of debate-style prompts.
+
+Each debate must be unique and never repeat.
+
+Track used prompts in the database.
+
+🧪 Tea Experiments
+Run 1 new community experiment per day.
+
+Clears results from the previous day.
+
+Resets daily at midnight or rolling 24-hour timer.
+
+🔁 How the Auto-Rotation Works
+Use a scheduler (setInterval, cron, or timestamp comparison logic).
+
+Daily content: refresh every 24 hours
+
+3-day content: refresh every 72 hours
+
+Weekly content: refresh every 7 days (rolling or fixed)
+
+Store each rotation cycle in the database with a timestamp and a used/unused prompt flag.
+
+When the expiration time passes:
+
+Replace expired content with new content.
+
+For prompts, ensure no repeats — pull only from unused prompts.
+
+The system should rotate content automatically even if users don’t refresh the app.
+
+⚠️ Additional Rules
+Do not repeat any prompt (daily or debate) ever — once used, it’s permanently marked as used.
+
+Leaderboards (Trending, Celebs, Hot Topics) can show repeated items if they naturally rank again.
+
+Users should see updates smoothly, without having to reload the app.
+
+Optionally show banners like:
+
+“🎯 New Debate Just Dropped!” or “🔥 Leaderboard Reset!”

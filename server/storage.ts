@@ -1,4 +1,4 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { createHash } from "crypto";
 
@@ -62,6 +62,20 @@ export interface IStorage {
   getAllBannedDevices(): Promise<BannedDevice[]>;
   updateBannedDevice(deviceFingerprint: string, updates: Partial<BannedDevice>): Promise<boolean>;
   removeBannedDevice(deviceFingerprint: string): Promise<boolean>;
+
+  // Auto-rotation System
+  createContentPrompt(prompt: InsertContentPrompt): Promise<ContentPrompt>;
+  getContentPrompts(type?: string, onlyUnused?: boolean): Promise<ContentPrompt[]>;
+  markPromptAsUsed(promptId: string): Promise<void>;
+  createWeeklyTheme(theme: InsertWeeklyTheme): Promise<WeeklyTheme>;
+  getWeeklyThemes(): Promise<WeeklyTheme[]>;
+  setActiveTheme(themeId: string): Promise<void>;
+  createRotationCycle(cycle: InsertRotationCycle): Promise<RotationCycle>;
+  getRotationCycles(): Promise<RotationCycle[]>;
+  updateRotationCycle(cycleId: string, updates: Partial<RotationCycle>): Promise<void>;
+  createLeaderboard(leaderboard: Omit<Leaderboard, 'id' | 'createdAt'>): Promise<Leaderboard>;
+  getActiveLeaderboards(type?: string): Promise<Leaderboard[]>;
+  deactivateLeaderboards(type: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -75,6 +89,10 @@ export class MemStorage implements IStorage {
   private anonymousUsers: Map<string, AnonymousUser>;
   private deviceSessions: Map<string, DeviceSession>;
   private bannedDevices: Map<string, BannedDevice>;
+  private contentPrompts: Map<string, ContentPrompt>;
+  private weeklyThemes: Map<string, WeeklyTheme>;
+  private rotationCycles: Map<string, RotationCycle>;
+  private leaderboards: Map<string, Leaderboard>;
 
   constructor() {
     this.posts = new Map();
@@ -87,6 +105,10 @@ export class MemStorage implements IStorage {
     this.anonymousUsers = new Map();
     this.deviceSessions = new Map();
     this.bannedDevices = new Map();
+    this.contentPrompts = new Map();
+    this.weeklyThemes = new Map();
+    this.rotationCycles = new Map();
+    this.leaderboards = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -804,6 +826,160 @@ export class MemStorage implements IStorage {
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     return userPosts;
+  }
+
+  // Auto-rotation System methods
+  async createContentPrompt(prompt: InsertContentPrompt): Promise<ContentPrompt> {
+    const id = randomUUID();
+    const newPrompt: ContentPrompt = {
+      id,
+      type: prompt.type,
+      content: prompt.content,
+      isUsed: false,
+      usedAt: null,
+      priority: prompt.priority || 1,
+      tags: prompt.tags || [],
+      createdAt: new Date()
+    };
+    this.contentPrompts.set(id, newPrompt);
+    return newPrompt;
+  }
+
+  async getContentPrompts(type?: string, onlyUnused?: boolean): Promise<ContentPrompt[]> {
+    let prompts = Array.from(this.contentPrompts.values());
+    
+    if (type) {
+      prompts = prompts.filter(p => p.type === type);
+    }
+    
+    if (onlyUnused) {
+      prompts = prompts.filter(p => !p.isUsed);
+    }
+    
+    return prompts.sort((a, b) => b.priority - a.priority || a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  async markPromptAsUsed(promptId: string): Promise<void> {
+    const prompt = this.contentPrompts.get(promptId);
+    if (prompt) {
+      prompt.isUsed = true;
+      prompt.usedAt = new Date();
+      this.contentPrompts.set(promptId, prompt);
+    }
+  }
+
+  async createWeeklyTheme(theme: InsertWeeklyTheme): Promise<WeeklyTheme> {
+    const id = randomUUID();
+    const newTheme: WeeklyTheme = {
+      id,
+      name: theme.name,
+      description: theme.description,
+      isActive: false,
+      startDate: null,
+      endDate: null,
+      createdAt: new Date()
+    };
+    this.weeklyThemes.set(id, newTheme);
+    return newTheme;
+  }
+
+  async getWeeklyThemes(): Promise<WeeklyTheme[]> {
+    return Array.from(this.weeklyThemes.values())
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  async setActiveTheme(themeId: string): Promise<void> {
+    // Deactivate all themes
+    for (const theme of this.weeklyThemes.values()) {
+      theme.isActive = false;
+    }
+    
+    // Activate specified theme
+    const theme = this.weeklyThemes.get(themeId);
+    if (theme) {
+      theme.isActive = true;
+      theme.startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 7);
+      theme.endDate = endDate;
+      this.weeklyThemes.set(themeId, theme);
+    }
+  }
+
+  async createRotationCycle(cycle: InsertRotationCycle): Promise<RotationCycle> {
+    const id = randomUUID();
+    const now = new Date();
+    const nextRotation = new Date(now);
+    
+    // Calculate next rotation based on interval
+    switch (cycle.rotationInterval) {
+      case '24h':
+        nextRotation.setHours(nextRotation.getHours() + 24);
+        break;
+      case '72h':
+        nextRotation.setHours(nextRotation.getHours() + 72);
+        break;
+      case '7d':
+        nextRotation.setDate(nextRotation.getDate() + 7);
+        break;
+    }
+    
+    const newCycle: RotationCycle = {
+      id,
+      type: cycle.type,
+      currentContentId: null,
+      lastRotatedAt: now,
+      nextRotationAt: nextRotation,
+      rotationInterval: cycle.rotationInterval,
+      isActive: true,
+      metadata: cycle.metadata || {},
+      createdAt: now
+    };
+    
+    this.rotationCycles.set(id, newCycle);
+    return newCycle;
+  }
+
+  async getRotationCycles(): Promise<RotationCycle[]> {
+    return Array.from(this.rotationCycles.values());
+  }
+
+  async updateRotationCycle(cycleId: string, updates: Partial<RotationCycle>): Promise<void> {
+    const cycle = this.rotationCycles.get(cycleId);
+    if (cycle) {
+      Object.assign(cycle, updates);
+      this.rotationCycles.set(cycleId, cycle);
+    }
+  }
+
+  async createLeaderboard(leaderboard: Omit<Leaderboard, 'id' | 'createdAt'>): Promise<Leaderboard> {
+    const id = randomUUID();
+    const newLeaderboard: Leaderboard = {
+      id,
+      ...leaderboard,
+      createdAt: new Date()
+    };
+    this.leaderboards.set(id, newLeaderboard);
+    return newLeaderboard;
+  }
+
+  async getActiveLeaderboards(type?: string): Promise<Leaderboard[]> {
+    let leaderboards = Array.from(this.leaderboards.values())
+      .filter(l => l.isActive);
+    
+    if (type) {
+      leaderboards = leaderboards.filter(l => l.type === type);
+    }
+    
+    return leaderboards.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async deactivateLeaderboards(type: string): Promise<void> {
+    for (const leaderboard of this.leaderboards.values()) {
+      if (leaderboard.type === type) {
+        leaderboard.isActive = false;
+      }
+    }
   }
 }
 

@@ -5,6 +5,7 @@ import session from "express-session";
 import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, banDeviceSchema, checkBanSchema, type ModerationResponse } from "@shared/schema";
 import { comprehensiveModeration } from "./moderation";
 import { checkDeviceBanMiddleware, strictBanCheckMiddleware, banSystem, startBanCleanupScheduler } from "./banMiddleware";
+import { memAutoRotationService } from "./memAutoRotationService";
 
 declare module 'express-session' {
   interface SessionData {
@@ -652,6 +653,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  // Auto-rotation endpoints
+  app.get("/api/rotation/current", async (req, res) => {
+    try {
+      const currentContent = await memAutoRotationService.getCurrentContent();
+      res.json(currentContent);
+    } catch (error) {
+      console.error("Failed to get current rotation content:", error);
+      res.status(500).json({ message: "Failed to get current rotation content" });
+    }
+  });
+
+  app.get("/api/rotation/trending", async (req, res) => {
+    try {
+      const trendingLeaderboard = await storage.getActiveLeaderboards('trending_posts');
+      res.json(trendingLeaderboard.length > 0 ? trendingLeaderboard[0] : null);
+    } catch (error) {
+      console.error("Failed to get trending leaderboard:", error);
+      res.status(500).json({ message: "Failed to get trending leaderboard" });
+    }
+  });
+
+  app.get("/api/rotation/celebrity-leaderboard", async (req, res) => {
+    try {
+      const celebrityLeaderboard = await storage.getActiveLeaderboards('celebrity_tea');
+      res.json(celebrityLeaderboard.length > 0 ? celebrityLeaderboard[0] : null);
+    } catch (error) {
+      console.error("Failed to get celebrity leaderboard:", error);
+      res.status(500).json({ message: "Failed to get celebrity leaderboard" });
+    }
+  });
+
+  app.get("/api/rotation/hot-topics-leaderboard", async (req, res) => {
+    try {
+      const hotTopicsLeaderboard = await storage.getActiveLeaderboards('hot_topics');
+      res.json(hotTopicsLeaderboard.length > 0 ? hotTopicsLeaderboard[0] : null);
+    } catch (error) {
+      console.error("Failed to get hot topics leaderboard:", error);
+      res.status(500).json({ message: "Failed to get hot topics leaderboard" });
+    }
+  });
+
   return httpServer;
 }
 

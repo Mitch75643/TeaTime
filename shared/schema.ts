@@ -171,6 +171,50 @@ export const bannedDevices = pgTable("banned_devices", {
   deviceMetadata: jsonb("device_metadata").default({}), // store device info for debugging
 });
 
+// Auto-rotation system tables
+export const contentPrompts = pgTable("content_prompts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: varchar("type").notNull(), // "daily_spill", "daily_debate", "tea_experiment"
+  content: text("content").notNull(),
+  isUsed: boolean("is_used").default(false),
+  usedAt: timestamp("used_at"),
+  priority: integer("priority").default(1), // Higher priority shown first
+  tags: text("tags").array().default([]), // Optional categorization
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const weeklyThemes = pgTable("weekly_themes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // "Friendship Week", "Embarrassing Moments Week"
+  description: text("description"),
+  isActive: boolean("is_active").default(false),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const rotationCycles = pgTable("rotation_cycles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: varchar("type").notNull(), // "daily_prompt", "weekly_theme", "trending_feed", "celebrity_leaderboard", "hot_topics_leaderboard", "daily_debate", "tea_experiment"
+  currentContentId: varchar("current_content_id"), // References contentPrompts.id or weeklyThemes.id
+  lastRotatedAt: timestamp("last_rotated_at").defaultNow(),
+  nextRotationAt: timestamp("next_rotation_at").notNull(),
+  rotationInterval: varchar("rotation_interval").notNull(), // "24h", "72h", "7d"
+  isActive: boolean("is_active").default(true),
+  metadata: jsonb("metadata").default({}), // Store cycle-specific data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const leaderboards = pgTable("leaderboards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: varchar("type").notNull(), // "trending_posts", "celebrity_tea", "hot_topics", "weekly_debates"
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  data: jsonb("data").notNull(), // Store leaderboard entries as JSON
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
@@ -229,6 +273,46 @@ export const reportSchema = z.object({
   postId: z.string(),
   reason: z.enum(["spam", "harassment", "inappropriate", "misinformation", "other"]),
 });
+
+// Auto-rotation schemas
+export const insertContentPromptSchema = createInsertSchema(contentPrompts).pick({
+  type: true,
+  content: true,
+  priority: true,
+  tags: true,
+}).extend({
+  type: z.enum(["daily_spill", "daily_debate", "tea_experiment"]),
+  content: z.string().min(10).max(500),
+  priority: z.number().min(1).max(10).optional().default(1),
+  tags: z.array(z.string()).optional().default([]),
+});
+
+export const insertWeeklyThemeSchema = createInsertSchema(weeklyThemes).pick({
+  name: true,
+  description: true,
+}).extend({
+  name: z.string().min(5).max(100),
+  description: z.string().min(10).max(300).optional(),
+});
+
+export const insertRotationCycleSchema = createInsertSchema(rotationCycles).pick({
+  type: true,
+  rotationInterval: true,
+  metadata: true,
+}).extend({
+  type: z.enum(["daily_prompt", "weekly_theme", "trending_feed", "celebrity_leaderboard", "hot_topics_leaderboard", "daily_debate", "tea_experiment"]),
+  rotationInterval: z.enum(["24h", "72h", "7d"]),
+  metadata: z.record(z.any()).optional().default({}),
+});
+
+// Auto-rotation types
+export type ContentPrompt = typeof contentPrompts.$inferSelect;
+export type InsertContentPrompt = z.infer<typeof insertContentPromptSchema>;
+export type WeeklyTheme = typeof weeklyThemes.$inferSelect;
+export type InsertWeeklyTheme = z.infer<typeof insertWeeklyThemeSchema>;
+export type RotationCycle = typeof rotationCycles.$inferSelect;
+export type InsertRotationCycle = z.infer<typeof insertRotationCycleSchema>;
+export type Leaderboard = typeof leaderboards.$inferSelect;
 
 export const notificationSchema = z.object({
   recipientSessionId: z.string(),
@@ -301,8 +385,8 @@ export const checkBanSchema = z.object({
 
 export type BanDevice = z.infer<typeof banDeviceSchema>;
 export type CheckBan = z.infer<typeof checkBanSchema>;
-export type BannedDevice = typeof bannedDevices.$inferSelect;
 
+// All types consolidated
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 
   sessionId?: string;
@@ -316,8 +400,11 @@ export type DramaVote = typeof dramaVotes.$inferSelect;
 export type UserFlag = typeof userFlags.$inferSelect;
 export type Report = typeof reports.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type User = typeof anonymousUsers.$inferSelect;
+export type InsertUser = typeof anonymousUsers.$inferInsert;
 export type AnonymousUser = typeof anonymousUsers.$inferSelect;
 export type DeviceSession = typeof deviceSessions.$inferSelect;
+export type BannedDevice = typeof bannedDevices.$inferSelect;
 export type ReactionInput = z.infer<typeof reactionSchema>;
 export type DramaVoteInput = z.infer<typeof dramaVoteSchema>;
 export type ReportInput = z.infer<typeof reportSchema>;

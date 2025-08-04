@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { memAutoRotationService } from "./memAutoRotationService";
 
 const app = express();
 app.use(express.json());
@@ -65,7 +66,17 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, () => {
+  }, async () => {
     log(`serving on port ${port}`);
+    
+    // Initialize and start auto-rotation service
+    try {
+      await memAutoRotationService.seedInitialContent();
+      await memAutoRotationService.initializeRotationCycles();
+      memAutoRotationService.start();
+      log('[Auto-Rotation] Service started successfully');
+    } catch (error) {
+      console.error('[Auto-Rotation] Failed to start service:', error);
+    }
   });
 })();
