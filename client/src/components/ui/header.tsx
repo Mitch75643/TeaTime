@@ -21,13 +21,13 @@ export function Header() {
   return (
     <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           <img 
             src={fessrLogo} 
             alt="Fessr Logo" 
-            className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter brightness-0 invert translate-y-0.5"
+            className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter brightness-0 invert translate-y-0.5 translate-x-0.5"
           />
-          <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide">Fessr</h1>
+          <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide -translate-x-0.5">Fessr</h1>
         </div>
         <div className="flex items-center space-x-3">
           <NotificationsPanel />
