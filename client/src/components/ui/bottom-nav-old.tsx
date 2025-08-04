@@ -3,7 +3,7 @@ import { Button } from "./button";
 import { SearchPage } from "./search-page";
 import { FloatingPostButton } from "./floating-post-button";
 import { Home, Coffee, Settings, Users } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
@@ -68,6 +68,43 @@ export function BottomNav() {
                         : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                     )}
                   >
+                      {/* Active glow effect */}
+                      {isActive && (
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
+                      )}
+                      
+                      <Icon className={cn(
+                        "h-6 w-6 transition-all duration-300",
+                        isActive ? "mb-1 scale-110" : "mb-0"
+                      )} />
+                      
+                      {/* Dynamic label - only show when active */}
+                      <span className={cn(
+                        "text-xs font-medium transition-all duration-300 overflow-hidden",
+                        isActive 
+                          ? "max-h-6 opacity-100 mt-1" 
+                          : "max-h-0 opacity-0 mt-0"
+                      )}>
+                        {item.label}
+                      </span>
+                    </Button>
+                  </Link>
+                </div>
+              );
+            }
+            
+            return (
+              <div key={item.id} className="flex-1 flex justify-center relative">
+                <Link href={item.path!}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
+                      isActive 
+                        ? "text-orange-500 dark:text-orange-400" 
+                        : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                    )}
+                  >
                     {/* Active glow effect */}
                     {isActive && (
                       <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
@@ -88,52 +125,14 @@ export function BottomNav() {
                       {item.label}
                     </span>
                   </Button>
-                  
-                  {/* Floating action button container */}
-                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
-                    <FloatingPostButton />
-                  </div>
-                </div>
-              );
-            }
-            
-            return (
-              <div key={item.id} className="flex-1 flex justify-center relative">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleNavigation(item.path)}
-                  className={cn(
-                    "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
-                    isActive 
-                      ? "text-orange-500 dark:text-orange-400" 
-                      : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                  )}
-                >
-                  {/* Active glow effect */}
-                  {isActive && (
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
-                  )}
-                  
-                  <Icon className={cn(
-                    "h-6 w-6 transition-all duration-300",
-                    isActive ? "mb-1 scale-110" : "mb-0"
-                  )} />
-                  
-                  {/* Dynamic label - only show when active */}
-                  <span className={cn(
-                    "text-xs font-medium transition-all duration-300 overflow-hidden",
-                    isActive 
-                      ? "max-h-6 opacity-100 mt-1" 
-                      : "max-h-0 opacity-0 mt-0"
-                  )}>
-                    {item.label}
-                  </span>
-                </Button>
+                </Link>
               </div>
             );
           })}
         </div>
       </nav>
+      
+
       
       <SearchPage 
         isOpen={isSearchOpen} 

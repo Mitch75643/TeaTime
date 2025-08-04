@@ -30,6 +30,8 @@ export default function Home() {
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
+
+
   // Check for focus parameter in URL (from notifications)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -54,6 +56,19 @@ export default function Home() {
     }
   }, []);
 
+  // Listen for navigation refresh events
+  useEffect(() => {
+    const handleRefreshPage = () => {
+      handleRefresh();
+    };
+
+    window.addEventListener('refreshPage', handleRefreshPage);
+    
+    return () => {
+      window.removeEventListener('refreshPage', handleRefreshPage);
+    };
+  }, []);
+
   const { data: allPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
     queryFn: async () => {
@@ -76,8 +91,17 @@ export default function Home() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    
+    // Scroll to top immediately
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Invalidate and refetch posts
     await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
-    setIsRefreshing(false);
+    
+    // Small delay for UX feedback
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
   };
 
   return (
@@ -100,25 +124,28 @@ export default function Home() {
 
 
 
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {feedType === "new" ? "Latest Posts" : "Trending Posts"}
-            {activeCategory !== "all" && (
-              <span className="ml-2 text-sm text-gray-500">
-                in {categories.find(c => c.id === activeCategory)?.label}
-              </span>
-            )}
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400"
-          >
-            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="text-xs">Refresh</span>
-          </Button>
+        {/* Sticky Latest Posts Header */}
+        <div className="sticky top-32 z-30 bg-gray-50 dark:bg-gray-900 -mx-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 mb-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {feedType === "new" ? "Latest Posts" : "Trending Posts"}
+              {activeCategory !== "all" && (
+                <span className="ml-2 text-sm text-gray-500">
+                  in {categories.find(c => c.id === activeCategory)?.label}
+                </span>
+              )}
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm font-medium">Refresh</span>
+            </Button>
+          </div>
         </div>
         {isLoading ? (
           <div className="space-y-4">
