@@ -10,9 +10,7 @@ import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
-import { useUserAvatar } from "@/hooks/use-user-avatar";
-import { useUserAlias } from "@/hooks/use-user-alias";
-import { useAvatarColor } from "@/hooks/use-avatar-color";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
 import { getAvatarById } from "@/lib/avatars";
 import type { Comment, InsertComment } from "@shared/schema";
@@ -38,10 +36,14 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   const [sessionId, setSessionId] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { userAvatarId } = useUserAvatar();
-  const { userAlias } = useUserAlias();
-  const { avatarColor } = useAvatarColor();
+  const { profile, getCachedProfile } = useUserProfile();
   const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
+  
+  // Use cached profile data to prevent flashing
+  const cachedProfile = getCachedProfile();
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || 'mask-anonymous';
+  const userAlias = profile?.alias || cachedProfile?.alias || 'Anonymous';
+  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
 
   // Get current session ID
   useEffect(() => {

@@ -1,7 +1,6 @@
 import { getAvatarEmoji } from "./avatar-selector";
 import { cn } from "@/lib/utils";
-import { useAvatarColor } from "@/hooks/use-avatar-color";
-import { useUserAvatar } from "@/hooks/use-user-avatar";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 // Generate random gradient colors based on avatarId for consistency (fallback only)
 function generateGradientColors(avatarId: string): string {
@@ -51,8 +50,12 @@ export function AvatarDisplay({
   isCurrentUser = false
 }: AvatarDisplayProps) {
   const emoji = getAvatarEmoji(avatarId);
-  const { userAvatarId } = useUserAvatar();
-  const { avatarColor } = useAvatarColor();
+  const { profile, getCachedProfile } = useUserProfile();
+  
+  // Get cached profile data to prevent flashing
+  const cachedProfile = getCachedProfile();
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId;
+  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
   
   // Determine if this is the current user's avatar by comparing avatarId
   const isUserAvatar = isCurrentUser || avatarId === userAvatarId;

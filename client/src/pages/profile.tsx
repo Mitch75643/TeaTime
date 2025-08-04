@@ -44,9 +44,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { AvatarSelector } from "@/components/ui/avatar-selector";
 import { AvatarColorPicker } from "@/components/ui/avatar-color-picker";
-import { useUserAvatar } from "@/hooks/use-user-avatar";
-import { useUserAlias } from "@/hooks/use-user-alias";
-import { useAvatarColor } from "@/hooks/use-avatar-color";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { AliasSelector } from "@/components/ui/alias-selector";
 import { useLocation } from "wouter";
 import type { Post } from "@shared/schema";
@@ -64,9 +62,13 @@ export default function Profile() {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
-  const { userAvatarId, updateAvatar } = useUserAvatar();
-  const { userAlias, fullAlias, generateNewAlias, keepCurrentUsername } = useUserAlias();
-  const { avatarColor, updateAvatarColor } = useAvatarColor();
+  const { profile, getCachedProfile, updateProfile } = useUserProfile();
+  
+  // Use cached profile data to prevent flashing
+  const cachedProfile = getCachedProfile();
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || 'mask-anonymous';
+  const userAlias = profile?.alias || cachedProfile?.alias || 'Anonymous';
+  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -101,7 +103,7 @@ export default function Profile() {
   };
 
   const handleAvatarSelect = (avatarId: string) => {
-    updateAvatar(avatarId);
+    updateProfile({ avatarId });
     setAvatarSelectorOpen(false);
     toast({
       title: "Avatar updated!",
@@ -110,7 +112,7 @@ export default function Profile() {
   };
 
   const handleColorSelect = async (color: string) => {
-    await updateAvatarColor(color);
+    await updateProfile({ avatarColor: color });
     toast({
       title: "Avatar color updated!",
       description: "Your profile picture color has been changed and will be visible to all users.",
@@ -269,7 +271,7 @@ export default function Profile() {
                 {/* Avatar Customization */}
                 <div className="flex flex-col gap-2">
                   <AvatarColorPicker
-                    currentColor={avatarColor}
+                    currentColor={avatarColor || 'gradient-purple-blue'}
                     onColorSelect={handleColorSelect}
                     className="mx-auto"
                   />
@@ -369,9 +371,9 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <AliasSelector
-                  currentAlias={fullAlias}
+                  currentAlias={{ alias: userAlias, emoji: '', category: '' }}
                   onSelect={(newUsername) => {
-                    keepCurrentUsername(newUsername);
+                    updateProfile({ alias: newUsername.alias });
                     toast({
                       title: "Username updated!",
                       description: `You're now known as ${newUsername.alias}`,

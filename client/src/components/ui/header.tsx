@@ -4,17 +4,20 @@ import { NotificationsPanel } from "./notifications-panel";
 import { AuthButton } from "../auth/AuthButton";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useLocation } from "wouter";
-import { useUserAvatar } from "@/hooks/use-user-avatar";
-import { useAvatarColor } from "@/hooks/use-avatar-color";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { MentalHealthQuickAccess } from "@/components/ui/mental-health-support";
 import tfessLogo from "../../assets/fessr-logo.png";
 
 export function Header() {
   const [, setLocation] = useLocation();
-  const { userAvatarId } = useUserAvatar();
-  const { avatarColor } = useAvatarColor();
+  const { profile, getCachedProfile } = useUserProfile();
   const { user } = useAnonymousAuth();
+  
+  // Use cached profile data to prevent flashing
+  const cachedProfile = getCachedProfile();
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || 'mask-anonymous';
+  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
 
   const handleProfileClick = () => {
     setLocation('/profile');

@@ -8,9 +8,7 @@ import { PostStats, usePostView } from "./post-stats";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
-import { useUserAvatar } from "@/hooks/use-user-avatar";
-import { useUserAlias } from "@/hooks/use-user-alias";
-import { useAvatarColor } from "@/hooks/use-avatar-color";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import type { Post } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
@@ -65,9 +63,13 @@ export function PostCard({ post }: PostCardProps) {
   const [userReactions, setUserReactions] = useState<Record<string, boolean>>({});
   const [sessionId, setSessionId] = useState<string>('');
   const queryClient = useQueryClient();
-  const { userAvatarId } = useUserAvatar();
-  const { userAlias } = useUserAlias();
-  const { avatarColor } = useAvatarColor();
+  const { profile, getCachedProfile } = useUserProfile();
+  
+  // Use cached profile data to prevent flashing
+  const cachedProfile = getCachedProfile();
+  const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || 'mask-anonymous';
+  const userAlias = profile?.alias || cachedProfile?.alias || 'Anonymous';
+  const avatarColor = profile?.avatarColor || cachedProfile?.avatarColor;
 
   // Check if this is the user's own post
   const isOwner = sessionId === post.sessionId;
