@@ -33,7 +33,9 @@ import {
   RotateCw,
   Key,
   Check,
-  ChevronRight
+  ChevronRight,
+  BarChart3,
+  Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +54,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BanTestingPanel } from "@/components/admin/ban-testing-panel";
+import { Link } from "wouter";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
@@ -398,6 +401,32 @@ export default function Profile() {
                   </>
                 )}
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Post Analytics */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <BarChart3 className="h-5 w-5 mr-2" />
+              Post Analytics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Your post performance</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  See anonymous view counts and engagement stats
+                </p>
+              </div>
+              <Link href="/user-posts">
+                <Button variant="outline" size="sm">
+                  <Eye className="h-4 w-4 mr-1" />
+                  View Stats
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

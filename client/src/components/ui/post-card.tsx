@@ -4,6 +4,7 @@ import { Button } from "./button";
 import { DramaVoting } from "./drama-voting";
 import { CommentsDrawer } from "./comments-drawer";
 import { PostMenu } from "./post-menu";
+import { PostStats, usePostView } from "./post-stats";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { getAvatarById } from "@/lib/avatars";
@@ -65,6 +66,12 @@ export function PostCard({ post }: PostCardProps) {
   const queryClient = useQueryClient();
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
+
+  // Check if this is the user's own post
+  const isOwner = sessionId === post.sessionId;
+
+  // Track post view for non-owners
+  usePostView(post.id, isOwner);
 
   // Get current session ID
   useEffect(() => {
@@ -306,6 +313,16 @@ export function PostCard({ post }: PostCardProps) {
         />
       </div>
 
+      {/* Post Stats - only visible to post owner */}
+      <PostStats
+        postId={post.id}
+        isOwner={isOwner}
+        viewCount={post.viewCount ?? undefined}
+        commentCount={post.commentCount ?? undefined}
+        reactions={post.reactions ? JSON.parse(JSON.stringify(post.reactions)) : undefined}
+        createdAt={post.createdAt ?? undefined}
+        compact={true}
+      />
 
     </article>
   );

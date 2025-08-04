@@ -39,6 +39,10 @@ export const posts = pgTable("posts", {
   moderationCategories: text("moderation_categories").array().default([]), // flagged categories
   supportMessageShown: boolean("support_message_shown").default(false), // track if user saw mental health resources
   isHidden: boolean("is_hidden").default(false), // hide from public view if flagged as critical
+  // Post Stats tracking
+  viewCount: integer("view_count").default(0), // total unique views
+  lastViewedAt: timestamp("last_viewed_at"), // when last viewed
+  viewSessions: text("view_sessions").array().default([]), // track unique sessions that viewed (for privacy-safe counting)
 });
 
 export const userFlags = pgTable("user_flags", {

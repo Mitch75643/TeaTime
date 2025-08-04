@@ -1,0 +1,97 @@
+📋 🧠 Replit Prompt — Smart Feed Throttling & Refresh System for Tfess (All Pages)
+
+I want to implement a smart feed system across the entire Tfess app that avoids flooding users with posts, keeps performance smooth (especially on mobile), and gives users full control over when new content loads.
+
+I’ve combined two prompts into one for clarity. Follow this exactly.
+
+✅ Pages to Apply This System On:
+
+Home Page
+
+Daily Spill
+
+Community Topics:
+
+Celebrity Tea
+
+Story Time
+
+Hot Topics
+
+Tea Experiments
+
+Feedback/Suggestions
+
+Daily Debates
+
+
+
+🔧 Feed Control & Post Batching Logic:
+
+✅ Minimum Post Threshold Check:
+
+If the feed has fewer than 10 posts, show them all instantly.
+
+Do not apply batching, throttling, or delay in this case.
+
+✅ If the feed has 10 or more posts:
+
+Load an initial batch of 20–30 posts max.
+
+Add infinite scroll or a "Load More" button to fetch older posts.
+
+Do not auto-inject new posts in real time.
+
+Instead, show a banner like:
+
+🔄 7 New Posts — Tap to View
+
+Only insert those new posts when the user taps the banner.
+
+🔄 Manual & Auto Refresh System:
+
+✅ Add a “Refresh” button to all applicable pages:
+
+Always visible — pinned/floating at the top corner of the feed.
+
+When tapped:
+
+Loads new posts
+
+Smoothly scrolls user back to the top
+
+✅ Auto-refresh polling:
+
+Every 20–30 seconds (adjustable), check for new posts in the background.
+
+Do not visually update the UI unless the user taps the banner.
+
+🧠 UX Behavior Rules:
+
+✅ No disruptive changes:
+
+No sudden scroll jumps
+
+No layout shifts
+
+Smooth loading at all times
+
+✅ Category Switching:
+
+Ensure logic works when switching between categories like "School" → "All"
+
+Do not reset or break batching behavior
+
+✅ Mobile Optimization:
+
+Use lazy loading or virtual lists where needed
+
+Keep toolbars, buttons, and banners always accessible on small screens
+
+🎨 Style Guide:
+
+Match the dark mode, anonymous aesthetic of Tfess.
+
+Keep all banners, buttons, and loading states minimal and calm.
+
+Don’t use flashy animations or sound effects — this should feel sleek and invisible.

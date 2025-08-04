@@ -284,6 +284,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Track post view
+  app.post("/api/posts/:postId/view", async (req, res) => {
+    try {
+      const postId = req.params.postId;
+      const sessionId = req.session.id!;
+      await storage.trackPostView(postId, sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track post view:", error);
+      res.status(500).json({ message: "Failed to track view" });
+    }
+  });
+
+  // Get post stats
+  app.get("/api/posts/:postId/stats", async (req, res) => {
+    try {
+      const postId = req.params.postId;
+      const stats = await storage.getPostStats(postId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Failed to get post stats:", error);
+      res.status(500).json({ message: "Failed to get post stats" });
+    }
+  });
+
+  // Get user's post stats (for "Your Posts" view)
+  app.get("/api/user/post-stats", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const userPostStats = await storage.getUserPostStats(sessionId);
+      res.json(userPostStats);
+    } catch (error) {
+      console.error("Failed to get user post stats:", error);
+      res.status(500).json({ message: "Failed to get user post stats" });
+    }
+  });
+
   // Toggle reaction with "one emoji per post/comment" logic
   app.post("/api/reactions", async (req, res) => {
     try {

@@ -10,6 +10,10 @@ export interface IStorage {
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
   deletePost(postId: string, sessionId?: string): Promise<void>;
+  // Post Stats tracking
+  trackPostView(postId: string, sessionId: string): Promise<void>;
+  getPostStats(postId: string): Promise<{ viewCount: number; commentCount: number; reactions: Record<string, number>; lastViewedAt?: Date }>;
+  getUserPostStats(sessionId: string): Promise<Array<{ postId: string; viewCount: number; commentCount: number; reactions: Record<string, number>; lastViewedAt?: Date; postContent: string; category: string; createdAt: Date }>>;
   
   // Comments
   createComment(comment: InsertComment, alias: string, sessionId: string): Promise<Comment>;
@@ -109,6 +113,10 @@ export class MemStorage implements IStorage {
       pollVotes: insertPost.postType === 'poll' ? {optionA: 0, optionB: 0} : undefined,
       debateVotes: insertPost.postType === 'debate' ? {up: 0, down: 0} : undefined,
       allowComments: insertPost.allowComments !== false,
+      // Initialize post stats fields
+      viewCount: 0,
+      lastViewedAt: undefined,
+      viewSessions: [],
     };
     this.posts.set(id, post);
     return post;
@@ -750,6 +758,52 @@ export class MemStorage implements IStorage {
 
   async removeBannedDevice(deviceFingerprint: string): Promise<boolean> {
     return this.bannedDevices.delete(deviceFingerprint);
+  }
+
+  // Post Stats tracking methods
+  async trackPostView(postId: string, sessionId: string): Promise<void> {
+    const post = this.posts.get(postId);
+    if (!post) return;
+
+    // Only count unique views per session
+    if (!post.viewSessions.includes(sessionId)) {
+      post.viewSessions.push(sessionId);
+      post.viewCount = (post.viewCount || 0) + 1;
+      post.lastViewedAt = new Date();
+      this.posts.set(postId, post);
+    }
+  }
+
+  async getPostStats(postId: string): Promise<{ viewCount: number; commentCount: number; reactions: Record<string, number>; lastViewedAt?: Date }> {
+    const post = this.posts.get(postId);
+    if (!post) {
+      return { viewCount: 0, commentCount: 0, reactions: {} };
+    }
+
+    return {
+      viewCount: post.viewCount || 0,
+      commentCount: post.commentCount || 0,
+      reactions: post.reactions || {},
+      lastViewedAt: post.lastViewedAt,
+    };
+  }
+
+  async getUserPostStats(sessionId: string): Promise<Array<{ postId: string; viewCount: number; commentCount: number; reactions: Record<string, number>; lastViewedAt?: Date; postContent: string; category: string; createdAt: Date }>> {
+    const userPosts = Array.from(this.posts.values())
+      .filter(post => post.sessionId === sessionId)
+      .map(post => ({
+        postId: post.id,
+        viewCount: post.viewCount || 0,
+        commentCount: post.commentCount || 0,
+        reactions: post.reactions || {},
+        lastViewedAt: post.lastViewedAt,
+        postContent: post.content,
+        category: post.category,
+        createdAt: post.createdAt,
+      }))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    return userPosts;
   }
 }
 
