@@ -72,6 +72,13 @@ export function PostModal({
   // Load draft and set defaults when modal opens
   useEffect(() => {
     if (isOpen) {
+      // Reset form state first
+      setContent("");
+      setCategory("");
+      setTagsInput("");
+      setSelectedTags([]);
+      setShowTagSuggestions(false);
+      
       // Set default values if provided
       if (defaultCategory) {
         setCategory(defaultCategory);
@@ -181,6 +188,7 @@ export function PostModal({
   };
 
   const handleClose = () => {
+    // Clear all form state when closing
     setContent("");
     setCategory("");
     setTagsInput("");
