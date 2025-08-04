@@ -72,15 +72,7 @@ export const AVATAR_COLLECTION = {
     { id: 'abstract-eye', emoji: '👁️', name: 'All-Seeing Eye', category: 'Abstract' },
   ],
   
-  // Cyberpunk & Modern - Tech Anonymous
-  cyber: [
-    { id: 'cyber-robot', emoji: '🤖', name: 'Robot Face', category: 'Cyberpunk' },
-    { id: 'cyber-alien', emoji: '👾', name: 'Pixel Alien', category: 'Cyberpunk' },
-    { id: 'cyber-terminal', emoji: '💻', name: 'Terminal User', category: 'Cyberpunk' },
-    { id: 'cyber-vr', emoji: '🥽', name: 'VR Headset', category: 'Cyberpunk' },
-    { id: 'cyber-chip', emoji: '🔧', name: 'Tech User', category: 'Cyberpunk' },
-    { id: 'cyber-hacker', emoji: '👨‍💻', name: 'Hacker Silhouette', category: 'Cyberpunk' },
-  ]
+
 };
 
 // Flatten all avatars into a single array
@@ -100,7 +92,7 @@ export function AvatarSelector({ isOpen, onClose, currentAvatar, onAvatarSelect 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [tempSelected, setTempSelected] = useState<string>(currentAvatar);
 
-  const categories = ['all', 'masked', 'emotions', 'characters', 'animals', 'abstract', 'cyber'];
+  const categories = ['all', 'masked', 'emotions', 'characters', 'animals', 'abstract'];
   
   const filteredAvatars = selectedCategory === 'all' 
     ? ALL_AVATARS 

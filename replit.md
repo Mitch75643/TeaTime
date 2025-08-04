@@ -21,7 +21,7 @@ The system relies on session-based anonymous user tracking using Express session
 
 ### Key Features and Design Decisions
 The architecture prioritizes anonymous user interaction, real-time-feeling updates through optimistic UI patterns, and a mobile-first responsive design. Content is categorized and filtered with built-in moderation utilities, and a unique drama voting system encourages community engagement. Features include:
-- **Avatar Customization System**: Allows users to select from custom SVG avatars (Moods, Animals, Objects, Characters) for identity expression while maintaining anonymity. Avatars persist using localStorage and are displayed across the application.
+- **Avatar Customization System**: Allows users to select from custom SVG avatars across multiple categories (Masked, Emotions, Characters, Animals, Abstract) for identity expression while maintaining anonymity. Avatars persist using localStorage and are displayed consistently across the application with enhanced caching to prevent visual flashing.
 - **Random Fun Username System**: Automatically generates gossip-themed usernames, which can be selected and persist across sessions, replacing "Anonymous User" in interactions.
 - **Community Topic Enhancements**: Provides specialized components and interactive elements for various community topics like "Celebrity Tea," "Story Time," "Hot Topics," "Daily Debate," and "Tea Experiments," each with unique animations and styling.
 - **Home Page UI/UX**: Enhanced modal UX, branding, mobile responsiveness, and category filtering with visual active states.
