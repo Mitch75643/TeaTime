@@ -160,14 +160,7 @@ export default function Home() {
               {activeCategory === "all" ? "No one's spilled yet... will you be the first?" : "Be bold—spill the first sip in this category!"}
             </p>
 
-            {/* Call-to-Action Button */}
-            <button
-              onClick={() => setIsPostModalOpen(true)}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ease-out"
-            >
-              <span className="mr-2">✨</span>
-              Start the conversation
-            </button>
+
             
             {/* Subtle Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
