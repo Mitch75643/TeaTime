@@ -138,7 +138,7 @@ export default function Home() {
             ))}
           </div>
         ) : posts.length === 0 ? (
-          <div className="relative text-center py-16 mt-8">
+          <div className="relative text-center min-h-[60vh] flex flex-col items-center justify-center">
             {/* Animated Tea Cup Icon */}
             <div className="relative mb-6">
               <div className="text-6xl mb-2 animate-pulse">☕</div>
