@@ -25,7 +25,7 @@ export function Header() {
           <img 
             src={fessrLogo} 
             alt="Fessr Logo" 
-            className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter brightness-0 invert"
+            className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter brightness-0 invert translate-y-0.5"
           />
           <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide">Fessr</h1>
         </div>
