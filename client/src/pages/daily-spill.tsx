@@ -251,11 +251,11 @@ export default function DailySpill() {
   // Weekly theme animation hook
   const { animation, triggerAnimation, completeAnimation } = useWeeklyThemeAnimation();
 
-  // Get posts with daily spill tag
+  // Get posts with daily spill category and context
   const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", { tags: "#dailyspill" }],
+    queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }],
     queryFn: async () => {
-      const response = await fetch("/api/posts?sortBy=new&postContext=daily");
+      const response = await fetch("/api/posts?category=daily&sortBy=new&postContext=daily");
       if (!response.ok) throw new Error("Failed to fetch posts");
       return response.json();
     },
@@ -270,7 +270,7 @@ export default function DailySpill() {
     triggerAnimation(currentTheme.name);
     
     // Refresh the posts feed to show new post immediately
-    queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }] });
     
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };
@@ -392,6 +392,24 @@ export default function DailySpill() {
 
       {/* Posts Feed */}
       <main className="px-4 pb-20 space-y-4">
+        {/* Feed Header */}
+        {posts.length > 0 && (
+          <div className="flex items-center justify-between pb-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Today's Spills ({posts.length})
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                queryClient.invalidateQueries({ queryKey: ["/api/posts", { category: "daily", postContext: "daily", sortBy: "new" }] });
+              }}
+              className="text-orange-600 border-orange-200 hover:bg-orange-50"
+            >
+              Refresh
+            </Button>
+          </div>
+        )}
         {isLoading && (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
@@ -403,7 +421,7 @@ export default function DailySpill() {
           <div className="text-center py-12">
             <Coffee className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              No spills yet today
+              No tea spilled yet today
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
               Be the first to respond to today's prompt!
@@ -429,7 +447,7 @@ export default function DailySpill() {
       <SectionPostModal 
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
-        section="daily-spill"
+        section="daily-tea"
         sectionTitle="Daily Spill"
         category="daily"
         promptText={todayPrompt}
