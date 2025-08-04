@@ -210,12 +210,10 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                   <div key={comment.id} className="space-y-2">
                     {/* Main Comment */}
                     <div className={cn(
-                      "rounded-lg p-3 space-y-2 transition-all duration-200",
+                      "rounded-lg p-3 space-y-2",
                       isDrama 
                         ? "bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200"
-                        : "bg-gray-50 border border-gray-200",
-                      // Highlight when this comment is being replied to
-                      replyingTo === comment.id && "ring-2 ring-orange-300 bg-orange-25 border-orange-300"
+                        : "bg-gray-50 border border-gray-200"
                     )}>
                       <div className="flex items-start space-x-3">
                         <AvatarDisplay
@@ -273,7 +271,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                       {/* Reply Input (if replying to this comment) */}
                       {replyingTo === comment.id && (
-                        <div className="ml-4 sm:ml-11 mt-3 space-y-3 bg-white dark:bg-gray-800 p-3 rounded-lg border-l-4 border-orange-300">
+                        <div className="ml-4 sm:ml-11 mt-3 space-y-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
                           {/* Reply Context Header */}
                           <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded-md">
                             <Reply className="h-3 w-3" />
@@ -336,28 +334,19 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
                     {/* Replies */}
                     {(comment as any).replies && (comment as any).replies.length > 0 && (
-                      <div className="ml-4 sm:ml-8 space-y-2 relative">
-                        {/* Threading line */}
-                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-300 to-transparent"></div>
-                        
+                      <div className="ml-4 sm:ml-8 space-y-2">
                         {(comment as any).replies.map((reply: any) => (
                           <div key={reply.id} className={cn(
-                            "rounded-lg p-3 space-y-2 relative pl-4",
-                            isDrama 
-                              ? "bg-gradient-to-br from-orange-50/30 to-red-50/30 border border-orange-100"
-                              : "bg-white border border-gray-200"
+                            "rounded-lg p-3 space-y-2 bg-gray-50 border border-gray-200",
+                            isDrama && "bg-orange-50/50 border-orange-200"
                           )}>
                             <div className="flex items-start space-x-3">
-                              <div className={cn(
-                                "w-6 h-6 rounded-full flex items-center justify-center",
-                                isDrama 
-                                  ? "bg-gradient-to-br from-orange-300 to-red-400"
-                                  : "bg-gradient-to-br from-purple-300 to-pink-300"
-                              )}>
-                                <span className="text-white text-xs font-bold">
-                                  {reply.alias.charAt(0)}
-                                </span>
-                              </div>
+                              <AvatarDisplay
+                                avatarId={reply.sessionId === sessionId ? userAvatarId : (reply.avatarId || 'mask-anonymous')}
+                                size="xs"
+                                showBorder={false}
+                                gradientColors={reply.sessionId === sessionId ? avatarColor : undefined}
+                              />
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2">
                                   <p className="text-sm font-medium text-gray-900">
@@ -372,7 +361,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                             </div>
                             
                             {/* Reply Reactions */}
-                            <div className="flex items-center space-x-2 ml-6 sm:ml-9 flex-wrap">
+                            <div className="flex items-center space-x-2 ml-9 flex-wrap">
                               {Object.entries(reactionEmojis).map(([type, emoji]) => {
                                 const count = reply.reactions?.[type as keyof typeof reply.reactions] || 0;
                                 
@@ -402,25 +391,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
 
           {/* Comment Input */}
           <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-600 pt-4 pb-safe-area-inset-bottom bg-white dark:bg-gray-800">
-            {/* Reply Mode Header */}
-            {replyingTo && (
-              <div className="px-2 mb-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 text-sm text-orange-700 dark:text-orange-300">
-                    <Reply className="h-3 w-3" />
-                    <span>Reply mode active</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={cancelReply}
-                    className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-200 h-6 px-2 text-xs"
-                  >
-                    Cancel Reply
-                  </Button>
-                </div>
-              </div>
-            )}
+
             
             {!replyingTo && (
               <div className="flex space-x-3 px-2">
