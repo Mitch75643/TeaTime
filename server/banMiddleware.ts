@@ -49,10 +49,11 @@ export async function strictBanCheckMiddleware(req: Request, res: Response, next
       req.query?.deviceFingerprint ||
       req.headers['x-device-fingerprint'];
 
-    // If no fingerprint is provided, allow the action to proceed
-    // Only check for bans if we have a fingerprint
     if (!deviceFingerprint) {
-      return next();
+      // For strict actions, require fingerprint
+      return res.status(400).json({
+        error: "Device fingerprint required for this action"
+      });
     }
 
     const { banned, banInfo } = await banSystem.isDeviceBanned(deviceFingerprint as string);
@@ -71,8 +72,7 @@ export async function strictBanCheckMiddleware(req: Request, res: Response, next
     next();
   } catch (error) {
     console.error('Strict ban check middleware error:', error);
-    // On error, allow access (fail-safe)
-    next();
+    return res.status(500).json({ error: "Ban check failed" });
   }
 }
 

@@ -5,8 +5,7 @@ import { createHash } from "crypto";
 export interface IStorage {
   // Posts
   createPost(post: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post>;
-  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string, hotTopicFilter?: string, page?: number, limit?: number): Promise<Post[]>;
-  getPostsCount(category?: string, tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<number>;
+  getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string): Promise<Post[]>;
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
   updatePostCommentCount(postId: string, count: number): Promise<void>;
@@ -84,61 +83,10 @@ export class MemStorage implements IStorage {
     this.anonymousUsers = new Map();
     this.deviceSessions = new Map();
     this.bannedDevices = new Map();
-    
-    // Update trending scores every hour
-    setInterval(() => {
-      this.updateTrendingScores();
-    }, 60 * 60 * 1000); // 1 hour
   }
 
-  // Calculate which 3-day trending cycle we're in
-  private getCurrentTrendingCycle(): number {
-    const now = new Date();
-    const startOfEpoch = new Date('2025-01-01T00:00:00Z'); // Reference point
-    const diffInDays = Math.floor((now.getTime() - startOfEpoch.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.floor(diffInDays / 3); // Every 3 days
-  }
-
-  // Calculate trending score based on engagement within the current 3-day cycle
-  private calculateTrendingScore(post: Post): number {
-    const now = new Date();
-    const createdAt = post.createdAt ? new Date(post.createdAt) : new Date();
-    const postAge = now.getTime() - createdAt.getTime();
-    const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
-    
-    // Only posts from current 3-day cycle can be trending
-    if (postAge > threeDaysInMs) return 0;
-    
-    // Calculate engagement score
-    const reactions = Object.values(post.reactions || {}).reduce((sum, count) => sum + count, 0);
-    const comments = post.commentCount || 0;
-    
-    // Weight recent activity higher
-    const ageWeight = Math.max(0, 1 - (postAge / threeDaysInMs));
-    const engagementScore = (reactions * 2) + (comments * 3); // Comments worth more than reactions
-    
-    return Math.floor(engagementScore * ageWeight * 100);
-  }
-
-  // Update trending scores for all posts
-  private updateTrendingScores(): void {
-    const currentCycle = this.getCurrentTrendingCycle();
-    
-    for (const [id, post] of Array.from(this.posts.entries())) {
-      const trendingScore = this.calculateTrendingScore(post);
-      const updatedPost = {
-        ...post,
-        trendingScore,
-        trendingCycle: currentCycle,
-        lastTrendingUpdate: new Date()
-      };
-      this.posts.set(id, updatedPost);
-    }
-  }
-
-  async createPost(insertPost: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post> {
+  async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
     const id = randomUUID();
-    const currentCycle = this.getCurrentTrendingCycle();
     const post: Post = {
       ...insertPost,
       id,
@@ -149,15 +97,10 @@ export class MemStorage implements IStorage {
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
-      postContext: postContext || insertPost.postContext || 'home',
-      communitySection: communitySection || insertPost.communitySection,
+      postContext: insertPost.postContext || 'home',
+      communitySection: insertPost.communitySection || null,
       reportCount: 0,
       isRemoved: false,
-      // Trending fields
-      trendingScore: 0,
-      lastTrendingUpdate: new Date(),
-      trendingCycle: currentCycle,
-      // Section-specific fields
       postType: insertPost.postType || 'standard',
       celebrityName: insertPost.celebrityName || null,
       storyType: insertPost.storyType || null,
@@ -166,52 +109,12 @@ export class MemStorage implements IStorage {
       pollVotes: insertPost.postType === 'poll' ? {optionA: 0, optionB: 0} : undefined,
       debateVotes: insertPost.postType === 'debate' ? {up: 0, down: 0} : undefined,
       allowComments: insertPost.allowComments !== false,
-      // AI Moderation fields
-      moderationStatus: 'pending',
-      moderationLevel: 0,
-      moderationCategories: [],
-      supportMessageShown: false,
-      isHidden: false,
     };
     this.posts.set(id, post);
     return post;
   }
 
-  async getPostsCount(category?: string, tags?: string, userSessionId?: string, postContext?: string, section?: string): Promise<number> {
-    let posts = Array.from(this.posts.values());
-    
-    // Filter out removed posts
-    posts = posts.filter(post => !post.isRemoved);
-    
-    // Filter by user session if requested
-    if (userSessionId) {
-      posts = posts.filter(post => post.sessionId === userSessionId);
-    }
-    
-    // Filter by post context (home, daily, community)
-    if (postContext) {
-      posts = posts.filter(post => post.postContext === postContext);
-    }
-    
-    // Filter by community section
-    if (section) {
-      posts = posts.filter(post => post.communitySection === section);
-    }
-    
-    if (category && category !== 'all') {
-      posts = posts.filter(post => post.category === category);
-    }
-    
-    if (tags) {
-      posts = posts.filter(post => 
-        post.tags && post.tags.some(tag => tag === tags)
-      );
-    }
-    
-    return posts.length;
-  }
-
-  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string, hotTopicFilter?: string, page: number = 0, limit: number = 25): Promise<Post[]> {
+  async getPosts(category?: string, sortBy: 'trending' | 'new' = 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string, hotTopicFilter?: string): Promise<Post[]> {
     let posts = Array.from(this.posts.values());
     
     // Filter out removed posts
@@ -253,24 +156,18 @@ export class MemStorage implements IStorage {
     }
     
     if (sortBy === 'trending') {
-      // Update trending scores before sorting
-      this.updateTrendingScores();
-      
-      // Filter to only show posts from current 3-day cycle
-      const currentCycle = this.getCurrentTrendingCycle();
-      posts = posts.filter(post => post.trendingCycle === currentCycle);
-      
-      // Sort by trending score
-      posts.sort((a, b) => (b.trendingScore || 0) - (a.trendingScore || 0));
+      posts.sort((a, b) => {
+        const aReactions = a.reactions as any || {};
+        const bReactions = b.reactions as any || {};
+        const aScore = (aReactions.laugh || 0) * 3 + (aReactions.thumbsUp || 0) * 2 + (aReactions.sad || 0) + (aReactions.thumbsDown || 0) * 0.5 + (a.commentCount || 0) * 2;
+        const bScore = (bReactions.laugh || 0) * 3 + (bReactions.thumbsUp || 0) * 2 + (bReactions.sad || 0) + (bReactions.thumbsDown || 0) * 0.5 + (b.commentCount || 0) * 2;
+        return bScore - aScore;
+      });
     } else {
       posts.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
     }
     
-    // Apply pagination
-    const startIndex = page * limit;
-    const endIndex = startIndex + limit;
-    
-    return posts.slice(startIndex, endIndex);
+    return posts;
   }
 
   async getPost(id: string): Promise<Post | undefined> {
@@ -281,32 +178,14 @@ export class MemStorage implements IStorage {
     const post = this.posts.get(postId);
     if (post) {
       post.reactions = reactions;
-      // Recalculate trending score when reactions change
-      post.trendingScore = this.calculateTrendingScore(post);
       this.posts.set(postId, post);
     }
-  }
-
-  async updatePostModeration(id: string, moderationData: {
-    moderationStatus: 'pending' | 'approved' | 'flagged' | 'hidden';
-    moderationLevel: number;
-    moderationCategories: string[];
-    isHidden: boolean;
-  }): Promise<Post | undefined> {
-    const post = this.posts.get(id);
-    if (!post) return undefined;
-    
-    const updatedPost = { ...post, ...moderationData };
-    this.posts.set(id, updatedPost);
-    return updatedPost;
   }
 
   async updatePostCommentCount(postId: string, count: number): Promise<void> {
     const post = this.posts.get(postId);
     if (post) {
       post.commentCount = count;
-      // Recalculate trending score when comment count changes
-      post.trendingScore = this.calculateTrendingScore(post);
       this.posts.set(postId, post);
     }
   }
@@ -322,12 +201,6 @@ export class MemStorage implements IStorage {
       parentCommentId: insertComment.parentCommentId || null,
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
       createdAt: new Date(),
-      // AI Moderation fields
-      moderationStatus: 'pending',
-      moderationLevel: 0,
-      moderationCategories: [],
-      supportMessageShown: false,
-      isHidden: false,
     };
     this.comments.set(id, comment);
     
@@ -847,7 +720,7 @@ export class MemStorage implements IStorage {
       bannedBy: banData.bannedBy || null,
       banReason: banData.banReason || null,
       isTemporary: banData.isTemporary || false,
-      expiresAt: banData.expiresAt ? new Date(banData.expiresAt) : null,
+      expiresAt: banData.expiresAt || null,
       deviceMetadata: banData.deviceMetadata || {},
       createdAt: new Date(),
     };

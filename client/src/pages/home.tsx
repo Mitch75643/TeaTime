@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { FeedToggle } from "@/components/ui/feed-toggle";
@@ -6,14 +7,9 @@ import { FloatingPostButton } from "@/components/ui/floating-post-button";
 import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { useSmartFeed } from "@/hooks/use-smart-feed";
-import { 
-  NewPostsBanner, 
-  StickyRefreshHeader, 
-  LoadMoreButton, 
-  FeedSkeleton, 
-  SmartFeedContainer 
-} from "@/components/ui/smart-feed-ui";
+import { Button } from "@/components/ui/button";
+import { Plus, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import type { Post } from "@shared/schema";
 
 const categories = [
@@ -31,7 +27,10 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [feedType, setFeedType] = useState<"new" | "trending">("new");
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Check for focus parameter in URL (from notifications)
   useEffect(() => {
@@ -57,32 +56,50 @@ export default function Home() {
     }
   }, []);
 
-  // Smart feed hook with batching and auto-refresh
-  const smartFeed = useSmartFeed({
-    queryKey: ["/api/posts", activeCategory, feedType],
-    apiEndpoint: "/api/posts",
-    queryParams: {
-      ...(activeCategory !== "all" && { category: activeCategory }),
-      sortBy: feedType,
+  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
+    queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (activeCategory !== "all") {
+        params.append("category", activeCategory);
+      }
+      params.append("sortBy", feedType);
+      
+      params.append("postContext", "home");
+      
+      const response = await fetch(`/api/posts?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      return response.json();
     },
-    postContext: "home",
-    batchSize: 25,
-    autoRefreshInterval: 25000, // 25 seconds
   });
 
-  const {
-    posts,
-    isLoading,
-    isLoadingMore,
-    isRefreshing,
-    hasMore,
-    newPostsCount,
-    showNewPostsBanner,
-    loadMore,
-    refresh,
-    acceptNewPosts,
-    dismissNewPosts,
-  } = smartFeed;
+  // Use all posts directly - no filtering needed for "new" mode
+  const posts = allPosts;
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidate queries to force a fresh fetch
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/posts"] });
+      
+      // Smooth scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      
+      toast({
+        title: "Posts refreshed!",
+        description: "Latest content has been loaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Refresh failed",
+        description: "Unable to load latest posts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -99,25 +116,51 @@ export default function Home() {
         />
       </div>
 
-      {/* New Posts Banner */}
-      <NewPostsBanner
-        count={newPostsCount}
-        onAccept={acceptNewPosts}
-        onDismiss={dismissNewPosts}
-        show={showNewPostsBanner}
-      />
-
       {/* Sticky Header */}
-      <StickyRefreshHeader
-        title={feedType === "new" ? "Latest Posts" : "Trending Posts"}
-        subtitle={activeCategory !== "all" ? `in ${categories.find(c => c.id === activeCategory)?.label}` : undefined}
-        onRefresh={refresh}
-        isRefreshing={isRefreshing}
-      />
+      <div className="sticky top-24 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+        <div className="px-4 md:px-6 lg:px-8 py-3 max-w-screen-sm lg:max-w-2xl mx-auto">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {feedType === "new" ? "Latest Posts" : "Trending Posts"}
+              {activeCategory !== "all" && (
+                <span className="ml-2 text-sm text-gray-500">
+                  in {categories.find(c => c.id === activeCategory)?.label}
+                </span>
+              )}
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+            >
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-xs">Refresh</span>
+            </Button>
+          </div>
+        </div>
+      </div>
 
-      <SmartFeedContainer>
+      <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
+        <div className="space-y-6">
         {isLoading ? (
-          <FeedSkeleton count={5} />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 animate-pulse">
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : posts.length === 0 ? (
           <div className="relative text-center min-h-[60vh] flex flex-col items-center justify-center">
             {/* Animated Tea Cup Icon */}
@@ -153,20 +196,14 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <>
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
-            <LoadMoreButton
-              onLoadMore={loadMore}
-              isLoading={isLoadingMore}
-              hasMore={hasMore}
-            />
-          </>
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
         )}
-      </SmartFeedContainer>
+        </div>
+      </main>
 
       <FloatingPostButton />
       <BottomNav />

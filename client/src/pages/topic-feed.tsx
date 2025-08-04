@@ -1,388 +1,651 @@
 import { useState, useEffect } from "react";
-import { useParams, useLocation } from "wouter";
-import { Header } from "@/components/ui/header";
-import { PostCard } from "@/components/ui/post-card";
-import { BottomNav } from "@/components/ui/bottom-nav";
-import { SectionPostModal } from "@/components/ui/section-post-modals";
-import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
-import { CommunityTopicAnimation, useCommunityTopicAnimation } from "@/components/ui/community-topic-animations";
-import { useSmartFeed } from "@/hooks/use-smart-feed";
-import { 
-  NewPostsBanner, 
-  StickyRefreshHeader, 
-  LoadMoreButton, 
-  FeedSkeleton, 
-  SmartFeedContainer 
-} from "@/components/ui/smart-feed-ui";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Users, Plus, MessageSquare, User } from "lucide-react";
+import { PostCard } from "@/components/ui/post-card";
+import { SectionPostModal } from "@/components/ui/section-post-modals";
+import { CelebrityTeaFeatures } from "@/components/ui/celebrity-tea-features";
+import { StoryTimeFeatures } from "@/components/ui/story-time-features";
+import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
+import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
+import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
+
+import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
+import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
+import { ArrowLeft, Plus, RefreshCw, Users, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
-const topicConfigs = {
+interface TopicInfo {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  gradient: string;
+  textColor: string;
+  count: number;
+}
+
+const topicConfig: Record<string, TopicInfo> = {
   "celebrity-tea": {
     id: "celebrity-tea",
     name: "Celebrity Tea",
     emoji: "🎤",
-    description: "Spill the latest celebrity gossip, pop culture moments, and influencer drama",
-    gradient: "bg-gradient-to-br from-pink-500 to-rose-500",
+    description: "Spill the hottest celebrity gossip and entertainment drama",
+    gradient: "bg-gradient-to-br from-pink-500 to-rose-500", // Match Community card - Red
     textColor: "text-white",
-    category: "celebrity",
-    celebrationType: "paparazzi",
-    popularTags: [
-      { tag: "#Selena", count: 12 },
-      { tag: "#Drama", count: 22 },
-      { tag: "#Viral", count: 15 },
-      { tag: "#Beef", count: 8 }
-    ]
+    count: 234
   },
   "story-time": {
-    id: "story-time",
+    id: "story-time", 
     name: "Story Time",
-    emoji: "📖",
-    description: "Share personal or fictional stories with the community",
-    gradient: "bg-gradient-to-br from-blue-500 to-indigo-500",
+    emoji: "📚",
+    description: "Share your wildest, funniest, and most memorable life stories",
+    gradient: "bg-gradient-to-br from-blue-500 to-indigo-500", // Match Community card exactly
     textColor: "text-white",
-    category: "story",
-    celebrationType: "story",
-    popularTags: [
-      { tag: "#Scary", count: 8 },
-      { tag: "#Funny", count: 15 },
-      { tag: "#Emotional", count: 12 },
-      { tag: "#Shocking", count: 6 }
-    ]
+    count: 567
   },
   "hot-topics": {
     id: "hot-topics",
-    name: "Hot Topics",
+    name: "Hot Topics", 
     emoji: "🔥",
-    description: "Fast-moving trends and spicy community discussions",
-    gradient: "bg-gradient-to-br from-red-500 to-orange-500",
+    description: "Discuss trending subjects that everyone's talking about",
+    gradient: "bg-gradient-to-br from-red-500 to-orange-500", // Match Community card exactly
     textColor: "text-white",
-    category: "hot-topic",
-    celebrationType: "fire",
-    popularTags: [
-      { tag: "#Trending", count: 25 },
-      { tag: "#Controversial", count: 18 },
-      { tag: "#Debate", count: 20 },
-      { tag: "#Viral", count: 30 }
-    ]
+    count: 189
   },
   "daily-debate": {
     id: "daily-debate",
     name: "Daily Debate",
-    emoji: "🗳️",
-    description: "Join community discussions and share your perspective",
-    gradient: "bg-gradient-to-br from-purple-500 to-violet-500",
+    emoji: "⚔️", 
+    description: "Drop bold opinions and thought-provoking questions",
+    gradient: "bg-gradient-to-br from-green-500 to-teal-500", // Match Community card exactly
     textColor: "text-white",
-    category: "debate",
-    celebrationType: "debate",
-    popularTags: [
-      { tag: "#Opinion", count: 16 },
-      { tag: "#Vote", count: 12 },
-      { tag: "#Discussion", count: 22 },
-      { tag: "#Perspective", count: 9 }
-    ]
+    count: 345
   },
   "tea-experiments": {
     id: "tea-experiments",
     name: "Tea Experiments",
     emoji: "🧪",
-    description: "Community polls and social experiments",
-    gradient: "bg-gradient-to-br from-green-500 to-teal-500",
+    description: "Create polls and let the community decide",
+    gradient: "bg-gradient-to-br from-purple-500 to-violet-500", // Match Community card exactly
     textColor: "text-white",
-    category: "experiment",
-    celebrationType: "experiment",
-    popularTags: [
-      { tag: "#Poll", count: 14 },
-      { tag: "#Experiment", count: 10 },
-      { tag: "#Question", count: 18 },
-      { tag: "#Research", count: 7 }
-    ]
+    count: 78
   },
+
   "suggestions": {
     id: "suggestions",
-    name: "Feedback & Suggestions",
+    name: "Feedback/Suggestions",
     emoji: "💡",
-    description: "Share feature ideas and feedback to improve Tfess",
-    gradient: "bg-gradient-to-br from-cyan-500 to-blue-500",
-    textColor: "text-white",
-    category: "suggestion",
-    celebrationType: "suggestion",
-    popularTags: [
-      { tag: "#Feature", count: 9 },
-      { tag: "#Feedback", count: 12 },
-      { tag: "#Suggestion", count: 15 },
-      { tag: "#Improvement", count: 6 }
-    ]
+    description: "Ideas and feedback for improving Tfess",
+    gradient: "bg-gradient-to-br from-cyan-500 to-blue-500", // Match Community card exactly
+    textColor: "text-white", 
+    count: 56
   }
 };
 
+type SortOption = "new" | "trending" | "top" | "most-reacted";
+
 export default function TopicFeed() {
-  const { topicId } = useParams<{ topicId: string }>();
+  const params = useParams();
   const [, setLocation] = useLocation();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"feed" | "your-posts">("feed");
+  const [sortBy, setSortBy] = useState<SortOption>("new");
+  const [storyCategory, setStoryCategory] = useState("all");
+  const [hotTopicFilter, setHotTopicFilter] = useState("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [activeTab, setActiveTab] = useState<'community' | 'user'>('community');
+  const [prefilledCelebrity, setPrefilledCelebrity] = useState("");
+  
+  // Celebration hook
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
-  const { animation: topicAnimation, triggerAnimation: triggerTopicAnimation, completeAnimation: completeTopicAnimation } = useCommunityTopicAnimation();
   
-  const topicConfig = topicConfigs[topicId as keyof typeof topicConfigs];
-  
-  // Redirect to community if invalid topic
+  // Get topic ID from URL params
+  const topicId = params.topicId || 'celebrity-tea';
+  const topic = topicConfig[topicId];
+
+  // Scroll to top when topic changes
   useEffect(() => {
-    if (!topicConfig) {
-      setLocation('/community');
-    }
-  }, [topicConfig, setLocation]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [topicId]);
 
-  // Smart feed hook for all posts
-  const allPostsFeed = useSmartFeed({
-    queryKey: ["/api/posts", topicConfig?.category || topicId, "new", "all"],
-    apiEndpoint: "/api/posts",
-    queryParams: {
-      category: topicConfig?.category || topicId,
-      sortBy: "new",
-    },
-    postContext: topicId,
-    batchSize: 25,
-    autoRefreshInterval: 25000, // 25 seconds
+  // Listen for story category changes from post submission
+  useEffect(() => {
+    const handleStoryCategoryChange = (event: CustomEvent) => {
+      if (topicId === "story-time" && event.detail) {
+        setStoryCategory(event.detail);
+      }
+    };
+
+    window.addEventListener('setStoryCategory', handleStoryCategoryChange as EventListener);
+    return () => {
+      window.removeEventListener('setStoryCategory', handleStoryCategoryChange as EventListener);
+    };
+  }, [topicId]);
+
+  // Community Feed - All posts from this topic
+  const { data: communityPosts = [], isLoading: isLoadingCommunity } = useQuery<Post[]>({
+    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        sortBy,
+        postContext: 'community',
+        section: topicId
+      });
+      if (storyCategory !== "all") {
+        params.append('storyCategory', storyCategory);
+      }
+      if (hotTopicFilter !== "all") {
+        params.append('hotTopicFilter', hotTopicFilter);
+      }
+      const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch community posts");
+      return response.json();
+    }
   });
 
-  // Smart feed hook for user's posts in this topic
-  const userPostsFeed = useSmartFeed({
-    queryKey: ["/api/posts", topicConfig?.category || topicId, "new", "user"],
-    apiEndpoint: `/api/posts/${topicId}/new/user`,
-    queryParams: {
-      postContext: "community",
-      section: topicId,
-    },
-    postContext: topicId,
-    batchSize: 25,
-    autoRefreshInterval: 25000, // 25 seconds
+  // Your Posts - Only posts by current user for this topic
+  const { data: userPosts = [], isLoading: isLoadingUser } = useQuery<Post[]>({
+    queryKey: ['/api/posts/user', topicId, sortBy, storyCategory, hotTopicFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        sortBy,
+        userOnly: 'true',
+        postContext: 'community',
+        section: topicId
+      });
+      if (storyCategory !== "all") {
+        params.append('storyCategory', storyCategory);
+      }
+      if (hotTopicFilter !== "all") {
+        params.append('hotTopicFilter', hotTopicFilter);
+      }
+      const response = await fetch(`/api/posts/${topicId}/${sortBy}/user?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch user posts");
+      return response.json();
+    }
   });
 
-  // Use the appropriate feed based on active tab
-  const currentFeed = activeTab === "feed" ? allPostsFeed : userPostsFeed;
-  
-  const {
-    posts,
-    isLoading,
-    isLoadingMore,
-    isRefreshing,
-    hasMore,
-    newPostsCount,
-    showNewPostsBanner,
-    loadMore,
-    refresh,
-    acceptNewPosts,
-    dismissNewPosts,
-  } = currentFeed;
+  const isLoading = isLoadingCommunity || isLoadingUser;
 
-  const handlePostSuccess = (section: string) => {
-    // Trigger both celebration and topic animations
-    if (topicConfig?.celebrationType) {
-      const animationType = topicConfig.celebrationType as any;
-      triggerCelebration(animationType);
-      triggerTopicAnimation(section as any);
-    }
-    
-    // Refresh both feeds to show new post
-    allPostsFeed.refresh();
-    userPostsFeed.refresh();
-  };
-
-  if (!topicConfig) {
+  if (!topic) {
+    setLocation('/community');
     return null;
   }
 
+  const handleBackClick = () => {
+    setLocation('/community');
+  };
+
+  const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
+    setIsRefreshing(false);
+  };
+
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: "new", label: "New" },
+    { value: "trending", label: "Trending" },
+    { value: "top", label: "Top" },
+    { value: "most-reacted", label: "Most Reacted" }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header />
-      
-      {/* Topic Header */}
-      <div className="px-4 pt-4 pb-2">
-        <Card className={cn("border-0 text-white overflow-hidden", topicConfig.gradient)}>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3 mb-3">
+      {/* Fixed Back Arrow - Always visible in top left with topic theme */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBackClick}
+          className={cn(
+            "shadow-lg border backdrop-blur-sm",
+            topic.gradient,
+            topic.textColor,
+            "hover:opacity-90 transition-opacity"
+          )}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
+      {/* Header with topic branding */}
+      <div className={cn("relative", topic.gradient)}>
+        <div className="px-4 py-6">
+          {/* Navigation - Hidden since we have fixed back button */}
+          <div className="flex items-center justify-between mb-4">
+            <div></div> {/* Spacer */}
+          </div>
+
+          {/* Topic Header */}
+          <div className="text-center">
+            <div className="text-4xl mb-2">{topic.emoji}</div>
+            <h1 className={cn("text-2xl font-bold mb-2", topic.textColor)}>
+              {topic.name}
+            </h1>
+            <p className={cn("text-sm opacity-90 mb-4", topic.textColor)}>
+              {topic.description}
+            </p>
+            <div className="flex items-center justify-center space-x-4">
+              <div className={cn("text-sm opacity-75", topic.textColor)}>
+                {topic.count} posts • {communityPosts.length} showing
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation('/community')}
-                className="text-white hover:bg-white/20 p-2 h-auto"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className={cn(
+                  "text-xs p-2 rounded-full border border-white/20 hover:bg-white/10",
+                  topic.textColor
+                )}
               >
-                <ArrowLeft className="h-4 w-4" />
+                <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
               </Button>
-              <span className="text-2xl">{topicConfig.emoji}</span>
-              <div>
-                <h1 className="text-xl font-bold">{topicConfig.name}</h1>
-                <p className="text-sm opacity-90">{topicConfig.description}</p>
-              </div>
             </div>
-            
-            {/* Popular Tags */}
-            <div className="flex flex-wrap gap-2 mb-3">
-              {topicConfig.popularTags.slice(0, 4).map(({ tag, count }) => (
-                <Badge
-                  key={tag}
-                  className="bg-white/20 text-white border-0 hover:bg-white/30 text-xs"
-                >
-                  {tag} ({count})
-                </Badge>
-              ))}
-            </div>
-            
-            {/* Post Button */}
-            <Button
-              onClick={() => setIsPostModalOpen(true)}
-              className="w-full bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Share Your {topicConfig.name.includes('Tea') ? 'Tea' : 'Story'}
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+
       </div>
 
-      {/* New Posts Banner */}
-      <NewPostsBanner
-        count={newPostsCount}
-        onAccept={acceptNewPosts}
-        onDismiss={dismissNewPosts}
-        show={showNewPostsBanner}
-      />
+      {/* Topic-Specific Features */}
+      <div className="px-4 pt-8 pb-6 space-y-6 max-w-2xl mx-auto">
+        {topicId === "celebrity-tea" && (
+          <CelebrityTeaFeatures 
+            onSpillAbout={(celebName) => {
+              setPrefilledCelebrity(celebName);
+              setIsPostModalOpen(true);
+            }}
+            onCreatePost={() => {
+              setPrefilledCelebrity("");
+              setIsPostModalOpen(true);
+            }}
+          />
+        )}
+        
+        {topicId === "story-time" && (
+          <StoryTimeFeatures 
+            onWriteStory={(prompt, category) => {
+              setIsPostModalOpen(true);
+            }}
+            selectedCategory={storyCategory}
+            onCategoryChange={setStoryCategory}
+            onCreatePost={() => {
+              setIsPostModalOpen(true);
+            }}
+          />
+        )}
+        
+        {topicId === "hot-topics" && (
+          <HotTopicsFeatures 
+            onCreateTopic={(topic, hashtag) => {
+              setSelectedTopic(topic || "");
+              setIsPostModalOpen(true);
+            }}
+            onCreatePost={() => {
+              setSelectedTopic("");
+              setIsPostModalOpen(true);
+            }}
+            selectedTopicFilter={hotTopicFilter}
+            onTopicFilterChange={setHotTopicFilter}
+          />
+        )}
+        
+        {topicId === "daily-debate" && (
+          <DailyDebateFeatures 
+            onVote={(optionId) => {
+              console.log(`Voted ${optionId} on daily debate`);
+            }}
+            onCreateDebate={(question) => {
+              setIsPostModalOpen(true);
+            }}
+          />
+        )}
+        
+        {topicId === "tea-experiments" && (
+          <TeaExperimentsFeatures 
+            onCreatePoll={(question, options) => {
+              setIsPostModalOpen(true);
+            }}
+            onVote={(optionId) => {
+              console.log(`Voted ${optionId} on experiment`);
+            }}
+          />
+        )}
+        
 
-      {/* Tabs */}
-      <div className="sticky top-16 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="px-4">
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "feed" | "your-posts")}>
-            <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-700">
-              <TabsTrigger value="feed" className="flex items-center space-x-2">
-                <MessageSquare className="h-4 w-4" />
-                <span>Feed</span>
-              </TabsTrigger>
-              <TabsTrigger value="your-posts" className="flex items-center space-x-2">
-                <User className="h-4 w-4" />
-                <span>Your Posts</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+        
+        {topicId === "suggestions" && (
+          <SuggestionsFeatures 
+            onSubmitSuggestion={(suggestion) => {
+              console.log('New suggestion:', suggestion);
+            }}
+            onVote={(suggestionId, voteType) => {
+              console.log(`Voted ${voteType} on suggestion ${suggestionId}`);
+            }}
+            onCelebrationTrigger={(type) => {
+              triggerCelebration(type);
+            }}
+          />
+        )}
+      </div>
+
+      {/* Posts Section with Tabs */}
+      <div className="container mx-auto px-4 py-6 pb-20">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {/* Story Category Filter Bar - Only for Story Time */}
+          {topicId === "story-time" && (
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by story type:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={storyCategory === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("all")}
+                  className="text-xs"
+                >
+                  📖 All Stories
+                </Button>
+                <Button
+                  variant={storyCategory === "horror" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("horror")}
+                  className="text-xs"
+                >
+                  😱 Horror
+                </Button>
+                <Button
+                  variant={storyCategory === "funny" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("funny")}
+                  className="text-xs"
+                >
+                  😂 Funny
+                </Button>
+                <Button
+                  variant={storyCategory === "weird" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("weird")}
+                  className="text-xs"
+                >
+                  🤔 Weird
+                </Button>
+                <Button
+                  variant={storyCategory === "romantic" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("romantic")}
+                  className="text-xs"
+                >
+                  💕 Romantic
+                </Button>
+                <Button
+                  variant={storyCategory === "embarrassing" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStoryCategory("embarrassing")}
+                  className="text-xs"
+                >
+                  😳 Embarrassing
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Hot Topics Filter Bar - Only for Hot Topics */}
+          {topicId === "hot-topics" && (
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by hot topic:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={hotTopicFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("all")}
+                  className="text-xs"
+                >
+                  🔥 All Takes
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "AI will replace most jobs in 5 years" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("AI will replace most jobs in 5 years")}
+                  className="text-xs"
+                >
+                  #1 AI Jobs
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Social media is toxic for mental health" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Social media is toxic for mental health")}
+                  className="text-xs"
+                >
+                  #2 Social Media
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Climate change isn't being taken seriously" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Climate change isn't being taken seriously")}
+                  className="text-xs"
+                >
+                  #3 Climate
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Gen Z has it harder than previous generations" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Gen Z has it harder than previous generations")}
+                  className="text-xs"
+                >
+                  #4 Gen Z
+                </Button>
+                <Button
+                  variant={hotTopicFilter === "Remote work is overrated" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHotTopicFilter("Remote work is overrated")}
+                  className="text-xs"
+                >
+                  #5 Remote Work
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {/* Tab Headers */}
+          <div className="flex border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setActiveTab('community')}
+              className={cn(
+                "flex-1 px-6 py-4 text-sm font-medium transition-colors",
+                "flex items-center justify-center space-x-2",
+                activeTab === 'community'
+                  ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-b-2 border-purple-500"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              )}
+            >
+              <Users className="h-4 w-4" />
+              <span>Community Feed</span>
+              <span className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                {communityPosts.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('user')}
+              className={cn(
+                "flex-1 px-6 py-4 text-sm font-medium transition-colors",
+                "flex items-center justify-center space-x-2",
+                activeTab === 'user'
+                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              )}
+            >
+              <User className="h-4 w-4" />
+              <span>Your Posts</span>
+              <span className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                {userPosts.length}
+              </span>
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === 'community' && (
+              <div className="space-y-4">
+                {isLoadingCommunity ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : communityPosts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-4">{topic.emoji}</div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "No takes on this yet"
+                        : `No posts yet in ${topic.name}`
+                      }
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "Be the first to weigh in on this hot topic!"
+                        : "Be the first to share something in this topic!"
+                      }
+                    </p>
+                    <Button
+                      onClick={() => {
+                        if (topicId === "hot-topics" && hotTopicFilter !== "all") {
+                          setSelectedTopic(hotTopicFilter);
+                        }
+                        setIsPostModalOpen(true);
+                      }}
+                      className={cn("shadow-lg", topic.gradient, topic.textColor)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "+ Respond"
+                        : "Create First Post"
+                      }
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {communityPosts.map((post: Post) => (
+                      <PostCard 
+                        key={post.id} 
+                        post={post}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'user' && (
+              <div className="space-y-4">
+                {isLoadingUser ? (
+                  <div className="space-y-4">
+                    {[...Array(2)].map((_, i) => (
+                      <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : userPosts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-4">✍️</div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "You haven't shared your take yet"
+                        : "You haven't posted here yet"
+                      }
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "Share your perspective on this hot topic!"
+                        : `Share your thoughts about ${topic.name.toLowerCase()} with the community!`
+                      }
+                    </p>
+                    <Button
+                      onClick={() => {
+                        if (topicId === "hot-topics" && hotTopicFilter !== "all") {
+                          setSelectedTopic(hotTopicFilter);
+                        }
+                        setIsPostModalOpen(true);
+                      }}
+                      className={cn("shadow-lg", topic.gradient, topic.textColor)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {topicId === "hot-topics" && hotTopicFilter !== "all" 
+                        ? "+ Respond"
+                        : "Create Your First Post"
+                      }
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {userPosts.map((post: Post) => (
+                      <PostCard 
+                        key={post.id} 
+                        post={post}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Sticky Header */}
-      <StickyRefreshHeader
-        title={activeTab === "feed" ? `${topicConfig.name} Feed` : `Your ${topicConfig.name} Posts`}
-        subtitle={`${posts.length} posts`}
-        onRefresh={refresh}
-        isRefreshing={isRefreshing}
-        className="top-28"
-      />
+      {/* Floating Add Button */}
+      <Button
+        onClick={() => setIsPostModalOpen(true)}
+        className={cn(
+          "fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-50",
+          topic.gradient,
+          "hover:scale-105 transition-transform"
+        )}
+        size="icon"
+      >
+        <Plus className="h-6 w-6 text-white" />
+      </Button>
 
-      {/* Tab Content */}
-      <div className="px-4 md:px-6 lg:px-8 py-4 max-w-screen-sm lg:max-w-2xl mx-auto">
-        <Tabs value={activeTab} className="space-y-4">
-          <TabsContent value="feed" className="space-y-4 mt-0">
-            {isLoading ? (
-              <FeedSkeleton count={5} />
-            ) : posts.length === 0 ? (
-              <div className="text-center py-12">
-                <span className="text-6xl mb-4 block">{topicConfig.emoji}</span>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  No {topicConfig.name.toLowerCase()} yet
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  Be the first to start the conversation!
-                </p>
-                <Button
-                  onClick={() => setIsPostModalOpen(true)}
-                  className={cn("shadow-lg hover:shadow-xl text-white", topicConfig.gradient)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Share Your {topicConfig.name.includes('Tea') ? 'Tea' : 'Story'}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4">
-                  {posts.map((post: Post) => (
-                    <PostCard key={post.id} post={post} />
-                  ))}
-                </div>
-                <LoadMoreButton
-                  onLoadMore={loadMore}
-                  isLoading={isLoadingMore}
-                  hasMore={hasMore}
-                />
-              </>
-            )}
-          </TabsContent>
-
-          <TabsContent value="your-posts" className="space-y-4 mt-0">
-            {isLoading ? (
-              <FeedSkeleton count={3} />
-            ) : posts.length === 0 ? (
-              <div className="text-center py-12">
-                <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  No posts yet
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  You haven't shared anything in {topicConfig.name.toLowerCase()} yet.
-                </p>
-                <Button
-                  onClick={() => setIsPostModalOpen(true)}
-                  className={cn("shadow-lg hover:shadow-xl text-white", topicConfig.gradient)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Share Your First {topicConfig.name.includes('Tea') ? 'Tea' : 'Story'}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4">
-                  {posts.map((post: Post) => (
-                    <PostCard key={post.id} post={post} />
-                  ))}
-                </div>
-                <LoadMoreButton
-                  onLoadMore={loadMore}
-                  isLoading={isLoadingMore}
-                  hasMore={hasMore}
-                />
-              </>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      <SectionPostModal 
+      {/* Section-specific Post Modal */}
+      <SectionPostModal
         isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
+        onClose={() => {
+          setIsPostModalOpen(false);
+          setSelectedTopic("");
+          setPrefilledCelebrity("");
+        }}
         section={topicId}
-        sectionTitle={topicConfig.name}
-        category={topicConfig.category}
-        onPostSuccess={handlePostSuccess}
+        sectionTitle={`${topic.emoji} ${topic.name}`}
+        promptText={selectedTopic}
+        prefilledCelebrity={prefilledCelebrity}
+        onPostSuccess={(section) => {
+          // Trigger celebration for this topic
+          triggerCelebration(section as any);
+        }}
       />
       
       {/* Celebration Animation */}
-      <CelebrationAnimation 
+      <CelebrationAnimation
         isVisible={celebration.isVisible}
-        type={celebration.type}
         onComplete={completeCelebration}
+        type={celebration.type}
       />
-      
-      {/* Community Topic Animation */}
-      <CommunityTopicAnimation
-        isVisible={topicAnimation.isVisible}
-        type={topicAnimation.type}
-        onComplete={completeTopicAnimation}
-      />
-      
-      <BottomNav />
     </div>
   );
 }
