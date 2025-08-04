@@ -3,37 +3,12 @@ import { Button } from "./button";
 import { SearchPage } from "./search-page";
 import { FloatingPostButton } from "./floating-post-button";
 import { Home, Coffee, Settings, Users } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  // Handle navigation with scroll-to-top and reset behavior
-  const handleNavigation = (path: string) => {
-    // If already on the same page, scroll to top and reset
-    if (location === path) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      // Trigger a page refresh/reset for certain pages
-      if (path === '/') {
-        // For home page, trigger a gentle refresh of posts
-        const event = new CustomEvent('refreshPage');
-        window.dispatchEvent(event);
-      }
-      
-      return;
-    }
-    
-    // Navigate to new page
-    setLocation(path);
-    
-    // Scroll to top after navigation
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
-  };
 
   const navItems = [
     { id: "home", label: "Home", icon: Home, path: "/" },
@@ -58,9 +33,46 @@ export function BottomNav() {
             if (index === 1) {
               return (
                 <div key={`spacer-${index}`} className="flex-1 flex justify-center relative">
+                  <Link href={item.path!}>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
+                        isActive 
+                          ? "text-orange-500 dark:text-orange-400" 
+                          : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                      )}
+                    >
+                      {/* Active glow effect */}
+                      {isActive && (
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
+                      )}
+                      
+                      <Icon className={cn(
+                        "h-6 w-6 transition-all duration-300",
+                        isActive ? "mb-1 scale-110" : "mb-0"
+                      )} />
+                      
+                      {/* Dynamic label - only show when active */}
+                      <span className={cn(
+                        "text-xs font-medium transition-all duration-300 overflow-hidden",
+                        isActive 
+                          ? "max-h-6 opacity-100 mt-1" 
+                          : "max-h-0 opacity-0 mt-0"
+                      )}>
+                        {item.label}
+                      </span>
+                    </Button>
+                  </Link>
+                </div>
+              );
+            }
+            
+            return (
+              <div key={item.id} className="flex-1 flex justify-center relative">
+                <Link href={item.path!}>
                   <Button
                     variant="ghost"
-                    onClick={() => handleNavigation(item.path)}
                     className={cn(
                       "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
                       isActive 
@@ -88,52 +100,14 @@ export function BottomNav() {
                       {item.label}
                     </span>
                   </Button>
-                  
-                  {/* Floating action button container */}
-                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
-                    <FloatingPostButton />
-                  </div>
-                </div>
-              );
-            }
-            
-            return (
-              <div key={item.id} className="flex-1 flex justify-center relative">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleNavigation(item.path)}
-                  className={cn(
-                    "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
-                    isActive 
-                      ? "text-orange-500 dark:text-orange-400" 
-                      : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                  )}
-                >
-                  {/* Active glow effect */}
-                  {isActive && (
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
-                  )}
-                  
-                  <Icon className={cn(
-                    "h-6 w-6 transition-all duration-300",
-                    isActive ? "mb-1 scale-110" : "mb-0"
-                  )} />
-                  
-                  {/* Dynamic label - only show when active */}
-                  <span className={cn(
-                    "text-xs font-medium transition-all duration-300 overflow-hidden",
-                    isActive 
-                      ? "max-h-6 opacity-100 mt-1" 
-                      : "max-h-0 opacity-0 mt-0"
-                  )}>
-                    {item.label}
-                  </span>
-                </Button>
+                </Link>
               </div>
             );
           })}
         </div>
       </nav>
+      
+
       
       <SearchPage 
         isOpen={isSearchOpen} 

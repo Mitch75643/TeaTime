@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { FeedToggle } from "@/components/ui/feed-toggle";
-
+import { FloatingPostButton } from "@/components/ui/floating-post-button";
 import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -30,8 +30,6 @@ export default function Home() {
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-
-
   // Check for focus parameter in URL (from notifications)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -56,19 +54,6 @@ export default function Home() {
     }
   }, []);
 
-  // Listen for navigation refresh events
-  useEffect(() => {
-    const handleRefreshPage = () => {
-      handleRefresh();
-    };
-
-    window.addEventListener('refreshPage', handleRefreshPage);
-    
-    return () => {
-      window.removeEventListener('refreshPage', handleRefreshPage);
-    };
-  }, []);
-
   const { data: allPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
     queryFn: async () => {
@@ -91,17 +76,8 @@ export default function Home() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    
-    // Scroll to top immediately
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Invalidate and refetch posts
     await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
-    
-    // Small delay for UX feedback
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 500);
+    setIsRefreshing(false);
   };
 
   return (
@@ -121,28 +97,28 @@ export default function Home() {
 
       <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
         <div className="space-y-6">
-        {/* Sticky Latest Posts Header */}
-        <div className="sticky top-32 z-30 bg-gray-50 dark:bg-gray-900 -mx-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 mb-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {feedType === "new" ? "Latest Posts" : "Trending Posts"}
-              {activeCategory !== "all" && (
-                <span className="ml-2 text-sm text-gray-500">
-                  in {categories.find(c => c.id === activeCategory)?.label}
-                </span>
-              )}
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="text-sm font-medium">Refresh</span>
-            </Button>
-          </div>
+
+
+
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {feedType === "new" ? "Latest Posts" : "Trending Posts"}
+            {activeCategory !== "all" && (
+              <span className="ml-2 text-sm text-gray-500">
+                in {categories.find(c => c.id === activeCategory)?.label}
+              </span>
+            )}
+          </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400"
+          >
+            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="text-xs">Refresh</span>
+          </Button>
         </div>
         {isLoading ? (
           <div className="space-y-4">
@@ -185,6 +161,9 @@ export default function Home() {
             <p className="text-gray-600 dark:text-gray-400 mb-8 text-base">
               {activeCategory === "all" ? "No one's spilled yet... will you be the first?" : "Be bold—spill the first sip in this category!"}
             </p>
+
+
+            
             {/* Subtle Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-orange-200 dark:bg-orange-800 rounded-full opacity-20 animate-ping" style={{ animationDelay: '1s', animationDuration: '3s' }}></div>
@@ -202,6 +181,7 @@ export default function Home() {
         </div>
       </main>
 
+      <FloatingPostButton />
       <BottomNav />
 
       <PostModal
