@@ -2,10 +2,12 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
-import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, banDeviceSchema, checkBanSchema, type ModerationResponse } from "@shared/schema";
+import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, banDeviceSchema, checkBanSchema, pushSubscriptionSchema, updatePushPreferencesSchema, type ModerationResponse } from "@shared/schema";
 import { comprehensiveModeration } from "./moderation";
 import { checkDeviceBanMiddleware, strictBanCheckMiddleware, banSystem, startBanCleanupScheduler } from "./banMiddleware";
 import { memAutoRotationService } from "./memAutoRotationService";
+import { pushNotificationService } from "./pushNotificationService";
+import { addTestRoute } from "./testRoute";
 
 declare module 'express-session' {
   interface SessionData {
@@ -693,6 +695,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to get hot topics leaderboard" });
     }
   });
+
+  // Push notification endpoints
+  app.get("/api/push/vapid-key", (req, res) => {
+    res.json({ publicKey: pushNotificationService.getVapidPublicKey() });
+  });
+
+  app.post("/api/push/subscribe", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const subscriptionData = pushSubscriptionSchema.parse(req.body);
+      
+      await pushNotificationService.subscribe(sessionId, {
+        endpoint: subscriptionData.endpoint,
+        keys: {
+          p256dh: subscriptionData.p256dh,
+          auth: subscriptionData.auth,
+        }
+      }, subscriptionData.notificationTypes);
+      
+      res.json({ success: true, message: "Successfully subscribed to push notifications" });
+    } catch (error) {
+      console.error("Failed to subscribe to push notifications:", error);
+      res.status(500).json({ message: "Failed to subscribe to push notifications" });
+    }
+  });
+
+  app.post("/api/push/unsubscribe", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      await pushNotificationService.unsubscribe(sessionId);
+      res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
+    } catch (error) {
+      console.error("Failed to unsubscribe from push notifications:", error);
+      res.status(500).json({ message: "Failed to unsubscribe from push notifications" });
+    }
+  });
+
+  app.put("/api/push/preferences", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const preferences = updatePushPreferencesSchema.parse(req.body);
+      
+      await pushNotificationService.updatePreferences(sessionId, preferences.notificationTypes);
+      res.json({ success: true, message: "Notification preferences updated" });
+    } catch (error) {
+      console.error("Failed to update push preferences:", error);
+      res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
+  app.get("/api/push/status", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const subscriptions = await storage.getPushSubscriptions(sessionId);
+      const stats = await pushNotificationService.getStats(sessionId);
+      
+      res.json({
+        isSubscribed: subscriptions.length > 0 && subscriptions.some(sub => sub.isActive),
+        notificationTypes: subscriptions.length > 0 ? subscriptions[0].notificationTypes : [],
+        stats
+      });
+    } catch (error) {
+      console.error("Failed to get push status:", error);
+      res.status(500).json({ message: "Failed to get push notification status" });
+    }
+  });
+
+  // Add test routes for development
+  if (process.env.NODE_ENV === 'development') {
+    addTestRoute(app);
+  }
 
   return httpServer;
 }

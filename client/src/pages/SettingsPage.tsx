@@ -21,6 +21,7 @@ import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { checkBiometricSupport, isBiometricEnabled } from "@/lib/biometricAuth";
 import { SyncSetup } from "@/components/auth/SyncSetup";
 import { BiometricSetup } from "@/components/auth/BiometricSetup";
+import { NotificationSettings } from "@/components/NotificationSettings";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -239,29 +240,8 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* App Preferences */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="w-5 h-5" />
-              App Preferences
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-orange-600" />
-                <div>
-                  <p className="font-medium">Notifications</p>
-                  <p className="text-sm text-gray-500">Manage your notification preferences</p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" disabled>
-                Coming Soon
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Push Notifications */}
+        <NotificationSettings />
 
         {/* Privacy Notice */}
         <Alert>

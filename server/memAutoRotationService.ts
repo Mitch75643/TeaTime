@@ -1,5 +1,6 @@
 import { storage } from "./storage";
 import { type ContentPrompt, type WeeklyTheme, type RotationCycle, type Leaderboard } from "@shared/schema";
+import { pushNotificationService } from "./pushNotificationService";
 
 export class MemAutoRotationService {
   private rotationTimer: NodeJS.Timeout | null = null;
@@ -125,6 +126,10 @@ export class MemAutoRotationService {
           currentContentId: prompt.id
         });
       }
+
+      // Send push notifications for new prompt
+      console.log('[Auto-Rotation] Sending push notifications for new daily prompt');
+      await pushNotificationService.notifyNewPrompt(prompt);
     }
   }
 
@@ -144,6 +149,10 @@ export class MemAutoRotationService {
           currentContentId: prompt.id
         });
       }
+
+      // Send push notifications for new debate
+      console.log('[Auto-Rotation] Sending push notifications for new daily debate');
+      await pushNotificationService.notifyNewPrompt(prompt);
     }
   }
 

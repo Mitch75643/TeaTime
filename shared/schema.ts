@@ -215,6 +215,30 @@ export const leaderboards = pgTable("leaderboards", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Push notification subscriptions
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  isActive: boolean("is_active").default(true),
+  notificationTypes: text("notification_types").array().default(["daily_prompt", "daily_debate"]), // What notifications user wants
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUsedAt: timestamp("last_used_at").defaultNow(),
+});
+
+// Push notification log for tracking
+export const pushNotificationLog = pgTable("push_notification_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  subscriptionId: varchar("subscription_id").notNull().references(() => pushSubscriptions.id),
+  notificationType: varchar("notification_type").notNull(), // "daily_prompt", "daily_debate"
+  promptContent: text("prompt_content").notNull(),
+  status: varchar("status").notNull(), // "sent", "failed", "expired"
+  failureReason: text("failure_reason"),
+  sentAt: timestamp("sent_at").defaultNow(),
+});
+
 export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
@@ -386,6 +410,18 @@ export const checkBanSchema = z.object({
 export type BanDevice = z.infer<typeof banDeviceSchema>;
 export type CheckBan = z.infer<typeof checkBanSchema>;
 
+// Push notification schemas
+export const pushSubscriptionSchema = z.object({
+  endpoint: z.string().url(),
+  p256dh: z.string(),
+  auth: z.string(),
+  notificationTypes: z.array(z.enum(["daily_prompt", "daily_debate"])).optional().default(["daily_prompt", "daily_debate"]),
+});
+
+export const updatePushPreferencesSchema = z.object({
+  notificationTypes: z.array(z.enum(["daily_prompt", "daily_debate"])),
+});
+
 // All types consolidated
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 
@@ -412,3 +448,7 @@ export type NotificationInput = z.infer<typeof notificationSchema>;
 export type CreateAnonymousUserInput = z.infer<typeof createAnonymousUserSchema>;
 export type UpgradeAccountInput = z.infer<typeof upgradeAccountSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = z.infer<typeof pushSubscriptionSchema>;
+export type UpdatePushPreferences = z.infer<typeof updatePushPreferencesSchema>;
+export type PushNotificationLog = typeof pushNotificationLog.$inferSelect;

@@ -1,4 +1,4 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard, type PushSubscription, type InsertPushSubscription, type PushNotificationLog } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { createHash } from "crypto";
 
@@ -76,6 +76,19 @@ export interface IStorage {
   createLeaderboard(leaderboard: Omit<Leaderboard, 'id' | 'createdAt'>): Promise<Leaderboard>;
   getActiveLeaderboards(type?: string): Promise<Leaderboard[]>;
   deactivateLeaderboards(type: string): Promise<void>;
+
+  // Push Notifications
+  createPushSubscription(subscription: any): Promise<any>;
+  getPushSubscriptions(sessionId: string): Promise<any[]>;
+  getActiveSubscriptionsForType(notificationType: string): Promise<any[]>;
+  deactivatePushSubscription(subscriptionId: string): Promise<void>;
+  updatePushSubscriptionPreferences(subscriptionId: string, notificationTypes: string[]): Promise<void>;
+  updatePushSubscriptionLastUsed(subscriptionId: string): Promise<void>;
+  logPushNotification(subscriptionId: string, notificationType: string, promptContent: string, status: string): Promise<void>;
+  updatePushNotificationStatus(subscriptionId: string, status: string, failureReason?: string): Promise<void>;
+  getPushNotificationStats(sessionId?: string): Promise<{ totalSubscriptions: number; activeSubscriptions: number; sentNotifications: number; failedNotifications: number }>;
+  cleanupOldPushSubscriptions(cutoffDate: Date): Promise<void>;
+  cleanupOldPushNotificationLogs(cutoffDate: Date): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -93,6 +106,8 @@ export class MemStorage implements IStorage {
   private weeklyThemes: Map<string, WeeklyTheme>;
   private rotationCycles: Map<string, RotationCycle>;
   private leaderboards: Map<string, Leaderboard>;
+  private pushSubscriptions: Map<string, any>;
+  private pushNotificationLogs: Map<string, any>;
 
   constructor() {
     this.posts = new Map();
@@ -109,6 +124,8 @@ export class MemStorage implements IStorage {
     this.weeklyThemes = new Map();
     this.rotationCycles = new Map();
     this.leaderboards = new Map();
+    this.pushSubscriptions = new Map();
+    this.pushNotificationLogs = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -979,6 +996,138 @@ export class MemStorage implements IStorage {
       if (leaderboard.type === type) {
         leaderboard.isActive = false;
       }
+    }
+  }
+
+  // Push Notification methods
+  async createPushSubscription(subscriptionData: any): Promise<any> {
+    const id = randomUUID();
+    const subscription = {
+      id,
+      sessionId: subscriptionData.sessionId,
+      endpoint: subscriptionData.endpoint,
+      p256dh: subscriptionData.p256dh,
+      auth: subscriptionData.auth,
+      isActive: true,
+      notificationTypes: subscriptionData.notificationTypes || ["daily_prompt", "daily_debate"],
+      createdAt: new Date(),
+      lastUsedAt: new Date(),
+    };
+    this.pushSubscriptions.set(id, subscription);
+    return subscription;
+  }
+
+  async getPushSubscriptions(sessionId: string): Promise<any[]> {
+    return Array.from(this.pushSubscriptions.values())
+      .filter(sub => sub.sessionId === sessionId);
+  }
+
+  async getActiveSubscriptionsForType(notificationType: string): Promise<any[]> {
+    return Array.from(this.pushSubscriptions.values())
+      .filter(sub => 
+        sub.isActive && 
+        sub.notificationTypes.includes(notificationType)
+      );
+  }
+
+  async deactivatePushSubscription(subscriptionId: string): Promise<void> {
+    const subscription = this.pushSubscriptions.get(subscriptionId);
+    if (subscription) {
+      subscription.isActive = false;
+      this.pushSubscriptions.set(subscriptionId, subscription);
+    }
+  }
+
+  async updatePushSubscriptionPreferences(subscriptionId: string, notificationTypes: string[]): Promise<void> {
+    const subscription = this.pushSubscriptions.get(subscriptionId);
+    if (subscription) {
+      subscription.notificationTypes = notificationTypes;
+      this.pushSubscriptions.set(subscriptionId, subscription);
+    }
+  }
+
+  async updatePushSubscriptionLastUsed(subscriptionId: string): Promise<void> {
+    const subscription = this.pushSubscriptions.get(subscriptionId);
+    if (subscription) {
+      subscription.lastUsedAt = new Date();
+      this.pushSubscriptions.set(subscriptionId, subscription);
+    }
+  }
+
+  async logPushNotification(subscriptionId: string, notificationType: string, promptContent: string, status: string): Promise<void> {
+    const id = randomUUID();
+    const log = {
+      id,
+      subscriptionId,
+      notificationType,
+      promptContent,
+      status,
+      failureReason: null,
+      sentAt: new Date(),
+    };
+    this.pushNotificationLogs.set(id, log);
+  }
+
+  async updatePushNotificationStatus(subscriptionId: string, status: string, failureReason?: string): Promise<void> {
+    // Find the most recent log entry for this subscription
+    const logs = Array.from(this.pushNotificationLogs.values())
+      .filter(log => log.subscriptionId === subscriptionId)
+      .sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime());
+    
+    if (logs.length > 0) {
+      const latestLog = logs[0];
+      latestLog.status = status;
+      if (failureReason) {
+        latestLog.failureReason = failureReason;
+      }
+      this.pushNotificationLogs.set(latestLog.id, latestLog);
+    }
+  }
+
+  async getPushNotificationStats(sessionId?: string): Promise<{ totalSubscriptions: number; activeSubscriptions: number; sentNotifications: number; failedNotifications: number }> {
+    let subscriptions = Array.from(this.pushSubscriptions.values());
+    
+    if (sessionId) {
+      subscriptions = subscriptions.filter(sub => sub.sessionId === sessionId);
+    }
+
+    const subscriptionIds = subscriptions.map(sub => sub.id);
+    const logs = Array.from(this.pushNotificationLogs.values())
+      .filter(log => sessionId ? subscriptionIds.includes(log.subscriptionId) : true);
+
+    return {
+      totalSubscriptions: subscriptions.length,
+      activeSubscriptions: subscriptions.filter(sub => sub.isActive).length,
+      sentNotifications: logs.filter(log => log.status === 'sent').length,
+      failedNotifications: logs.filter(log => log.status === 'failed').length,
+    };
+  }
+
+  async cleanupOldPushSubscriptions(cutoffDate: Date): Promise<void> {
+    const toRemove: string[] = [];
+    
+    for (const [id, subscription] of this.pushSubscriptions.entries()) {
+      if (!subscription.isActive && subscription.lastUsedAt && subscription.lastUsedAt < cutoffDate) {
+        toRemove.push(id);
+      }
+    }
+
+    for (const id of toRemove) {
+      this.pushSubscriptions.delete(id);
+    }
+  }
+
+  async cleanupOldPushNotificationLogs(cutoffDate: Date): Promise<void> {
+    const toRemove: string[] = [];
+    
+    for (const [id, log] of this.pushNotificationLogs.entries()) {
+      if (log.sentAt < cutoffDate) {
+        toRemove.push(id);
+      }
+    }
+
+    for (const id of toRemove) {
+      this.pushNotificationLogs.delete(id);
     }
   }
 }
