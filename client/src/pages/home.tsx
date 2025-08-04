@@ -146,12 +146,7 @@ export default function Home() {
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               {activeCategory === "all" ? "Be the first to spill some tea!" : "Be the first to spill the tea in this category!"}
             </p>
-            <Button 
-              onClick={() => setIsPostModalOpen(true)}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-            >
-              Create Post
-            </Button>
+
           </div>
         ) : (
           <div className="space-y-4">

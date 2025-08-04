@@ -207,7 +207,7 @@ export function PostModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] max-w-md mx-auto my-8 max-h-[85vh] overflow-y-auto rounded-xl" style={{ pointerEvents: 'auto' }}>
+      <DialogContent className="w-[95vw] max-w-md mx-auto my-8 max-h-[85vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle>
             <div className="flex items-center justify-between">
@@ -247,18 +247,11 @@ export function PostModal({
             <Textarea
               id="content"
               value={content}
-              onChange={(e) => {
-                console.log('Textarea onChange triggered:', e.target.value);
-                setContent(e.target.value);
-              }}
-              onFocus={() => console.log('Textarea focused')}
-              onBlur={() => console.log('Textarea blurred')}
-              onClick={() => console.log('Textarea clicked')}
+              onChange={(e) => setContent(e.target.value)}
               placeholder={promptText ? `Responding to: "${promptText}"` : "Share your thoughts anonymously..."}
               className="h-24 resize-none"
               maxLength={500}
               autoFocus
-              style={{ pointerEvents: 'auto' }}
             />
             <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
               <span>Your username: <span className="font-medium text-purple-600 dark:text-purple-400">{userAlias}</span></span>
