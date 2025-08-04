@@ -341,9 +341,9 @@ export default function TopicFeed() {
 
       {/* Posts Section with Tabs */}
       <div className="container mx-auto px-4 py-6 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 max-w-4xl mx-auto">
           {/* Main Posts Section */}
-          <div className="lg:col-span-2">
+          <div>
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
               {/* Story Category Filter Bar - Only for Story Time */}
               {topicId === "story-time" && (
@@ -545,6 +545,23 @@ export default function TopicFeed() {
                   </div>
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {/* Show Story Recommendations first for Story Time */}
+                    {topicId === "story-time" && (
+                      <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                            ✨ Recommended for You
+                          </span>
+                        </div>
+                        <StoryRecommendations 
+                          limit={3}
+                          showPreferences={true}
+                          className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4"
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Regular Community Posts */}
                     {communityPosts.map((post: Post) => (
                       <PostCard 
                         key={post.id} 
@@ -613,24 +630,7 @@ export default function TopicFeed() {
           </div>
             </div>
           
-          {/* Sidebar with Recommendations - Only for Story Time */}
-          {topicId === "story-time" && (
-            <div className="lg:col-span-1 space-y-6">
-              {/* Story Recommendations */}
-              <StoryRecommendations 
-                limit={6}
-                showPreferences={true}
-                className="sticky top-6"
-              />
-              
-              {/* Trending Stories */}
-              <TrendingStories 
-                limit={5}
-                showEngagement={true}
-                className="sticky top-6"
-              />
-            </div>
-          )}
+
         </div>
       </div>
     </div>
