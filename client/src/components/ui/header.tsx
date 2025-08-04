@@ -29,7 +29,7 @@ export function Header() {
           />
           <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide -translate-x-0.5">Tfess</h1>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           <MentalHealthQuickAccess />
           <NotificationsPanel />
           {user ? (
@@ -37,12 +37,12 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={handleProfileClick}
-              className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-10 h-10"
+              className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-12 h-12 ml-1"
             >
               <AvatarDisplay
                 avatarId={userAvatarId}
-                size="sm"
-                className="border-2 border-white/30"
+                size="md"
+                className="border-2 border-white/40 shadow-lg"
               />
             </Button>
           ) : (

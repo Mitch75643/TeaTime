@@ -1,11 +1,34 @@
 import { getAvatarEmoji } from "./avatar-selector";
 import { cn } from "@/lib/utils";
 
+// Generate random gradient colors based on avatarId for consistency
+function generateGradientColors(avatarId: string): string {
+  const colorPalettes = [
+    'from-purple-400 to-pink-400',
+    'from-blue-400 to-cyan-400', 
+    'from-green-400 to-emerald-400',
+    'from-yellow-400 to-orange-400',
+    'from-red-400 to-pink-400',
+    'from-indigo-400 to-purple-400',
+    'from-teal-400 to-green-400',
+    'from-orange-400 to-red-400',
+    'from-cyan-400 to-blue-400',
+    'from-emerald-400 to-teal-400',
+    'from-pink-400 to-rose-400',
+    'from-amber-400 to-yellow-400'
+  ];
+  
+  // Use avatarId to consistently pick the same color for the same avatar
+  const hash = avatarId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colorPalettes[hash % colorPalettes.length];
+}
+
 interface AvatarDisplayProps {
   avatarId: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   showBorder?: boolean;
+  gradientColors?: string; // Custom gradient for background
 }
 
 const sizeClasses = {
@@ -20,22 +43,23 @@ export function AvatarDisplay({
   avatarId, 
   size = 'md', 
   className,
-  showBorder = true 
+  showBorder = true,
+  gradientColors
 }: AvatarDisplayProps) {
   const emoji = getAvatarEmoji(avatarId);
+  const gradient = gradientColors || generateGradientColors(avatarId);
   
   return (
     <div
       className={cn(
         "rounded-full flex items-center justify-center",
-        "bg-gradient-to-br from-purple-100 to-blue-100",
-        "dark:from-purple-900/30 dark:to-blue-900/30",
-        showBorder && "border-2 border-purple-200 dark:border-purple-700",
+        `bg-gradient-to-br ${gradient}`,
+        showBorder && "border-2 border-white/30 dark:border-white/50",
         sizeClasses[size],
         className
       )}
     >
-      <span className="select-none">{emoji}</span>
+      <span className="select-none filter drop-shadow-sm">{emoji}</span>
     </div>
   );
 }
