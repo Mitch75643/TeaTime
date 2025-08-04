@@ -5,21 +5,23 @@ import { useAnonymousAuth } from '@/lib/anonymousAuth';
 const AVATAR_COLOR_KEY = 'tfess_avatar_color';
 
 export const avatarColorOptions = [
-  { name: 'Purple Pink', value: 'from-purple-400 to-pink-400' },
-  { name: 'Blue Cyan', value: 'from-blue-400 to-cyan-400' },
-  { name: 'Green Emerald', value: 'from-green-400 to-emerald-400' },
-  { name: 'Yellow Orange', value: 'from-yellow-400 to-orange-400' },
-  { name: 'Red Pink', value: 'from-red-400 to-pink-400' },
-  { name: 'Indigo Purple', value: 'from-indigo-400 to-purple-400' },
-  { name: 'Teal Green', value: 'from-teal-400 to-green-400' },
-  { name: 'Orange Red', value: 'from-orange-400 to-red-400' },
-  { name: 'Cyan Blue', value: 'from-cyan-400 to-blue-400' },
-  { name: 'Emerald Teal', value: 'from-emerald-400 to-teal-400' },
-  { name: 'Pink Rose', value: 'from-pink-400 to-rose-400' },
-  { name: 'Amber Yellow', value: 'from-amber-400 to-yellow-400' },
-  { name: 'Violet Blue', value: 'from-violet-400 to-blue-400' },
-  { name: 'Lime Green', value: 'from-lime-400 to-green-400' },
-  { name: 'Sky Blue', value: 'from-sky-400 to-blue-400' },
+  { name: 'Purple Pink', value: 'from-purple-500 to-pink-500' },
+  { name: 'Ocean Blue', value: 'from-blue-500 to-cyan-400' },
+  { name: 'Forest Green', value: 'from-green-600 to-lime-400' },
+  { name: 'Sunset Orange', value: 'from-yellow-400 to-red-500' },
+  { name: 'Rose Gold', value: 'from-pink-400 to-yellow-300' },
+  
+  { name: 'Deep Purple', value: 'from-indigo-600 to-purple-600' },
+  { name: 'Aqua Marine', value: 'from-teal-500 to-blue-400' },
+  { name: 'Fire Red', value: 'from-orange-500 to-red-600' },
+  { name: 'Electric Blue', value: 'from-cyan-400 to-blue-600' },
+  { name: 'Neon Green', value: 'from-lime-400 to-green-500' },
+  
+  { name: 'Cotton Candy', value: 'from-pink-300 to-purple-400' },
+  { name: 'Golden Hour', value: 'from-amber-400 to-orange-400' },
+  { name: 'Midnight Blue', value: 'from-slate-600 to-blue-800' },
+  { name: 'Spring Fresh', value: 'from-emerald-400 to-cyan-300' },
+  { name: 'Lavender Dream', value: 'from-violet-400 to-pink-300' },
 ];
 
 export function useAvatarColor() {
