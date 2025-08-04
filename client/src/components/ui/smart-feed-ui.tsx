@@ -106,7 +106,7 @@ interface LoadMoreButtonProps {
 export function LoadMoreButton({ onLoadMore, isLoading, hasMore, className }: LoadMoreButtonProps) {
   if (!hasMore) {
     return (
-      <div className={cn("text-center py-8", className)}>
+      <div className={cn("text-center py-8 pb-20", className)}>
         <p className="text-gray-500 dark:text-gray-400 text-sm">
           You've reached the end! 🎉
         </p>
