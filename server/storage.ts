@@ -287,6 +287,20 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async updatePostModeration(id: string, moderationData: {
+    moderationStatus: 'pending' | 'approved' | 'flagged' | 'hidden';
+    moderationLevel: number;
+    moderationCategories: string[];
+    isHidden: boolean;
+  }): Promise<Post | undefined> {
+    const post = this.posts.get(id);
+    if (!post) return undefined;
+    
+    const updatedPost = { ...post, ...moderationData };
+    this.posts.set(id, updatedPost);
+    return updatedPost;
+  }
+
   async updatePostCommentCount(postId: string, count: number): Promise<void> {
     const post = this.posts.get(postId);
     if (post) {

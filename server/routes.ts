@@ -147,10 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertPostSchema.parse(req.body);
       
-      // AI Content Moderation
-      const moderationResult = await comprehensiveModeration(validatedData.content);
-      
-      // Content filtering
+      // Basic content filtering (synchronous)
       const filteredContent = filterContent(validatedData.content);
       if (filteredContent !== validatedData.content) {
         return res.status(400).json({ message: "Content contains inappropriate language" });
@@ -168,30 +165,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user's avatar from request body or user profile
       const avatarId = req.body.avatarId || user?.avatarId || 'happy-face';
       
+      // Create post immediately with pending moderation status
       const postData = {
         ...validatedData,
         avatarId,
-        // Add moderation data
-        moderationStatus: moderationResult.action === 'hide' ? 'hidden' : 
-                         moderationResult.action === 'review' ? 'flagged' : 'approved',
-        moderationLevel: moderationResult.severityLevel,
-        moderationCategories: moderationResult.categories,
-        isHidden: moderationResult.action === 'hide'
+        // Set initial moderation status as pending
+        moderationStatus: 'pending' as const,
+        moderationLevel: 0,
+        moderationCategories: [],
+        isHidden: false
       };
       
-      const post = await storage.createPost(postData, alias, sessionId);
+      const post = await storage.createPost(postData, alias, sessionId, postContext, communitySection);
       
-      // Return post with moderation response for frontend handling
-      const response = {
-        ...post,
-        moderationResponse: moderationResult.flagged ? {
-          severityLevel: moderationResult.severityLevel,
-          supportMessage: moderationResult.supportMessage,
-          resources: moderationResult.resources
-        } : undefined
-      };
+      // Perform AI moderation asynchronously (non-blocking)
+      comprehensiveModeration(validatedData.content)
+        .then(async (moderationResult) => {
+          try {
+            // Update post with moderation results
+            const updatedPostData = {
+              moderationStatus: moderationResult.action === 'hide' ? 'hidden' : 
+                               moderationResult.action === 'review' ? 'flagged' : 'approved',
+              moderationLevel: moderationResult.severityLevel,
+              moderationCategories: moderationResult.categories,
+              isHidden: moderationResult.action === 'hide'
+            };
+            
+            await storage.updatePostModeration(post.id, updatedPostData);
+          } catch (error) {
+            console.error('Failed to update post moderation:', error);
+          }
+        })
+        .catch((error) => {
+          console.error('Moderation API error:', error);
+          // Leave post as 'pending' if moderation fails
+        });
       
-      res.json(response);
+      // Return post immediately
+      res.json(post);
     } catch (error) {
       if (error instanceof Error) {
         res.status(400).json({ message: error.message });
