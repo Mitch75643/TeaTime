@@ -32,8 +32,8 @@ const categoryStyles = {
     inactive: "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50 border-amber-200"
   },
   "relationships": {
-    active: "bg-orange-500 text-white dark:bg-orange-600 border-orange-300",
-    inactive: "bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50 border-orange-200"
+    active: "bg-red-500 text-white dark:bg-red-600 border-red-300",
+    inactive: "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 border-red-200"
   },
   "family": {
     active: "bg-blue-500 text-white dark:bg-blue-600 border-blue-300",
