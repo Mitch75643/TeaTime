@@ -22,6 +22,15 @@ export function BanTestingPanel() {
   const { toast } = useToast();
   const { getFingerprint, refreshBanStatus, banInfo, canPerformAction } = useDeviceFingerprint();
 
+  // SECURITY: Admin/Developer check - only show panel in development or to authorized admins
+  const isAdminEnvironment = import.meta.env.DEV || import.meta.env.MODE === 'development';
+  const isAuthorizedAdmin = false; // TODO: Implement proper admin role checking when auth system is ready
+  
+  // SECURITY: Hide panel from regular users - this contains sensitive admin functions
+  if (!isAdminEnvironment && !isAuthorizedAdmin) {
+    return null;
+  }
+
   const addTestResult = (result: any) => {
     setTestResults(prev => [{ ...result, timestamp: new Date().toLocaleTimeString() }, ...prev.slice(0, 9)]);
   };

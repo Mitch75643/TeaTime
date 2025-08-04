@@ -624,7 +624,7 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Ban System Testing (Development Only) */}
+        {/* Ban System Testing Panel - ADMIN/DEV ONLY - Never visible to regular users */}
         <BanTestingPanel />
 
         {/* Help & Support */}
