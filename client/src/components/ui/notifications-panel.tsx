@@ -79,7 +79,7 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
           variant="ghost"
           size="icon"
           className={cn(
-            "relative p-2 rounded-full hover:bg-white/10 transition-colors text-white",
+            "relative p-2 rounded-full hover:bg-white/10 transition-colors text-white w-10 h-10 mr-1",
             className
           )}
         >

@@ -55,6 +55,7 @@ export interface IStorage {
   upgradeAccount(anonId: string, upgradeData: UpgradeAccountInput): Promise<{ success: boolean; error?: string }>;
   loginUser(loginData: LoginInput & { deviceFingerprint?: string }): Promise<{ success: boolean; error?: string; user?: AnonymousUser }>;
   updateUserProfile(anonId: string, updates: { alias?: string; avatarId?: string }): Promise<void>;
+  updateUserAvatarColor(userId: string, avatarColor: string): Promise<void>;
   createDeviceSession(anonUserId: string, sessionId: string, deviceFingerprint?: string): Promise<DeviceSession>;
   
   // Device Ban System
@@ -629,6 +630,7 @@ export class MemStorage implements IStorage {
       deviceFingerprint: userData.deviceFingerprint || null,
       alias: userData.alias || `AnonUser${Math.floor(Math.random() * 1000)}`,
       avatarId: userData.avatarId || 'happy-face',
+      avatarColor: userData.avatarColor || 'from-purple-400 to-pink-500',
       isUpgraded: false,
       passphraseHash: null,
       email: null,
