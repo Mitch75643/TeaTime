@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
-import { AvatarSelector } from "@/components/ui/avatar-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -35,12 +34,15 @@ import {
   Check,
   ChevronRight,
   BarChart3,
-  Eye
+  Eye,
+  Edit,
+  Pencil
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { getAvatarById } from "@/lib/avatars";
+import { AvatarDisplay } from "@/components/ui/avatar-display";
+import { AvatarSelector } from "@/components/ui/avatar-selector";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
 import { AliasSelector } from "@/components/ui/alias-selector";
@@ -72,6 +74,7 @@ export default function Profile() {
   const [biometricDialogOpen, setBiometricDialogOpen] = useState(false);
   const [biometricSupported, setBiometricSupported] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
 
   useEffect(() => {
     checkBiometricSupport().then(setBiometricSupported);
@@ -96,6 +99,7 @@ export default function Profile() {
 
   const handleAvatarSelect = (avatarId: string) => {
     updateAvatar(avatarId);
+    setAvatarSelectorOpen(false);
     toast({
       title: "Avatar updated!",
       description: "Your new profile picture has been saved.",
@@ -225,27 +229,21 @@ export default function Profile() {
             <div className="flex flex-col items-center space-y-4">
               {/* Avatar with selector */}
               <div className="relative">
-                {getAvatarById(userAvatarId) ? (
-                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white dark:border-white">
-                    <div 
-                      className="w-full h-full"
-                      dangerouslySetInnerHTML={{ __html: getAvatarById(userAvatarId)?.svg || '' }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center border-4 border-white dark:border-white">
-                    <User className="h-10 w-10 text-white" />
-                  </div>
-                )}
+                <AvatarDisplay 
+                  avatarId={userAvatarId} 
+                  size="xl" 
+                  className="border-4 border-white dark:border-gray-800 shadow-lg"
+                />
                 
-                {/* Avatar Selector Button */}
-                <div className="absolute -bottom-2 -right-2">
-                  <AvatarSelector
-                    currentAvatarId={userAvatarId}
-                    onSelect={handleAvatarSelect}
-                    className="w-8 h-8 border border-white dark:border-gray-800 shadow-lg"
-                  />
-                </div>
+                {/* Avatar Edit Button */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 border-2 border-white dark:border-gray-800 shadow-lg bg-white dark:bg-gray-800"
+                  onClick={() => setAvatarSelectorOpen(true)}
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
               </div>
               
               <div>
@@ -661,6 +659,14 @@ export default function Profile() {
       </main>
 
       <BottomNav />
+      
+      {/* Avatar Selector Modal */}
+      <AvatarSelector
+        isOpen={avatarSelectorOpen}
+        onClose={() => setAvatarSelectorOpen(false)}
+        currentAvatar={userAvatarId}
+        onAvatarSelect={handleAvatarSelect}
+      />
     </div>
   );
 }

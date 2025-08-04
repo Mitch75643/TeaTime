@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
+import { DEFAULT_AVATAR, getRandomAvatarId } from "@/components/ui/avatar-selector";
 
 export function useUserAvatar() {
-  const [userAvatarId, setUserAvatarId] = useState<string>('happy-face');
+  const [userAvatarId, setUserAvatarId] = useState<string>(DEFAULT_AVATAR);
 
   useEffect(() => {
     // Load initial avatar from localStorage
     const savedAvatarId = localStorage.getItem('userAvatarId');
     if (savedAvatarId) {
       setUserAvatarId(savedAvatarId);
+    } else {
+      // Assign random avatar to new users for better onboarding
+      const randomAvatar = getRandomAvatarId();
+      setUserAvatarId(randomAvatar);
+      localStorage.setItem('userAvatarId', randomAvatar);
     }
 
     // Listen for avatar changes across tabs/components

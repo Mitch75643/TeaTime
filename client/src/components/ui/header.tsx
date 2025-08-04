@@ -2,7 +2,7 @@ import { User, Flame } from "lucide-react";
 import { Button } from "./button";
 import { NotificationsPanel } from "./notifications-panel";
 import { AuthButton } from "../auth/AuthButton";
-import { getAvatarById } from "@/lib/avatars";
+import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useLocation } from "wouter";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
@@ -13,7 +13,6 @@ export function Header() {
   const [, setLocation] = useLocation();
   const { userAvatarId } = useUserAvatar();
   const { user } = useAnonymousAuth();
-  const currentAvatar = getAvatarById(userAvatarId);
 
   const handleProfileClick = () => {
     setLocation('/profile');
@@ -40,22 +39,11 @@ export function Header() {
               onClick={handleProfileClick}
               className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-10 h-10"
             >
-              {currentAvatar ? (
-                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center bg-white">
-                  <div 
-                    className="w-full h-full object-cover flex items-center justify-center"
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      transform: 'scale(1.5)'
-                    }}
-                    dangerouslySetInnerHTML={{ __html: currentAvatar.svg }}
-                  />
-                </div>
-              ) : (
-                <User className="h-5 w-5" />
-              )}
+              <AvatarDisplay
+                avatarId={userAvatarId}
+                size="sm"
+                className="border-2 border-white/30"
+              />
             </Button>
           ) : (
             <AuthButton />

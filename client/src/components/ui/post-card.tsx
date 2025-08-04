@@ -7,7 +7,7 @@ import { PostMenu } from "./post-menu";
 import { PostStats, usePostView } from "./post-stats";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
-import { getAvatarById } from "@/lib/avatars";
+import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
 import type { Post } from "@shared/schema";
@@ -179,37 +179,11 @@ export function PostCard({ post }: PostCardProps) {
 
       <div className={cn("flex items-start justify-between gap-3", isTrending && !post.isDrama && "pt-2")}>
         <div className="flex items-center space-x-3 min-w-0 flex-1">
-          <div className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden",
-            post.isDrama 
-              ? "bg-gradient-to-br from-orange-400 to-red-500"
-              : "bg-gradient-to-br from-purple-400 to-pink-400"
-          )}>
-            {/* Show user's current avatar for posts from their session, or post's saved avatar for others */}
-            {sessionId && post.sessionId === sessionId ? (
-              getAvatarById(userAvatarId) ? (
-                <div 
-                  className="w-full h-full"
-                  dangerouslySetInnerHTML={{ __html: getAvatarById(userAvatarId)?.svg || '' }}
-                />
-              ) : (
-                <span className="text-white text-xs font-bold">
-                  {post.alias.charAt(0)}
-                </span>
-              )
-            ) : (
-              post.avatarId && post.avatarId !== 'default' ? (
-                <div 
-                  className="w-full h-full"
-                  dangerouslySetInnerHTML={{ __html: getAvatarById(post.avatarId)?.svg || '' }}
-                />
-              ) : (
-                <span className="text-white text-xs font-bold">
-                  {post.alias.charAt(0)}
-                </span>
-              )
-            )}
-          </div>
+          <AvatarDisplay
+            avatarId={sessionId && post.sessionId === sessionId ? userAvatarId : (post.avatarId || 'mask-anonymous')}
+            size="sm"
+            showBorder={false}
+          />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
               {sessionId && post.sessionId === sessionId ? userAlias : post.alias}

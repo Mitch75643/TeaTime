@@ -9,7 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { getAvatarById } from "@/lib/avatars";
+import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
 import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
@@ -212,23 +212,11 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                         : "bg-gray-50 border border-gray-200"
                     )}>
                       <div className="flex items-start space-x-3">
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden",
-                          isDrama 
-                            ? "bg-gradient-to-br from-orange-400 to-red-500"
-                            : "bg-gradient-to-br from-purple-400 to-pink-400"
-                        )}>
-                          {comment.avatarId && getAvatarById(comment.avatarId) ? (
-                            <div 
-                              className="w-full h-full"
-                              dangerouslySetInnerHTML={{ __html: getAvatarById(comment.avatarId)?.svg || '' }}
-                            />
-                          ) : (
-                            <span className="text-white text-xs font-bold">
-                              {comment.alias.charAt(0)}
-                            </span>
-                          )}
-                        </div>
+                        <AvatarDisplay
+                          avatarId={comment.sessionId === sessionId ? userAvatarId : (comment.avatarId || 'mask-anonymous')}
+                          size="sm"
+                          showBorder={false}
+                        />
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
                             <p className="text-sm font-medium text-gray-900">
