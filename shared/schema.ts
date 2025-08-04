@@ -24,6 +24,10 @@ export const posts = pgTable("posts", {
   reportCount: integer("report_count").default(0),
   isRemoved: boolean("is_removed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
+  // Trending system fields
+  trendingScore: integer("trending_score").default(0), // calculated score for trending
+  lastTrendingUpdate: timestamp("last_trending_update").defaultNow(),
+  trendingCycle: integer("trending_cycle").default(0), // which 3-day cycle this post belongs to
   // Section-specific fields
   postType: varchar("post_type").default("standard"), // standard, poll, debate
   celebrityName: varchar("celebrity_name"), // for Celebrity Tea

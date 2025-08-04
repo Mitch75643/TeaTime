@@ -152,6 +152,17 @@ All avatars maintain user anonymity while allowing personality expression throug
 - **Crisis Prevention**: Automatic detection of suicidal ideation, self-harm, and violence with immediate mental health resource display
 - **Resource Integration**: Built-in access to 988 Lifeline, Crisis Text Line, NAMI, and international crisis resources
 - **Privacy-First Design**: Moderation data never compromises user anonymity; support messages visible only to content creator
-- **Header Quick Access**: Mental health resources always available via heart icon in top navigation for immediate crisis support
 - **Comprehensive Coverage**: Both AI-powered detection (OpenAI) and keyword-based fallback system for maximum safety coverage
 - **User Education**: Clear messaging that reaching out for support is a sign of strength, not weakness
+
+### 3-Day Trending Reset System (January 2025)
+- **Automatic Trending Cycles**: Trending posts reset every 3 days with completely fresh calculations and competitive rankings
+- **Cycle Tracking**: Each post belongs to a specific 3-day trending cycle, with trending scores only calculated within current cycle
+- **Smart Scoring Algorithm**: Trending score calculated from reactions (2x weight) + comments (3x weight) with time decay over 3-day period
+- **Real-Time Updates**: Trending scores recalculate when reactions or comments change, plus hourly batch updates for all posts
+- **Cycle Information Display**: Trending page shows current cycle number and countdown to next reset for transparency
+- **Fresh Start Mechanism**: Every 3 days, all posts start with zero trending score, ensuring new content can compete fairly
+- **Performance Optimized**: Smart feed system with 25-post batching and 30-second auto-refresh for trending page
+- **Visual Ranking System**: Top 3 trending posts get special badges (#1 🔥, #2 ⭐, #3 🥉) with gradient styling
+- **Age-Based Filtering**: Only posts from current 3-day cycle appear in trending feed, older posts automatically excluded
+- **Engagement-Driven**: Comments weighted higher than reactions to prioritize posts generating real conversations
