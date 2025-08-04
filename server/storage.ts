@@ -87,7 +87,7 @@ export class MemStorage implements IStorage {
       commentCount: 0,
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
-      sessionId: sessionId ?? 'anonymous',
+      sessionId: sessionId || 'anonymous',
       postContext: insertPost.postContext || 'home',
       communitySection: insertPost.communitySection ?? null,
       reportCount: 0,
