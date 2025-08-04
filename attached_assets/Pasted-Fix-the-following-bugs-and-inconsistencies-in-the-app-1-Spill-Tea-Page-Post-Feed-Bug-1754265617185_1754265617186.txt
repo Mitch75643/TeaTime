@@ -1,0 +1,39 @@
+Fix the following bugs and inconsistencies in the app:
+
+---
+
+1. **Spill Tea Page – Post Feed Bug**
+- Issue: When someone submits a new post on the Spill Tea page, it doesn’t show up in the recent posts feed.
+- Fix: Ensure newly submitted posts automatically appear in the recent post feed without needing to refresh. Use real-time updates or re-fetch the data after a post is made.
+
+---
+
+2. **Mobile Reply/Comment UI Bug**
+- Issue: On mobile, when trying to type a reply or comment, a black box or overlay covers the input area, making it impossible to see what you're typing.
+- Fix: Adjust mobile UI so that the comment input stays visible when the keyboard opens. Ensure the view scrolls correctly and that the input box stays above any overlays or containers.
+
+---
+
+3. **Notification System – Username Mismatch**
+- Issue: Notifications show the wrong display name when someone replies to a comment — it's not matching the sender’s current username.
+- Fix: Make sure the name shown in notifications always matches the latest username from that user's profile settings.
+
+---
+
+4. **Notification Click Behavior**
+- Issue: Clicking a notification doesn’t take the user to the correct place or highlight what triggered the notification.
+- Fix: When a user clicks a notification, navigate them directly to the exact comment, reply, or post that triggered it. Also, highlight the related action briefly so it’s clear what the notification was about.
+
+---
+
+5. **Username Consistency Throughout the App**
+- Issue: Usernames are randomly changing across the app, even when the user hasn’t edited their profile.
+- Fix: Ensure that usernames are stored and referenced correctly across all parts of the app. They should only change if the user explicitly updates their username in the settings.
+- Make sure all post/comment displays, notifications, replies, and feeds consistently show the correct username for each user.
+
+---
+
+⚙️ Additional Notes:
+- Test all changes on both desktop and mobile views.
+- Ensure there are no caching or state issues causing the wrong data to show.
+- Maintain performance and responsiveness with these fixes in place.
