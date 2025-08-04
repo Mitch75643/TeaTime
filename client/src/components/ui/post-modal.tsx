@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useUserAlias } from "@/hooks/use-user-alias";
+import { useAvatarColor } from "@/hooks/use-avatar-color";
 import { getAvatarById } from "@/lib/avatars";
 import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/draft-storage";
 import { HomeCategoryAnimation, useHomeCategoryAnimation } from "./home-category-animations";
@@ -80,6 +81,7 @@ export function PostModal({
   const tagInputRef = useRef<HTMLInputElement>(null);
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
+  const { avatarColor } = useAvatarColor();
   const { animation, triggerAnimation, completeAnimation } = useHomeCategoryAnimation();
   const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
 
@@ -137,6 +139,7 @@ export function PostModal({
         ...data,
         alias: userAlias,
         avatarId: userAvatarId,
+        avatarColor: avatarColor,
         deviceFingerprint
       });
     },

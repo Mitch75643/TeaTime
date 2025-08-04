@@ -139,12 +139,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postContext = req.body.postContext || 'home';
       const communitySection = req.body.communitySection;
       
-      // Get user's avatar from request body or user profile
+      // Get user's avatar and color from request body or user profile
       const avatarId = req.body.avatarId || user?.avatarId || 'happy-face';
+      const avatarColor = req.body.avatarColor || user?.avatarColor;
       
       const postData = {
         ...validatedData,
         avatarId,
+        avatarColor,
         // Add moderation data
         moderationStatus: moderationResult.action === 'hide' ? 'hidden' : 
                          moderationResult.action === 'review' ? 'flagged' : 'approved',
@@ -208,9 +210,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getAnonymousUserBySession(sessionId);
       const alias = user?.alias || generateAlias();
       
+      // Include user's avatar color
+      const avatarColor = user?.avatarColor;
+      
       // Add moderation data to comment
       const commentData = {
         ...validatedData,
+        avatarColor,
         moderationStatus: moderationResult.action === 'hide' ? 'hidden' : 
                          moderationResult.action === 'review' ? 'flagged' : 'approved',
         moderationLevel: moderationResult.severityLevel,
@@ -557,6 +563,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to update profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Update user avatar color
+  app.post("/api/user/avatar-color", async (req, res) => {
+    try {
+      const { avatarColor } = req.body;
+      if (!avatarColor || typeof avatarColor !== 'string') {
+        return res.status(400).json({ message: "Invalid avatar color" });
+      }
+      
+      const sessionId = req.session.id!;
+      const user = await storage.getAnonymousUserBySession(sessionId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Update user avatar color
+      await storage.updateUserAvatarColor(user.id, avatarColor);
+      
+      res.json({ success: true, avatarColor });
+    } catch (error) {
+      console.error("Failed to update avatar color:", error);
+      res.status(500).json({ message: "Failed to update avatar color" });
     }
   });
 

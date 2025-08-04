@@ -75,6 +75,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
       return apiRequest("POST", `/api/posts/${postId}/comments`, {
         ...data,
         avatarId: userAvatarId,
+        avatarColor: avatarColor,
         alias: userAlias,
         deviceFingerprint
       });

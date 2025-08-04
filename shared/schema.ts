@@ -9,6 +9,7 @@ export const posts = pgTable("posts", {
   category: varchar("category").notNull(),
   alias: varchar("alias").notNull(),
   avatarId: varchar("avatar_id").default("happy-face"),
+  avatarColor: varchar("avatar_color"),
   tags: text("tags").array().default([]),
   reactions: jsonb("reactions").default({
     thumbsUp: 0,
@@ -69,6 +70,7 @@ export const comments = pgTable("comments", {
   content: text("content").notNull(),
   alias: varchar("alias").notNull(),
   avatarId: varchar("avatar_id").default("happy-face"),
+  avatarColor: varchar("avatar_color"),
   sessionId: varchar("session_id").notNull(), // Track which session created this comment
   reactions: jsonb("reactions").default({
     thumbsUp: 0,
@@ -122,6 +124,7 @@ export const anonymousUsers = pgTable("anonymous_users", {
   deviceFingerprint: varchar("device_fingerprint"), // Optional device identification
   alias: varchar("alias").notNull(), // Generated fun username
   avatarId: varchar("avatar_id").default("happy-face"),
+  avatarColor: varchar("avatar_color"),
   
   // Account upgrade fields (for cross-device sync)
   isUpgraded: boolean("is_upgraded").default(false),

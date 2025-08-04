@@ -109,11 +109,11 @@ export default function Profile() {
     });
   };
 
-  const handleColorSelect = (color: string) => {
-    updateAvatarColor(color);
+  const handleColorSelect = async (color: string) => {
+    await updateAvatarColor(color);
     toast({
       title: "Avatar color updated!",
-      description: "Your profile picture color has been changed.",
+      description: "Your profile picture color has been changed and will be visible to all users.",
     });
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiRequest } from '@/lib/queryClient';
 
 const AVATAR_COLOR_KEY = 'tfess_avatar_color';
 
@@ -30,9 +31,18 @@ export function useAvatarColor() {
     }
   }, []);
 
-  const updateAvatarColor = (color: string) => {
+  const updateAvatarColor = async (color: string) => {
+    // Update locally first for instant feedback
     setAvatarColorState(color);
     localStorage.setItem(AVATAR_COLOR_KEY, color);
+    
+    // Sync with server for global visibility
+    try {
+      await apiRequest('POST', '/api/user/avatar-color', { avatarColor: color });
+    } catch (error) {
+      console.error('Failed to sync avatar color with server:', error);
+      // Don't revert local change since user experience should be preserved
+    }
   };
 
   return {

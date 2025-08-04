@@ -136,6 +136,7 @@ export class MemStorage implements IStorage {
       id,
       alias,
       avatarId: insertPost.avatarId || 'happy-face',
+      avatarColor: insertPost.avatarColor,
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
       commentCount: 0,
       isDrama: insertPost.category === 'drama',
@@ -250,6 +251,7 @@ export class MemStorage implements IStorage {
       id,
       alias,
       avatarId: 'happy-face',
+      avatarColor: insertComment.avatarColor,
       sessionId,
       parentCommentId: insertComment.parentCommentId || null,
       reactions: { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 },
@@ -759,6 +761,14 @@ export class MemStorage implements IStorage {
     
     user.lastActiveAt = new Date();
     this.anonymousUsers.set(user.id, user);
+  }
+
+  async updateUserAvatarColor(userId: string, avatarColor: string): Promise<void> {
+    const user = this.anonymousUsers.get(userId);
+    if (user) {
+      user.avatarColor = avatarColor;
+      this.anonymousUsers.set(userId, user);
+    }
   }
 
   async createDeviceSession(anonUserId: string, sessionId: string, deviceFingerprint?: string): Promise<DeviceSession> {
