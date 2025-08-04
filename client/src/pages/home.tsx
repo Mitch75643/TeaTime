@@ -26,7 +26,6 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [feedType, setFeedType] = useState<"new" | "trending">("new");
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const [seenPostIds, setSeenPostIds] = useState<Set<string>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -72,23 +71,10 @@ export default function Home() {
     },
   });
 
-  // Filter out seen posts when in "new" mode
-  const posts = feedType === "new" 
-    ? allPosts.filter(post => !seenPostIds.has(post.id))
-    : allPosts;
-
-  // Track seen posts
-  useEffect(() => {
-    if (allPosts.length > 0) {
-      const newSeenIds = new Set(seenPostIds);
-      allPosts.forEach(post => newSeenIds.add(post.id));
-      setSeenPostIds(newSeenIds);
-    }
-  }, [allPosts]);
+  // Use all posts directly - no filtering needed for "new" mode
+  const posts = allPosts;
 
   const handleRefresh = async () => {
-    if (feedType !== "new") return;
-    
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
     setIsRefreshing(false);
@@ -114,28 +100,26 @@ export default function Home() {
 
 
 
-        {feedType === "new" && (
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Recent Community Posts
-              {posts.length !== allPosts.length && (
-                <span className="ml-2 text-sm text-gray-500">
-                  ({posts.length} new)
-                </span>
-              )}
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="flex items-center space-x-1 text-purple-600 hover:text-purple-800 dark:text-purple-400"
-            >
-              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="text-xs">Refresh</span>
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {feedType === "new" ? "Latest Posts" : "Trending Posts"}
+            {activeCategory !== "all" && (
+              <span className="ml-2 text-sm text-gray-500">
+                in {categories.find(c => c.id === activeCategory)?.label}
+              </span>
+            )}
+          </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400"
+          >
+            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="text-xs">Refresh</span>
+          </Button>
+        </div>
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
