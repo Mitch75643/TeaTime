@@ -202,6 +202,12 @@ class AnonymousAuthService {
 
   // Sync local user with server
   private async syncWithServer(anonId: string) {
+    // Don't try to sync if anonId is undefined or empty
+    if (!anonId || anonId === 'undefined') {
+      console.log('Skipping sync - no valid anonId');
+      return;
+    }
+
     try {
       const serverUser = await apiRequest('POST', `/api/auth/sync/${anonId}`, {
         deviceFingerprint: this.currentUser?.deviceFingerprint
@@ -336,6 +342,15 @@ class AnonymousAuthService {
     }
   }
 
+  // Ensure user exists (create if needed)
+  async ensureUserExists(): Promise<LocalUserData> {
+    if (this.currentUser) {
+      return this.currentUser;
+    }
+    
+    return this.createOrGetUser();
+  }
+
   // Clear user data (for testing or logout)
   clearUserData() {
     Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
@@ -368,6 +383,7 @@ export function useAnonymousAuth() {
     updateProfile: anonymousAuth.updateProfile.bind(anonymousAuth),
     markUserAsPosted: anonymousAuth.markUserAsPosted.bind(anonymousAuth),
     incrementVisitCount: anonymousAuth.incrementVisitCount.bind(anonymousAuth),
+    ensureUserExists: anonymousAuth.ensureUserExists.bind(anonymousAuth),
     clearUserData: anonymousAuth.clearUserData.bind(anonymousAuth)
   };
 }
@@ -387,6 +403,11 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
     
     if (existingUser || hasSeenAuth) {
       // User has already authenticated or chosen to stay anonymous
+      anonymousAuth.createOrGetUser();
+      setHasChosenAuth(true);
+    } else {
+      // Auto-create anonymous user for immediate functionality
+      localStorage.setItem('fessr_auth_seen', 'true');
       anonymousAuth.createOrGetUser();
       setHasChosenAuth(true);
     }

@@ -1,7 +1,9 @@
 import { getAvatarEmoji } from "./avatar-selector";
 import { cn } from "@/lib/utils";
+import { useAvatarColor } from "@/hooks/use-avatar-color";
+import { useUserAvatar } from "@/hooks/use-user-avatar";
 
-// Generate random gradient colors based on avatarId for consistency
+// Generate random gradient colors based on avatarId for consistency (fallback only)
 function generateGradientColors(avatarId: string): string {
   const colorPalettes = [
     'from-purple-400 to-pink-400',
@@ -29,6 +31,7 @@ interface AvatarDisplayProps {
   className?: string;
   showBorder?: boolean;
   gradientColors?: string; // Custom gradient for background
+  isCurrentUser?: boolean; // Whether this is the current user's avatar
 }
 
 const sizeClasses = {
@@ -44,10 +47,19 @@ export function AvatarDisplay({
   size = 'md', 
   className,
   showBorder = true,
-  gradientColors
+  gradientColors,
+  isCurrentUser = false
 }: AvatarDisplayProps) {
   const emoji = getAvatarEmoji(avatarId);
-  const gradient = gradientColors || generateGradientColors(avatarId);
+  const { userAvatarId } = useUserAvatar();
+  const { avatarColor } = useAvatarColor();
+  
+  // Determine if this is the current user's avatar by comparing avatarId
+  const isUserAvatar = isCurrentUser || avatarId === userAvatarId;
+  
+  // Use user's selected color for their own avatar, fallback for others
+  const gradient = gradientColors || 
+    (isUserAvatar && avatarColor ? avatarColor : generateGradientColors(avatarId));
   
   return (
     <div

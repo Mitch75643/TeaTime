@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
+import { useAnonymousAuth } from '@/lib/anonymousAuth';
 
 const AVATAR_COLOR_KEY = 'tfess_avatar_color';
 
@@ -23,12 +24,38 @@ export const avatarColorOptions = [
 
 export function useAvatarColor() {
   const [avatarColor, setAvatarColorState] = useState<string>('');
+  const { user, ensureUserExists } = useAnonymousAuth();
 
   useEffect(() => {
     const stored = localStorage.getItem(AVATAR_COLOR_KEY);
     if (stored) {
       setAvatarColorState(stored);
+    } else {
+      // Set default color if none exists
+      const defaultColor = avatarColorOptions[0].value;
+      setAvatarColorState(defaultColor);
+      localStorage.setItem(AVATAR_COLOR_KEY, defaultColor);
     }
+
+    // Listen for avatar color changes from other tabs/components
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === AVATAR_COLOR_KEY && e.newValue) {
+        setAvatarColorState(e.newValue);
+      }
+    };
+
+    // Listen for custom avatar color change events (for same-tab updates)
+    const handleAvatarColorChange = (e: CustomEvent) => {
+      setAvatarColorState(e.detail.avatarColor);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('avatarColorChanged', handleAvatarColorChange as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('avatarColorChanged', handleAvatarColorChange as EventListener);
+    };
   }, []);
 
   const updateAvatarColor = async (color: string) => {
@@ -36,12 +63,21 @@ export function useAvatarColor() {
     setAvatarColorState(color);
     localStorage.setItem(AVATAR_COLOR_KEY, color);
     
-    // Sync with server for global visibility
+    // Dispatch custom event for same-tab updates
+    window.dispatchEvent(new CustomEvent('avatarColorChanged', { 
+      detail: { avatarColor: color } 
+    }));
+    
+    // Ensure user exists before syncing
     try {
+      await ensureUserExists();
+      
+      // Sync with server for global visibility
       await apiRequest('POST', '/api/user/avatar-color', { avatarColor: color });
     } catch (error) {
       console.error('Failed to sync avatar color with server:', error);
       // Don't revert local change since user experience should be preserved
+      // User will see their color locally, and it will sync when user is created
     }
   };
 
