@@ -32,7 +32,7 @@ export function AvatarColorPicker({
           className={cn("flex items-center gap-2", className)}
         >
           <Palette className="h-4 w-4" />
-          🎨 Edit Avatar Color
+          Edit Avatar Color
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
