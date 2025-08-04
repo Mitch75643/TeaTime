@@ -143,3 +143,15 @@ All avatars maintain user anonymity while allowing personality expression throug
 - **Category Filtering**: Fully functional category filtering system with visual active states and clear filter indicators
 - **Layout Consistency**: Standardized spacing, padding, and responsive breakpoints across all components
 - **Filter UX**: Added filter indicator with clear button and category-specific empty state messages
+
+### AI Moderation & Mental Health Safety System (January 2025)
+- **Real-Time Content Scanning**: Integrated OpenAI moderation API with comprehensive content analysis for posts and comments
+- **Severity-Based Response System**: Three-level flagging system (1=watch, 2=concerning, 3=critical) with appropriate actions (allow/review/hide)
+- **Mental Health Support Components**: Custom UI components for displaying mental health resources and crisis intervention information
+- **Anonymous Protection**: All moderation maintains complete user anonymity while providing immediate support resources
+- **Crisis Prevention**: Automatic detection of suicidal ideation, self-harm, and violence with immediate mental health resource display
+- **Resource Integration**: Built-in access to 988 Lifeline, Crisis Text Line, NAMI, and international crisis resources
+- **Privacy-First Design**: Moderation data never compromises user anonymity; support messages visible only to content creator
+- **Header Quick Access**: Mental health resources always available via heart icon in top navigation for immediate crisis support
+- **Comprehensive Coverage**: Both AI-powered detection (OpenAI) and keyword-based fallback system for maximum safety coverage
+- **User Education**: Clear messaging that reaching out for support is a sign of strength, not weakness

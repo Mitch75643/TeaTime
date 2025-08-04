@@ -33,6 +33,12 @@ export const posts = pgTable("posts", {
   pollVotes: jsonb("poll_votes").default({optionA: 0, optionB: 0}), // for Tea Experiments
   debateVotes: jsonb("debate_votes").default({up: 0, down: 0}), // for Daily Debate
   allowComments: boolean("allow_comments").default(true), // false for Daily Debate
+  // AI Moderation fields
+  moderationStatus: varchar("moderation_status").default("pending"), // pending, approved, flagged, hidden
+  moderationLevel: integer("moderation_level").default(0), // 0=clean, 1=watch, 2=concerning, 3=critical
+  moderationCategories: text("moderation_categories").array().default([]), // flagged categories
+  supportMessageShown: boolean("support_message_shown").default(false), // track if user saw mental health resources
+  isHidden: boolean("is_hidden").default(false), // hide from public view if flagged as critical
 });
 
 export const userFlags = pgTable("user_flags", {
@@ -66,6 +72,12 @@ export const comments = pgTable("comments", {
     laugh: 0,
     sad: 0
   }),
+  // AI Moderation fields for comments
+  moderationStatus: varchar("moderation_status").default("pending"), // pending, approved, flagged, hidden
+  moderationLevel: integer("moderation_level").default(0), // 0=clean, 1=watch, 2=concerning, 3=critical
+  moderationCategories: text("moderation_categories").array().default([]), // flagged categories
+  supportMessageShown: boolean("support_message_shown").default(false), // track if user saw mental health resources
+  isHidden: boolean("is_hidden").default(false), // hide from public view if flagged as critical
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -242,6 +254,22 @@ export const loginSchema = z.object({
 }, {
   message: "Must provide credentials for selected login type"
 });
+
+// Moderation Response schema
+export const moderationResponseSchema = z.object({
+  flagged: z.boolean(),
+  severityLevel: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  categories: z.array(z.string()),
+  action: z.enum(['allow', 'hide', 'review']),
+  supportMessage: z.string().optional(),
+  resources: z.array(z.object({
+    title: z.string(),
+    url: z.string(),
+    phone: z.string().optional()
+  })).optional()
+});
+
+export type ModerationResponse = z.infer<typeof moderationResponseSchema>;
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect & { 

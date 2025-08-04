@@ -6,6 +6,7 @@ import { getAvatarById } from "@/lib/avatars";
 import { useLocation } from "wouter";
 import { useUserAvatar } from "@/hooks/use-user-avatar";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
+import { MentalHealthQuickAccess } from "@/components/ui/mental-health-support";
 import tfessLogo from "../../assets/fessr-logo.png";
 
 export function Header() {
@@ -30,6 +31,7 @@ export function Header() {
           <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide -translate-x-0.5">Tfess</h1>
         </div>
         <div className="flex items-center space-x-3">
+          <MentalHealthQuickAccess />
           <NotificationsPanel />
           {user ? (
             <Button

@@ -2,7 +2,8 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
-import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema } from "@shared/schema";
+import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, type ModerationResponse } from "@shared/schema";
+import { comprehensiveModeration } from "./moderation";
 
 declare module 'express-session' {
   interface SessionData {
@@ -109,6 +110,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertPostSchema.parse(req.body);
       
+      // AI Content Moderation
+      const moderationResult = await comprehensiveModeration(validatedData.content);
+      
       // Content filtering
       const filteredContent = filterContent(validatedData.content);
       if (filteredContent !== validatedData.content) {
@@ -129,11 +133,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const postData = {
         ...validatedData,
-        avatarId
+        avatarId,
+        // Add moderation data
+        moderationStatus: moderationResult.action === 'hide' ? 'hidden' : 
+                         moderationResult.action === 'review' ? 'flagged' : 'approved',
+        moderationLevel: moderationResult.severityLevel,
+        moderationCategories: moderationResult.categories,
+        isHidden: moderationResult.action === 'hide'
       };
       
       const post = await storage.createPost(postData, alias, sessionId);
-      res.json(post);
+      
+      // Return post with moderation response for frontend handling
+      const response = {
+        ...post,
+        moderationResponse: moderationResult.flagged ? {
+          severityLevel: moderationResult.severityLevel,
+          supportMessage: moderationResult.supportMessage,
+          resources: moderationResult.resources
+        } : undefined
+      };
+      
+      res.json(response);
     } catch (error) {
       if (error instanceof Error) {
         res.status(400).json({ message: error.message });
@@ -161,6 +182,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         postId: req.params.postId
       });
       
+      // AI Content Moderation for comments
+      const moderationResult = await comprehensiveModeration(validatedData.content);
+      
       // Content filtering
       const filteredContent = filterContent(validatedData.content);
       if (filteredContent !== validatedData.content) {
@@ -173,7 +197,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getAnonymousUserBySession(sessionId);
       const alias = user?.alias || generateAlias();
       
-      const comment = await storage.createComment(validatedData, alias, sessionId);
+      // Add moderation data to comment
+      const commentData = {
+        ...validatedData,
+        moderationStatus: moderationResult.action === 'hide' ? 'hidden' : 
+                         moderationResult.action === 'review' ? 'flagged' : 'approved',
+        moderationLevel: moderationResult.severityLevel,
+        moderationCategories: moderationResult.categories,
+        isHidden: moderationResult.action === 'hide'
+      };
+      
+      const comment = await storage.createComment(commentData, alias, sessionId);
       
       // Create notification for post owner or parent comment owner
       try {
@@ -210,7 +244,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the comment creation if notification fails
       }
       
-      res.json(comment);
+      // Return comment with moderation response for frontend handling
+      const response = {
+        ...comment,
+        moderationResponse: moderationResult.flagged ? {
+          severityLevel: moderationResult.severityLevel,
+          supportMessage: moderationResult.supportMessage,
+          resources: moderationResult.resources
+        } : undefined
+      };
+      
+      res.json(response);
     } catch (error) {
       if (error instanceof Error) {
         res.status(400).json({ message: error.message });

@@ -14,7 +14,8 @@ import { useUserAlias } from "@/hooks/use-user-alias";
 import { getAvatarById } from "@/lib/avatars";
 import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/draft-storage";
 import { HomeCategoryAnimation, useHomeCategoryAnimation } from "./home-category-animations";
-import type { InsertPost } from "@shared/schema";
+import type { InsertPost, ModerationResponse } from "@shared/schema";
+import { MentalHealthSupport } from "@/components/ui/mental-health-support";
 
 interface PostModalProps {
   isOpen: boolean;
@@ -62,6 +63,16 @@ export function PostModal({
   const [tagsInput, setTagsInput] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+  const [moderationResponse, setModerationResponse] = useState<{
+    severityLevel: 1 | 2 | 3;
+    supportMessage?: string;
+    resources?: Array<{
+      title: string;
+      url: string;
+      phone?: string;
+    }>;
+  } | null>(null);
+  const [showMentalHealthSupport, setShowMentalHealthSupport] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const tagInputRef = useRef<HTMLInputElement>(null);
@@ -108,14 +119,20 @@ export function PostModal({
   }, [content, category, selectedTags, isOpen]);
 
   const createPostMutation = useMutation({
-    mutationFn: async (data: InsertPost & { postContext?: string; communitySection?: string }) => {
+    mutationFn: async (data: InsertPost & { postContext?: string; communitySection?: string }): Promise<any> => {
       return apiRequest("POST", "/api/posts", {
         ...data,
         alias: userAlias,
         avatarId: userAvatarId
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      // Check if there's a moderation response
+      if (response.moderationResponse) {
+        setModerationResponse(response.moderationResponse);
+        setShowMentalHealthSupport(true);
+      }
+      
       // Invalidate all post queries to ensure posts appear everywhere they should
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       clearDraft(); // Clear draft after successful post
@@ -131,7 +148,11 @@ export function PostModal({
         title: "Post created!",
         description: "Your anonymous post has been shared with the community.",
       });
-      handleClose();
+      
+      // Only close if no mental health support needed
+      if (!response.moderationResponse) {
+        handleClose();
+      }
     },
     onError: (error: any) => {
       toast({
@@ -186,7 +207,21 @@ export function PostModal({
     setTagsInput("");
     setSelectedTags([]);
     setShowTagSuggestions(false);
+    setModerationResponse(null);
+    setShowMentalHealthSupport(false);
     onClose();
+  };
+
+  const handleMentalHealthAcknowledge = () => {
+    setShowMentalHealthSupport(false);
+    setModerationResponse(null);
+    handleClose();
+  };
+
+  const handleMentalHealthClose = () => {
+    setShowMentalHealthSupport(false);
+    setModerationResponse(null);
+    handleClose();
   };
 
   const addTag = (tag: string) => {
@@ -353,6 +388,16 @@ export function PostModal({
         onComplete={completeAnimation}
         category={animation.category}
       />
+
+      {/* Mental Health Support Modal */}
+      {moderationResponse && (
+        <MentalHealthSupport
+          moderationResponse={moderationResponse}
+          isOpen={showMentalHealthSupport}
+          onClose={handleMentalHealthClose}
+          onAcknowledge={handleMentalHealthAcknowledge}
+        />
+      )}
     </Dialog>
   );
 }
