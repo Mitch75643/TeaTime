@@ -1,5 +1,7 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { storage } from "./storage";
 import session from "express-session";
 import { insertPostSchema, insertCommentSchema, reactionSchema, dramaVoteSchema, reportSchema, createAnonymousUserSchema, upgradeAccountSchema, loginSchema, banDeviceSchema, checkBanSchema, pushSubscriptionSchema, updatePushPreferencesSchema, insertUserInteractionSchema, updateStoryPreferencesSchema, type ModerationResponse } from "@shared/schema";
@@ -1521,11 +1523,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve admin page separately at /admin route
-  app.get("/admin", (req, res) => {
-    const path = require('path');
-    res.sendFile(path.join(__dirname, "../public/admin.html"));
-  });
+  // Admin access is handled through API routes only
+  // The admin frontend will be a separate deployment or accessed via direct file serving
 
   // Add test routes for development
   if (process.env.NODE_ENV === 'development') {
