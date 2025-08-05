@@ -169,7 +169,7 @@ class AnonymousAuthService {
     } catch (error) {
       console.error('Failed to initialize user:', error);
       // Fallback: create new user
-      await this.createNewUser();
+      await this.findOrCreateUser();
       this.notify();
     }
   }
@@ -226,12 +226,17 @@ class AnonymousAuthService {
       if (this.currentUser) {
         this.currentUser.sessionId = serverUser.sessionId;
         this.currentUser.isUpgraded = serverUser.isUpgraded || false;
+        // Update alias and avatar if they exist on server
+        if (serverUser.alias) this.currentUser.alias = serverUser.alias;
+        if (serverUser.avatarId) this.currentUser.avatarId = serverUser.avatarId;
         this.saveToLocalStorage();
       }
     } catch (error) {
-      // Silently handle sync errors - user can continue without server sync
-      // Only log for debugging if needed
-      if (error instanceof Error && !error.message.includes('User not found')) {
+      // If user not found, try to create with device fingerprint instead
+      if (error instanceof Error && error.message.includes('User not found')) {
+        console.log('User not found on server, creating with device fingerprint...');
+        await this.findOrCreateUser();
+      } else {
         console.error('Failed to sync with server:', error);
       }
     }
@@ -367,7 +372,17 @@ class AnonymousAuthService {
     localStorage.removeItem('fessr_has_posted');
     localStorage.removeItem('fessr_visit_count');
     localStorage.removeItem('fessr_auth_seen');
+    localStorage.removeItem('tfess_has_posted'); // Clear both old and new keys
+    localStorage.removeItem('tfess_visit_count');
     this.currentUser = null;
+    this.notify();
+  }
+
+  // Force refresh user data (for testing cross-device sync)
+  async forceRefresh() {
+    console.log('Force refreshing user data...');
+    this.clearUserData();
+    await this.findOrCreateUser();
     this.notify();
   }
 }

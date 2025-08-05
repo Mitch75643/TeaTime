@@ -61,7 +61,7 @@ export function DramaVoting({ postId }: DramaVotingProps) {
     }
     
     setPrevVotes(votes);
-  }, [votes, prevVotes]);
+  }, [votes]); // Removed prevVotes from dependencies to prevent infinite loop
 
   const { data: hasVoted = false } = useQuery({
     queryKey: ["/api/posts", postId, "has-voted"],
