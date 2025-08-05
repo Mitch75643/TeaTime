@@ -1,0 +1,118 @@
+🛠️ Replit Prompt — Smart Feed Sync with Post Throttling, Fair Distribution & Visibility Logic (Tfess)
+
+📌 What I Need Replit to Do:
+
+I'm building for scale and want the feed system on Tfess to handle high post volume without flooding users, while also ensuring posts get visibility even if 100+ users post at once.
+
+🔄 Part 1: Smart Post Distribution (Anti-Flooding)
+
+Do NOT flood the screen with dozens of new posts when thousands of users are posting. I want the following logic applied:
+
+🔹 When Refreshing (Manual or "Tap to View"):
+
+Only show 30 of the newest posts max per refresh.
+
+At the bottom of the screen, when hitting the max limit of 30, have a Refresh button that appears only when this limit is hit, saying:
+
+"Refresh to see more posts"
+
+If more than 30 new posts exist, queue the rest for the next refresh.
+
+Never show more than 30 new posts per load — keeps feed readable.
+
+🔹 Live Posting Behavior:
+
+New posts do NOT appear automatically.
+
+Only show them after the user taps “Refresh” or “New Post – Tap to View.”
+
+Banner still says “🔄 X New Posts – Tap to View” when there are more than 0 new posts.
+
+🎯 Part 2: Post Visibility Fairness Logic
+
+When many users post at the same time (e.g., 100+), I don’t want them to show in pure time order (first = bottom). I want fair visibility, so that everyone gets seen.
+
+Implement This Logic:
+
+Distribute incoming posts among users randomly in small batches:
+
+Example: if 100 users post → break into chunks of ~10–15
+
+Each user gets a different subset of posts from that group
+
+No one’s post gets permanently buried
+
+Add randomization logic to which posts a user sees in the “New” section of the Home Page.
+
+✨ Part 3: Prioritize Posts Needing Attention (With Limits)
+
+In the “New” section, add a chance-based visibility boost to posts with low or no engagement.
+
+Updated Rules:
+
+When the feed is refreshed, make sure:
+
+10–20% of the posts that appear are ones with 0 reactions or 0 comments
+
+10–20% of the posts that appear are ones with low reactions or low comments
+
+The remaining 60–80% can be typical posts based on time and interaction
+
+⚠️ These boosted posts should be sprinkled in, not dominate the feed. Don’t make it too obvious or repetitive.
+
+Only show this behavior in the New section of the Home Page.
+
+✅ Part 4: Real-Time Interactions (Comments, Reactions, Polls)
+
+Make sure the following elements update live for all users across devices:
+
+Votes in polls
+
+Emoji reactions
+
+Comment counts
+
+Live comment threads
+
+Edits to profile pics and usernames (if updated by users)
+
+Use Firebase onSnapshot or WebSockets if needed.
+
+✅ Part 5: Cross-Device & Performance Rules
+
+Always prevent showing stale data (like old posts or incorrect usernames).
+
+Prevent UI flooding or jittery refreshes.
+
+Use virtual lists or lazy loading to avoid mobile slowdown.
+
+Apply this behavior to:
+
+Home Page
+
+Daily Spill Page
+
+All Topics on the Community Page
+
+Profile Feeds (if needed)
+
+✅ Make sure every Community Topic Feed includes a Refresh button inside the feed area.
+
+🚫 Do NOT add refresh buttons or smart batching to:
+
+Trending section on the Home Page
+
+Spill of the Day section on the Daily Spill page
+
+✅ Once implemented, confirm:
+
+Feeds are balanced.
+
+New content doesn’t flood users.
+
+Engagement is fairly distributed.
+
+Live syncing works without manual refreshes.
+
+Only intended pages have refresh or batching enabled.
+
