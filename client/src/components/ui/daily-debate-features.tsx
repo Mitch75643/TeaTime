@@ -3,8 +3,7 @@ import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Badge } from "./badge";
 import { Progress } from "./progress";
-import { Input } from "./input";
-import { Vote, ThumbsUp, ThumbsDown, Users, Clock, Plus } from "lucide-react";
+import { Vote, ThumbsUp, ThumbsDown, Users, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DebateOption {
@@ -52,8 +51,7 @@ interface DailyDebateFeaturesProps {
 
 export function DailyDebateFeatures({ onVote, onCreateDebate }: DailyDebateFeaturesProps) {
   const [userVote, setUserVote] = useState<string | null>(null);
-  const [newDebateQuestion, setNewDebateQuestion] = useState("");
-  const [submittedQuestions, setSubmittedQuestions] = useState<string[]>([]);
+
   const [showResults, setShowResults] = useState(false);
 
   const handleVote = (optionId: string) => {
@@ -62,12 +60,7 @@ export function DailyDebateFeatures({ onVote, onCreateDebate }: DailyDebateFeatu
     onVote(optionId);
   };
 
-  const submitDebateQuestion = () => {
-    if (newDebateQuestion.trim()) {
-      setSubmittedQuestions([...submittedQuestions, newDebateQuestion.trim()]);
-      setNewDebateQuestion("");
-    }
-  };
+
 
   return (
     <div className="space-y-6">
@@ -163,57 +156,7 @@ export function DailyDebateFeatures({ onVote, onCreateDebate }: DailyDebateFeatu
         </CardContent>
       </Card>
 
-      {/* Suggest Future Debates */}
-      <Card className="border-purple-200 dark:border-purple-800">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
-          <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
-            <Plus className="h-5 w-5" />
-            💭 Suggest Tomorrow's Debate
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="What should we debate tomorrow?"
-                value={newDebateQuestion}
-                onChange={(e) => setNewDebateQuestion(e.target.value)}
-                className="flex-1"
-                onKeyPress={(e) => e.key === "Enter" && submitDebateQuestion()}
-              />
-              <Button
-                onClick={submitDebateQuestion}
-                disabled={!newDebateQuestion.trim()}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Submit
-              </Button>
-            </div>
-            
-            {submittedQuestions.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Your Submitted Questions:
-                </p>
-                {submittedQuestions.map((question, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg"
-                  >
-                    <Badge className="bg-purple-100 text-purple-700 text-xs">
-                      Pending
-                    </Badge>
-                    <span className="text-sm text-purple-600 dark:text-purple-400">
-                      {question}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Upcoming Debates Preview */}
       <Card className="border-gray-200 dark:border-gray-700">
