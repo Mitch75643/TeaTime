@@ -509,7 +509,7 @@ export default function TopicFeed() {
                 >
                   <User className="h-5 w-5" />
                   <span>Your Posts</span>
-                  <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium ml-[5px] mr-[5px]">
+                  <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium ml-[2px] mr-[5px]">
                     {userPosts.length}
                   </span>
                 </button>
