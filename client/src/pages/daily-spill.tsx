@@ -417,21 +417,21 @@ export default function DailySpill() {
         )}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 flex-1">
                 <div className={cn(
-                  "p-2 rounded-full text-white text-lg font-bold",
+                  "w-12 h-12 rounded-full text-white text-lg font-bold flex items-center justify-center shrink-0",
                   `bg-gradient-to-br ${currentTheme.color}`
                 )}>
                   {currentTheme.emoji}
                 </div>
-                <div>
-                  <p className="font-bold text-base text-gray-900 dark:text-gray-100">{currentTheme.name}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{currentTheme.description}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-base text-gray-900 dark:text-gray-100 truncate">{currentTheme.name}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{currentTheme.description}</p>
                 </div>
               </div>
               <div className={cn(
-                "px-3 py-1 rounded-full text-xs font-semibold",
-                `bg-gradient-to-r ${currentTheme.color} text-white`
+                "px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 ml-3 flex items-center justify-center",
+                `bg-gradient-to-r ${currentTheme.color} text-white shadow-sm`
               )}>
                 This Week
               </div>
