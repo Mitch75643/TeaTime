@@ -1,4 +1,4 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard, type PushSubscription, type InsertPushSubscription, type PushNotificationLog, type DailyPromptStreak, type InsertDailyPromptStreak, type DailyPromptSubmission, type InsertDailyPromptSubmission } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type RestrictedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard, type PushSubscription, type InsertPushSubscription, type PushNotificationLog, type DailyPromptStreak, type InsertDailyPromptStreak, type DailyPromptSubmission, type InsertDailyPromptSubmission } from "@shared/schema";
 import { type AdminFingerprint, type InsertAdminFingerprint, type AdminEmail, type InsertAdminEmail, type AdminSession, type InsertAdminSession, type AdminActivityLog, type InsertAdminActivityLog } from "@shared/admin-schema";
 import { randomUUID } from "crypto";
 import { createHash } from "crypto";
@@ -65,6 +65,13 @@ export interface IStorage {
   getAllBannedDevices(): Promise<BannedDevice[]>;
   updateBannedDevice(deviceFingerprint: string, updates: Partial<BannedDevice>): Promise<boolean>;
   removeBannedDevice(deviceFingerprint: string): Promise<boolean>;
+
+  // Device Restriction System
+  createRestrictedDevice(restrictionData: { deviceFingerprint: string; restrictedBy?: string; restrictionReason?: string; restrictionType: string; isTemporary?: boolean; expiresAt?: string; restrictions?: Record<string, any>; deviceMetadata?: Record<string, any> }): Promise<RestrictedDevice>;
+  getRestrictedDevice(deviceFingerprint: string): Promise<RestrictedDevice | undefined>;
+  getAllRestrictedDevices(): Promise<RestrictedDevice[]>;
+  updateRestrictedDevice(deviceFingerprint: string, updates: Partial<RestrictedDevice>): Promise<boolean>;
+  removeRestrictedDevice(deviceFingerprint: string): Promise<boolean>;
 
   // Auto-rotation System
   createContentPrompt(prompt: InsertContentPrompt): Promise<ContentPrompt>;
@@ -140,6 +147,7 @@ export class MemStorage implements IStorage {
   private anonymousUsers: Map<string, AnonymousUser>;
   private deviceSessions: Map<string, DeviceSession>;
   private bannedDevices: Map<string, BannedDevice>;
+  private restrictedDevices: Map<string, RestrictedDevice>;
   private contentPrompts: Map<string, ContentPrompt>;
   private weeklyThemes: Map<string, WeeklyTheme>;
   private rotationCycles: Map<string, RotationCycle>;
@@ -164,6 +172,7 @@ export class MemStorage implements IStorage {
     this.anonymousUsers = new Map();
     this.deviceSessions = new Map();
     this.bannedDevices = new Map();
+    this.restrictedDevices = new Map();
     this.contentPrompts = new Map();
     this.weeklyThemes = new Map();
     this.rotationCycles = new Map();
@@ -887,6 +896,50 @@ export class MemStorage implements IStorage {
 
   async removeBannedDevice(deviceFingerprint: string): Promise<boolean> {
     return this.bannedDevices.delete(deviceFingerprint);
+  }
+
+  // Device Restriction System methods
+  async createRestrictedDevice(restrictionData: { deviceFingerprint: string; restrictedBy?: string; restrictionReason?: string; restrictionType: string; isTemporary?: boolean; expiresAt?: string; restrictions?: Record<string, any>; deviceMetadata?: Record<string, any> }): Promise<RestrictedDevice> {
+    const id = randomUUID();
+    const restriction: RestrictedDevice = {
+      id,
+      deviceFingerprint: restrictionData.deviceFingerprint,
+      restrictedBy: restrictionData.restrictedBy || null,
+      restrictionReason: restrictionData.restrictionReason || null,
+      restrictionType: restrictionData.restrictionType,
+      isTemporary: restrictionData.isTemporary || false,
+      expiresAt: restrictionData.expiresAt ? new Date(restrictionData.expiresAt) : null,
+      restrictions: restrictionData.restrictions || {},
+      deviceMetadata: restrictionData.deviceMetadata || {},
+      createdAt: new Date(),
+    };
+    this.restrictedDevices.set(restrictionData.deviceFingerprint, restriction);
+    return restriction;
+  }
+
+  async getRestrictedDevice(deviceFingerprint: string): Promise<RestrictedDevice | undefined> {
+    return this.restrictedDevices.get(deviceFingerprint);
+  }
+
+  async getAllRestrictedDevices(): Promise<RestrictedDevice[]> {
+    return Array.from(this.restrictedDevices.values())
+      .map(restriction => ({
+        ...restriction,
+        isActive: !restriction.expiresAt || new Date() < restriction.expiresAt
+      }));
+  }
+
+  async updateRestrictedDevice(deviceFingerprint: string, updates: Partial<RestrictedDevice>): Promise<boolean> {
+    const restriction = this.restrictedDevices.get(deviceFingerprint);
+    if (!restriction) return false;
+    
+    Object.assign(restriction, updates);
+    this.restrictedDevices.set(deviceFingerprint, restriction);
+    return true;
+  }
+
+  async removeRestrictedDevice(deviceFingerprint: string): Promise<boolean> {
+    return this.restrictedDevices.delete(deviceFingerprint);
   }
 
   // Post Stats tracking methods

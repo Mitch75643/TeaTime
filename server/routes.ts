@@ -1517,6 +1517,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get restricted users (root host only)
+  app.get("/api/admin/restricted-users", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const restrictedUsers = await storage.getAllRestrictedDevices();
+      res.json(restrictedUsers);
+    } catch (error) {
+      console.error("Get restricted users error:", error);
+      res.status(500).json({ message: "Failed to get restricted users" });
+    }
+  });
+
+  // Create restricted user (root host only)
+  app.post("/api/admin/restricted-users", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const { deviceFingerprint, restrictionReason, restrictionType, isTemporary, expiresAt, restrictions } = req.body;
+      
+      if (!deviceFingerprint || !restrictionType) {
+        return res.status(400).json({ message: "Device fingerprint and restriction type are required" });
+      }
+
+      const restrictedUser = await storage.createRestrictedDevice({
+        deviceFingerprint,
+        restrictedBy: verification.admin.email,
+        restrictionReason,
+        restrictionType,
+        isTemporary: isTemporary || false,
+        expiresAt,
+        restrictions: restrictions || {},
+        deviceMetadata: {}
+      });
+
+      res.json(restrictedUser);
+    } catch (error) {
+      console.error("Create restricted user error:", error);
+      res.status(500).json({ message: "Failed to create restricted user" });
+    }
+  });
+
+  // Update restricted user (root host only)
+  app.put("/api/admin/restricted-users/:fingerprint", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const { fingerprint } = req.params;
+      const updates = req.body;
+
+      const success = await storage.updateRestrictedDevice(fingerprint, updates);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Restricted user not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Update restricted user error:", error);
+      res.status(500).json({ message: "Failed to update restricted user" });
+    }
+  });
+
+  // Remove restricted user (root host only)
+  app.delete("/api/admin/restricted-users/:fingerprint", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const { fingerprint } = req.params;
+
+      const success = await storage.removeRestrictedDevice(fingerprint);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Restricted user not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Remove restricted user error:", error);
+      res.status(500).json({ message: "Failed to remove restricted user" });
+    }
+  });
+
   // Temporary route to add specific fingerprint to admin system
   app.post("/api/admin/add-user-fingerprint", async (req, res) => {
     try {

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminAuth } from "@/components/AdminAuth";
-import { AdminPanel, BannedUsersPanel } from "@/components/AdminPanel";
+import { AdminPanel, BannedUsersPanel, RestrictedUsersPanel } from "@/components/AdminPanel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { Shield, Settings, Users, UserX } from "lucide-react";
+import { Shield, Settings, Users, UserX, UserMinus } from "lucide-react";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("auth");
@@ -25,7 +25,7 @@ export default function AdminPage() {
           <AdminAuth onSuccess={() => setActiveTab("management")} />
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-8">
+            <TabsList className="grid w-full grid-cols-4 max-w-3xl mx-auto mb-8">
               <TabsTrigger value="auth" className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
                 Authentication
@@ -45,6 +45,14 @@ export default function AdminPage() {
               >
                 <UserX className="w-4 h-4" />
                 Banned Users
+              </TabsTrigger>
+              <TabsTrigger 
+                value="restricted" 
+                className="flex items-center gap-2"
+                disabled={!isRootHost}
+              >
+                <UserMinus className="w-4 h-4" />
+                Restricted Users
               </TabsTrigger>
             </TabsList>
 
@@ -79,6 +87,22 @@ export default function AdminPage() {
                   </h2>
                   <p className="text-muted-foreground">
                     Only the root host can view banned users information.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="restricted">
+              {isRootHost ? (
+                <RestrictedUsersPanel />
+              ) : (
+                <div className="text-center py-8">
+                  <UserMinus className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold text-foreground mb-2">
+                    Restricted Users
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Only the root host can view restricted users information.
                   </p>
                 </div>
               )}

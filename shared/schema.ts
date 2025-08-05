@@ -174,6 +174,19 @@ export const bannedDevices = pgTable("banned_devices", {
   deviceMetadata: jsonb("device_metadata").default({}), // store device info for debugging
 });
 
+export const restrictedDevices = pgTable("restricted_devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  deviceFingerprint: varchar("device_fingerprint").notNull().unique(),
+  restrictedBy: varchar("restricted_by"), // admin identifier
+  restrictionReason: text("restriction_reason"),
+  restrictionType: varchar("restriction_type").notNull(), // "post_limit", "comment_limit", "read_only", "time_limit"
+  isTemporary: boolean("is_temporary").default(false),
+  expiresAt: timestamp("expires_at"), // null for permanent restrictions
+  restrictions: jsonb("restrictions").default({}), // Specific restriction details
+  createdAt: timestamp("created_at").defaultNow(),
+  deviceMetadata: jsonb("device_metadata").default({}), // store device info for debugging
+});
+
 // Auto-rotation system tables
 export const contentPrompts = pgTable("content_prompts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -596,6 +609,7 @@ export type InsertUser = typeof anonymousUsers.$inferInsert;
 export type AnonymousUser = typeof anonymousUsers.$inferSelect;
 export type DeviceSession = typeof deviceSessions.$inferSelect;
 export type BannedDevice = typeof bannedDevices.$inferSelect;
+export type RestrictedDevice = typeof restrictedDevices.$inferSelect;
 export type ReactionInput = z.infer<typeof reactionSchema>;
 export type DramaVoteInput = z.infer<typeof dramaVoteSchema>;
 export type ReportInput = z.infer<typeof reportSchema>;

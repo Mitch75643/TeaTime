@@ -587,3 +587,205 @@ export function BannedUsersPanel() {
     </div>
   );
 }
+
+// Separate Restricted Users Component
+export function RestrictedUsersPanel() {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Fetch restricted users
+  const { data: restrictedUsers, isLoading: isLoadingRestricted } = useQuery({
+    queryKey: ['/api/admin/restricted-users'],
+    retry: false,
+  });
+
+  // Filter restricted users based on search term
+  const filteredRestrictedUsers = restrictedUsers?.filter((restriction: any) => 
+    restriction.deviceFingerprint?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    restriction.restrictionReason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    restriction.restrictionType?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const activeRestrictions = filteredRestrictedUsers.filter((restriction: any) => restriction.isActive);
+  const expiredRestrictions = filteredRestrictedUsers.filter((restriction: any) => !restriction.isActive);
+
+  return (
+    <div className="space-y-6 w-full max-w-6xl mx-auto">
+      {/* Header with Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserMinus className="w-5 h-5 text-orange-600" />
+            Restricted Users Management
+          </CardTitle>
+          <CardDescription>
+            Monitor and manage restricted devices with advanced search and filtering capabilities.
+          </CardDescription>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+            <div className="bg-orange-50 dark:bg-orange-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-orange-600">{activeRestrictions.length}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Active Restrictions</div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-gray-600">{expiredRestrictions.length}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Expired Restrictions</div>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{restrictedUsers?.length || 0}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Total Records</div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Search and Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Search & Filter</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Label htmlFor="search">Search by Fingerprint ID, Reason, or Type</Label>
+              <div className="relative mt-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Enter fingerprint ID, restriction reason, or type..."
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Restricted Users List */}
+      <div className="grid gap-4">
+        {isLoadingRestricted ? (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-muted-foreground">
+                Loading restricted users...
+              </div>
+            </CardContent>
+          </Card>
+        ) : filteredRestrictedUsers.length === 0 ? (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-muted-foreground">
+                {searchTerm ? 'No restricted users found matching your search.' : 'No restricted users found.'}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Active Restrictions */}
+            {activeRestrictions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg text-orange-600">
+                    Active Restrictions ({activeRestrictions.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {activeRestrictions.map((restriction: any) => (
+                      <div key={restriction.id} className="border rounded-lg p-4 bg-orange-50 dark:bg-orange-950/10">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <div className="font-mono text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                              {restriction.deviceFingerprint}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Type:</span> {restriction.restrictionType}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Reason:</span> {restriction.restrictionReason || 'No reason provided'}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Restricted by:</span> {restriction.restrictedBy}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Created:</span> {new Date(restriction.createdAt).toLocaleString()}
+                            </div>
+                            {restriction.isTemporary && restriction.expiresAt && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                <span className="font-medium">Expires:</span> {new Date(restriction.expiresAt).toLocaleString()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded">
+                              {restriction.isTemporary ? 'Temporary' : 'Permanent'}
+                            </span>
+                            <span className="px-2 py-1 text-xs font-medium bg-orange-600 text-white rounded">
+                              Active
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Expired Restrictions */}
+            {expiredRestrictions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg text-gray-600">
+                    Expired Restrictions ({expiredRestrictions.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {expiredRestrictions.map((restriction: any) => (
+                      <div key={restriction.id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-950/10">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <div className="font-mono text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                              {restriction.deviceFingerprint}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Type:</span> {restriction.restrictionType}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Reason:</span> {restriction.restrictionReason || 'No reason provided'}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Restricted by:</span> {restriction.restrictedBy}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Created:</span> {new Date(restriction.createdAt).toLocaleString()}
+                            </div>
+                            {restriction.expiresAt && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                <span className="font-medium">Expired:</span> {new Date(restriction.expiresAt).toLocaleString()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 rounded">
+                              {restriction.isTemporary ? 'Temporary' : 'Permanent'}
+                            </span>
+                            <span className="px-2 py-1 text-xs font-medium bg-gray-400 text-white rounded">
+                              Expired
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
