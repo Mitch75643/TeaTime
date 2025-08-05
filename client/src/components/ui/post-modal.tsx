@@ -86,12 +86,12 @@ export function PostModal({
   const { animation, triggerAnimation, completeAnimation } = useHomeCategoryAnimation();
   const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
 
-  console.log("PostModal render - isOpen:", isOpen, "category:", category);
+  console.log("PostModal render - isOpen:", isOpen, "category:", category, "defaultCategory:", defaultCategory);
 
   // Initialize state when modal opens (only run once per modal open)
   useEffect(() => {
     if (isOpen) {
-      // Set default values if provided
+      // Set default values if provided (only once when modal opens)
       if (defaultCategory) {
         console.log("Setting default category:", defaultCategory);
         setCategory(defaultCategory);
@@ -117,15 +117,7 @@ export function PostModal({
       setSelectedTags([]);
       setTagsInput("");
     }
-  }, [isOpen]); // Remove dependencies that cause unwanted re-runs
-
-  // Separate effect to handle default category changes (only when modal is already open)
-  useEffect(() => {
-    if (isOpen && defaultCategory && category !== defaultCategory) {
-      console.log("Updating category from defaultCategory:", defaultCategory);
-      setCategory(defaultCategory);
-    }
-  }, [defaultCategory, isOpen, category]);
+  }, [isOpen]); // Only depend on isOpen to prevent constant resets
 
   // Auto-save draft as user types
   useEffect(() => {
