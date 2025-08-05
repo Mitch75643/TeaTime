@@ -516,9 +516,9 @@ export default function DailySpill() {
                 <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
                   ⭐ Spill of the Day
                 </CardTitle>
-                <Badge className="bg-yellow-400 text-yellow-900 text-xs px-1 py-0">
+                <div className="bg-yellow-400 text-yellow-900 text-xs px-2 py-1 rounded-full font-medium">
                   Top
-                </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0 pb-2">
@@ -537,7 +537,7 @@ export default function DailySpill() {
       )}
 
       {/* Sticky Feed Header */}
-      <div className="sticky top-16 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+      <div className="sticky top-16 z-20 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -558,7 +558,7 @@ export default function DailySpill() {
       </div>
 
       {/* Posts Feed */}
-      <main className="px-4 pb-20 space-y-4 pt-4">
+      <main className="px-4 pb-24 space-y-4 pt-4">
         {isLoading && (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>

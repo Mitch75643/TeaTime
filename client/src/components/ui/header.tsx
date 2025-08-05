@@ -24,7 +24,7 @@ export function Header() {
   };
 
   return (
-    <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-50">
+    <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-40">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <img 
