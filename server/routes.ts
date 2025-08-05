@@ -1485,7 +1485,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add new admin (root host only)
+  // Verify admin management password
+  app.post("/api/admin/verify-management-password", async (req, res) => {
+    try {
+      const { password } = req.body;
+      const adminManagementPassword = "Mitchy75643Tape1234!Killer7564321789203858392MattFlan04932835683TheexitMatt!";
+      
+      if (password === adminManagementPassword) {
+        res.json({ verified: true, message: "Password verified" });
+      } else {
+        res.status(401).json({ verified: false, message: "Incorrect password" });
+      }
+    } catch (error) {
+      console.error("Admin management password verification error:", error);
+      res.status(500).json({ message: "Verification error" });
+    }
+  });
+
+  // Add new admin (root host only + password protected)
   app.post("/api/admin/manage/add", async (req, res) => {
     try {
       const sessionId = req.session.id;
@@ -1495,12 +1512,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Root host access required" });
       }
 
-      const adminData = addAdminSchema.parse(req.body);
+      const { password, ...adminData } = req.body;
+      const adminManagementPassword = "Mitchy75643Tape1234!Killer7564321789203858392MattFlan04932835683TheexitMatt!";
+      
+      if (password !== adminManagementPassword) {
+        return res.status(401).json({ message: "Invalid management password" });
+      }
+
+      const parsedAdminData = addAdminSchema.parse(adminData);
       
       const result = await adminAuthService.addAdmin(
         verification.admin.email,
         verification.admin.fingerprint,
-        adminData
+        parsedAdminData
       );
       
       res.json(result);
@@ -1510,7 +1534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Remove admin (root host only)
+  // Remove admin (root host only + password protected)
   app.post("/api/admin/manage/remove", async (req, res) => {
     try {
       const sessionId = req.session.id;
@@ -1520,10 +1544,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Root host access required" });
       }
 
-      const { targetEmail } = req.body;
+      const { targetEmail, password } = req.body;
+      const adminManagementPassword = "Mitchy75643Tape1234!Killer7564321789203858392MattFlan04932835683TheexitMatt!";
       
       if (!targetEmail) {
         return res.status(400).json({ message: "Target email required" });
+      }
+
+      if (password !== adminManagementPassword) {
+        return res.status(401).json({ message: "Invalid management password" });
       }
 
       const result = await adminAuthService.removeAdmin(

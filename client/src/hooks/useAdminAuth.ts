@@ -82,6 +82,7 @@ export function useAdminManagement() {
       fingerprintLabel: string;
       email: string;
       role: 'admin' | 'root_host';
+      password: string;
     }) => {
       return apiRequest('POST', '/api/admin/manage/add', adminData);
     },
@@ -92,8 +93,8 @@ export function useAdminManagement() {
 
   // Remove admin
   const removeAdminMutation = useMutation({
-    mutationFn: async (targetEmail: string) => {
-      return apiRequest('POST', '/api/admin/manage/remove', { targetEmail });
+    mutationFn: async (targetEmail: string, password: string) => {
+      return apiRequest('POST', '/api/admin/manage/remove', { targetEmail, password });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/manage/list'] });

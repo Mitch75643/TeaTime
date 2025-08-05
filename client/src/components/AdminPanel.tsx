@@ -33,6 +33,11 @@ import {
 export function AdminPanel() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showRootHostConfirm, setShowRootHostConfirm] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordAction, setPasswordAction] = useState<'add' | 'remove'>('add');
+  const [targetEmail, setTargetEmail] = useState('');
+  const [managementPassword, setManagementPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [newAdminData, setNewAdminData] = useState({
     fingerprint: '',
@@ -91,8 +96,18 @@ export function AdminPanel() {
       return;
     }
 
+    // Prompt for management password
+    setPasswordAction('add');
+    setPasswordError('');
+    setShowPasswordDialog(true);
+  };
+
+  const executeAddAdmin = async () => {
     try {
-      const result = await addAdmin(newAdminData);
+      const result = await addAdmin({
+        ...newAdminData,
+        password: managementPassword
+      });
       
       if (result.success) {
         toast({
@@ -108,11 +123,12 @@ export function AdminPanel() {
           role: 'admin'
         });
         setShowAddForm(false);
+        closePasswordDialog();
       } else {
-        setError(result.message);
+        setPasswordError(result.message || 'Failed to add admin');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to add admin');
+      setPasswordError(err.message || 'Failed to add admin');
     }
   };
 
@@ -126,30 +142,36 @@ export function AdminPanel() {
       return;
     }
 
-    if (window.confirm(`Are you sure you want to remove admin: ${email}?`)) {
-      try {
-        const result = await removeAdmin(email);
-        
-        if (result.success) {
-          toast({
-            title: "Admin Removed",
-            description: result.message,
-          });
-        } else {
-          toast({
-            title: "Failed to Remove Admin",
-            description: result.message,
-            variant: "destructive",
-          });
-        }
-      } catch (err: any) {
+    // Prompt for management password
+    setTargetEmail(email);
+    setPasswordAction('remove');
+    setPasswordError('');
+    setShowPasswordDialog(true);
+  };
+
+  const executeRemoveAdmin = async () => {
+    try {
+      const result = await removeAdmin(targetEmail, managementPassword);
+      
+      if (result.success) {
         toast({
-          title: "Error",
-          description: err.message || 'Failed to remove admin',
-          variant: "destructive",
+          title: "Admin Removed",
+          description: result.message,
         });
+        closePasswordDialog();
+      } else {
+        setPasswordError(result.message || 'Failed to remove admin');
       }
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to remove admin');
     }
+  };
+
+  const closePasswordDialog = () => {
+    setShowPasswordDialog(false);
+    setManagementPassword('');
+    setPasswordError('');
+    setTargetEmail('');
   };
 
   const generateCurrentFingerprint = async () => {
@@ -402,6 +424,55 @@ export function AdminPanel() {
           </CardContent>
         </Card>
       )}
+
+      {/* Password Dialog for Admin Operations */}
+      <AlertDialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Admin Management Password Required
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Enter the management password to {passwordAction === 'add' ? 'add a new admin' : `remove admin: ${targetEmail}`}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="management-password">Management Password</Label>
+              <Input
+                id="management-password"
+                type="password"
+                value={managementPassword}
+                onChange={(e) => {
+                  setManagementPassword(e.target.value);
+                  setPasswordError('');
+                }}
+                placeholder="Enter admin management password..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    passwordAction === 'add' ? executeAddAdmin() : executeRemoveAdmin();
+                  }
+                }}
+              />
+              {passwordError && (
+                <p className="text-sm text-destructive">{passwordError}</p>
+              )}
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closePasswordDialog}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={passwordAction === 'add' ? executeAddAdmin : executeRemoveAdmin}
+              disabled={!managementPassword.trim()}
+            >
+              {passwordAction === 'add' ? 'Add Admin' : 'Remove Admin'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   );
