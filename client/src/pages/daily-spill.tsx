@@ -409,20 +409,38 @@ export default function DailySpill() {
       
       {/* Theme of the Week Banner with Streak */}
       <div className="px-4 pt-4">
-        <Card className={cn("border-0 text-white bg-gradient-to-r", currentTheme.color)}>
-          <CardContent className="p-3">
+        <Card className={cn(
+          "border-2 backdrop-blur-sm relative overflow-hidden",
+          currentTheme.borderColor,
+          currentTheme.bgColor,
+          currentTheme.darkBgColor
+        )}>
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">{currentTheme.emoji}</span>
+              <div className="flex items-center space-x-3">
+                <div className={cn(
+                  "p-2 rounded-full text-white text-lg font-bold",
+                  `bg-gradient-to-br ${currentTheme.color}`
+                )}>
+                  {currentTheme.emoji}
+                </div>
                 <div>
-                  <p className="font-bold text-sm">{currentTheme.name}</p>
-                  <p className="text-xs opacity-90">{currentTheme.description}</p>
+                  <p className="font-bold text-base text-gray-900 dark:text-gray-100">{currentTheme.name}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{currentTheme.description}</p>
                 </div>
               </div>
-
+              <div className={cn(
+                "px-3 py-1 rounded-full text-xs font-semibold",
+                `bg-gradient-to-r ${currentTheme.color} text-white`
+              )}>
+                This Week
+              </div>
             </div>
             {/* Streak Badge attached to theme banner */}
-            <div className="mt-2 pt-2 border-t border-white/20">
+            <div className={cn(
+              "mt-3 pt-3 border-t",
+              currentTheme.borderColor.replace('border-', 'border-t-')
+            )}>
               <SpillStreak />
             </div>
           </CardContent>
