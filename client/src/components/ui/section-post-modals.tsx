@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { generateAlias } from "@/lib/aliases";
 import { CelebrationAnimation, useCelebration } from "./celebration-animations";
 import { CommunityTopicAnimation, useCommunityTopicAnimation } from "./community-topic-animations";
+import { getDeviceFingerprint } from "@/lib/deviceFingerprint";
 import type { InsertPost } from "@shared/schema";
 
 interface SectionPostModalProps {
@@ -192,9 +193,26 @@ export function SectionPostModal({
 
   const createPostMutation = useMutation({
     mutationFn: async (data: InsertPost) => {
-      return apiRequest("POST", "/api/posts", data);
+      // Get device fingerprint for spam detection
+      const deviceFingerprint = await getDeviceFingerprint();
+      
+      // Send the device fingerprint as a header for spam detection
+      return apiRequest("POST", "/api/posts", data, {
+        headers: {
+          'x-device-fingerprint': deviceFingerprint
+        }
+      });
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
+      // Handle spam warning if present
+      if (response?.spamWarning) {
+        toast({
+          title: "⚠️ Posting Pattern Alert",
+          description: response.spamWarning,
+          variant: "destructive",
+        });
+      }
+      
       // Invalidate all post-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
@@ -227,11 +245,26 @@ export function SectionPostModal({
       }, 200);
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create post",
-        variant: "destructive",
-      });
+      // Handle spam-related errors with specific messaging
+      if (error.isBlocked) {
+        toast({
+          title: "⛔ Account Restricted",
+          description: error.message || "Your account has been temporarily restricted due to multiple violations.",
+          variant: "destructive",
+        });
+      } else if (error.isThrottled) {
+        toast({
+          title: "⏱️ Posting Cooldown",
+          description: error.message || "Please wait before posting again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to create post",
+          variant: "destructive",
+        });
+      }
     },
   });
 

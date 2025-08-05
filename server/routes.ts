@@ -9,6 +9,7 @@ import { memAutoRotationService } from "./memAutoRotationService";
 import { pushNotificationService } from "./pushNotificationService";
 import { addTestRoute } from "./testRoute";
 import { memoryStoryRecommendationEngine } from "./storyRecommendationEngine";
+import { detectSpam, isInCooldown, updateEngagementScore } from "./spamDetection";
 
 declare module 'express-session' {
   interface SessionData {
@@ -120,6 +121,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/posts", checkDeviceBanMiddleware, async (req, res) => {
     try {
       const validatedData = insertPostSchema.parse(req.body);
+      const sessionId = req.session.id!;
+      
+      // Check if user is in cooldown from previous spam violations
+      const cooldownCheck = isInCooldown(sessionId);
+      if (cooldownCheck.inCooldown) {
+        return res.status(429).json({ 
+          message: `⏱️ Please wait ${cooldownCheck.remainingMinutes} more minute${cooldownCheck.remainingMinutes !== 1 ? 's' : ''} before posting again.`,
+          cooldownMinutes: cooldownCheck.remainingMinutes
+        });
+      }
+      
+      // Spam Detection
+      const postContext = req.body.postContext || 'home';
+      const communitySection = req.body.communitySection || '';
+      const pageIdentifier = communitySection || postContext;
+      
+      const spamResult = await detectSpam(
+        sessionId,
+        validatedData.content,
+        validatedData.category,
+        pageIdentifier,
+        req.headers['x-device-fingerprint'] as string
+      );
+      
+      // Handle spam detection results
+      if (spamResult.isSpam) {
+        if (spamResult.action === 'block') {
+          return res.status(403).json({ 
+            message: "⛔ Your account has been temporarily restricted due to multiple violations. Please contact support if you believe this is an error.",
+            isBlocked: true
+          });
+        } else if (spamResult.action === 'throttle') {
+          return res.status(429).json({ 
+            message: spamResult.message,
+            isThrottled: true,
+            cooldownMinutes: spamResult.cooldownMinutes
+          });
+        } else if (spamResult.action === 'warn') {
+          // Continue with post creation but include warning
+          res.locals.spamWarning = spamResult.message;
+        }
+      }
       
       // AI Content Moderation (with fallback for quota issues)
       let moderationResult;
@@ -142,14 +185,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Content contains inappropriate language" });
       }
 
-      const sessionId = req.session.id!;
-      
       // Get user's current username from their anonymous profile
       const user = await storage.getAnonymousUserBySession(sessionId);
       const alias = user?.alias || generateAlias();
-      
-      const postContext = req.body.postContext || 'home';
-      const communitySection = req.body.communitySection;
       
       // Get user's avatar and color from request body or user profile
       const avatarId = req.body.avatarId || user?.avatarId || 'happy-face';
@@ -208,7 +246,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Return post with moderation response and streak data for frontend handling
+      // Track engagement for spam detection (async, don't wait)
+      setTimeout(() => {
+        updateEngagementScore(sessionId, post.id).catch(console.error);
+      }, 1000);
+      
+      // Return post with moderation response, streak data, and spam warning for frontend handling
       const response = {
         ...post,
         moderationResponse: moderationResult.flagged ? {
@@ -216,7 +259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           supportMessage: moderationResult.supportMessage,
           resources: moderationResult.resources
         } : undefined,
-        streakResult
+        streakResult,
+        spamWarning: res.locals.spamWarning
       };
       
       res.json(response);
@@ -247,6 +291,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         postId: req.params.postId
       });
       
+      const sessionId = req.session.id!;
+      
+      // Check if user is in cooldown from previous spam violations
+      const cooldownCheck = isInCooldown(sessionId);
+      if (cooldownCheck.inCooldown) {
+        return res.status(429).json({ 
+          message: `⏱️ Please wait ${cooldownCheck.remainingMinutes} more minute${cooldownCheck.remainingMinutes !== 1 ? 's' : ''} before commenting again.`,
+          cooldownMinutes: cooldownCheck.remainingMinutes
+        });
+      }
+      
+      // Spam Detection for comments
+      const spamResult = await detectSpam(
+        sessionId,
+        validatedData.content,
+        'comment',
+        'comments',
+        req.headers['x-device-fingerprint'] as string
+      );
+      
+      // Handle spam detection results
+      if (spamResult.isSpam) {
+        if (spamResult.action === 'block') {
+          return res.status(403).json({ 
+            message: "⛔ Your account has been temporarily restricted due to multiple violations.",
+            isBlocked: true
+          });
+        } else if (spamResult.action === 'throttle') {
+          return res.status(429).json({ 
+            message: spamResult.message,
+            isThrottled: true,
+            cooldownMinutes: spamResult.cooldownMinutes
+          });
+        } else if (spamResult.action === 'warn') {
+          res.locals.spamWarning = spamResult.message;
+        }
+      }
+      
       // AI Content Moderation for comments
       const moderationResult = await comprehensiveModeration(validatedData.content);
       
@@ -256,8 +338,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Content contains inappropriate language" });
       }
 
-      const sessionId = req.session.id!;
-      
       // Get user's current username from their anonymous profile
       const user = await storage.getAnonymousUserBySession(sessionId);
       const alias = user?.alias || generateAlias();
@@ -313,14 +393,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the comment creation if notification fails
       }
       
-      // Return comment with moderation response for frontend handling
+      // Return comment with moderation response and spam warning for frontend handling
       const response = {
         ...comment,
         moderationResponse: moderationResult.flagged ? {
           severityLevel: moderationResult.severityLevel,
           supportMessage: moderationResult.supportMessage,
           resources: moderationResult.resources
-        } : undefined
+        } : undefined,
+        spamWarning: res.locals.spamWarning
       };
       
       res.json(response);
@@ -1109,6 +1190,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to get submissions" });
     }
   });
+
+  // Admin endpoints for spam monitoring (development only for now)
+  if (process.env.NODE_ENV === 'development') {
+    // Get spam detection statistics
+    app.get("/api/admin/spam/stats", (req, res) => {
+      try {
+        const stats = getSpamDetectionStats();
+        res.json(stats);
+      } catch (error) {
+        console.error("Failed to get spam stats:", error);
+        res.status(500).json({ message: "Failed to get spam statistics" });
+      }
+    });
+
+    // Get recent spam violations
+    app.get("/api/admin/spam/violations", (req, res) => {
+      try {
+        const limit = parseInt(req.query.limit as string) || 50;
+        const violations = getRecentViolations(limit);
+        res.json(violations);
+      } catch (error) {
+        console.error("Failed to get spam violations:", error);
+        res.status(500).json({ message: "Failed to get spam violations" });
+      }
+    });
+
+    // Clear spam history for a session (admin tool)
+    app.post("/api/admin/spam/clear-session", (req, res) => {
+      try {
+        const { sessionId } = req.body;
+        if (!sessionId) {
+          return res.status(400).json({ message: "Session ID required" });
+        }
+        clearSessionSpamHistory(sessionId);
+        res.json({ success: true, message: "Session spam history cleared" });
+      } catch (error) {
+        console.error("Failed to clear session spam history:", error);
+        res.status(500).json({ message: "Failed to clear spam history" });
+      }
+    });
+  }
 
   // Add test routes for development
   if (process.env.NODE_ENV === 'development') {

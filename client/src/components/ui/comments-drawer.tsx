@@ -84,7 +84,16 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
         deviceFingerprint
       });
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
+      // Handle spam warning if present
+      if (response?.spamWarning) {
+        toast({
+          title: "⚠️ Comment Pattern Alert",
+          description: response.spamWarning,
+          variant: "destructive",
+        });
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/posts", postId, "comments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       setComment("");
@@ -96,11 +105,26 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
       });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to post comment",
-        variant: "destructive",
-      });
+      // Handle spam-related errors with specific messaging
+      if (error.isBlocked) {
+        toast({
+          title: "⛔ Account Restricted",
+          description: error.message || "Your account has been temporarily restricted due to multiple violations.",
+          variant: "destructive",
+        });
+      } else if (error.isThrottled) {
+        toast({
+          title: "⏱️ Comment Cooldown",
+          description: error.message || "Please wait before commenting again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to post comment",
+          variant: "destructive",
+        });
+      }
     },
   });
 

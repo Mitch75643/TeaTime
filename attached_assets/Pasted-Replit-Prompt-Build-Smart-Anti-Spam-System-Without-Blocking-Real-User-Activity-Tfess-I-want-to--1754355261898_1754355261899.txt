@@ -1,0 +1,60 @@
+Replit Prompt — Build Smart Anti-Spam System Without Blocking Real User Activity (Tfess)
+
+I want to add a system to prevent users from spamming low-quality or excessive posts, but I do not want to discourage active or enthusiastic participation. It should feel invisible to regular users and only affect those behaving abusively.
+
+This should apply across the entire Tfess app — including:
+
+Home Page
+
+Daily Spill Page
+
+All Community Topic Pages (Celebrity Tea, Story Time, Hot Topics, Tea Experiments, Daily Debate, Feedback/Suggestions, etc.)
+
+If a user makes 1 post on Home and 2 on Daily Spill, it should count as 3 posts toward the limit.
+
+🔧 System Logic:
+
+Post Frequency Limit (Soft Throttle)
+
+Allow up to 10 posts per 15 minutes total across all pages (adjustable — e.g., 3 posts).
+
+After that, show a friendly message:“💬 Looks like you're on a roll! Try spacing out your posts so others can join the convo too.”
+
+Do not fully block, but encourage a pause.
+
+Content Similarity Filter
+
+Detect if a user posts nearly identical content multiple times.
+
+If repeated spam is detected, show:“⚠️ Posting the same thing repeatedly could limit your account visibility.”
+
+Duplicate Link or Keyword Flagging
+
+If the same link, emoji, or word pattern is used across multiple recent posts, log that user and temporarily hide those posts from public view pending review.
+
+Invisible Rate Limiting (Per Device/User)
+
+Apply quiet back-end limits using device fingerprint or user session:
+
+Temporarily throttle post visibility if someone is flooding without actual engagement (likes, comments, replies).
+
+Limit posting not by a hard block, but by reducing exposure.
+
+Progressive Feedback
+
+First offense: Gentle tooltip warning.
+
+Second: Slower post visibility or soft cooldown.
+
+Repeat offenders: Auto-flagged for admin review or silent shadowban.
+
+Whitelist Active Community Builders
+
+Users who consistently get engagement (likes, replies) can be exempted from strict spam filters.
+
+No UI Friction for Normal Users
+
+All real users should be able to post as usual if they aren’t triggering suspicious patterns.
+
+The system should never break the “flow” of someone excited to share — only react to suspicious abuse patterns.
+
