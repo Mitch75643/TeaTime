@@ -578,9 +578,9 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                     ) : (
-                      <div className="space-y-8">
+                      <div className="space-y-6">
                         {/* Smart Feed Notification */}
-                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 text-center mx-2">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 text-center">
                           <p className="text-blue-700 dark:text-blue-300 font-medium">
                             Smart feed active - posts are distributed fairly for better visibility
                           </p>
@@ -604,8 +604,11 @@ export default function TopicFeed() {
                     
                         {/* Regular Community Posts */}
                         {communityPosts.map((post: Post) => (
-                          <div key={post.id} className="mx-2">
-                            <PostCard post={post} />
+                          <div key={post.id} className="w-full">
+                            <PostCard 
+                              post={post} 
+                              hideStoryCategory={topicId === "story-time"}
+                            />
                           </div>
                         ))}
                       </div>
@@ -656,10 +659,13 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                     ) : (
-                      <div className="space-y-8">
+                      <div className="space-y-6">
                         {userPosts.map((post: Post) => (
-                          <div key={post.id} className="mx-2">
-                            <PostCard post={post} />
+                          <div key={post.id} className="w-full">
+                            <PostCard 
+                              post={post} 
+                              hideStoryCategory={topicId === "story-time"}
+                            />
                           </div>
                         ))}
                       </div>

@@ -15,6 +15,7 @@ import { formatDistanceToNow } from "date-fns";
 
 interface PostCardProps {
   post: Post;
+  hideStoryCategory?: boolean;
 }
 
 const categoryEmojis: Record<string, string> = {
@@ -62,7 +63,7 @@ const reactionEmojis = {
   sad: "😲", 
 };
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, hideStoryCategory = false }: PostCardProps) {
   const [userReactions, setUserReactions] = useState<Record<string, boolean>>({});
   const [sessionId, setSessionId] = useState<string>('');
   const [liveReactions, setLiveReactions] = useState<Record<string, number>>(
@@ -220,8 +221,10 @@ export function PostCard({ post }: PostCardProps) {
       id={`post-${post.id}`}
       className={cn(
         "w-full max-w-full rounded-2xl p-6 space-y-4 relative overflow-hidden break-words",
-        "bg-white dark:bg-gray-800/50 backdrop-blur-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200"
-      )}>
+        "bg-white dark:bg-gray-800/50 backdrop-blur-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200",
+        "mx-auto"
+      )}
+      style={{ minWidth: "100%", maxWidth: "100%" }}>
       {/* Trending Badge */}
       {isTrending && !post.isDrama && (
         <div className="absolute top-0 right-0 gradient-drama text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
@@ -245,14 +248,17 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0">
-          <span className={cn(
-            "px-3 py-1 text-xs font-bold rounded-full border-2 shadow-sm whitespace-nowrap",
-            post.isDrama 
-              ? "gradient-drama text-white border-red-300"
-              : categoryColors[post.category] || "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
-          )}>
-            {categoryEmojis[post.category]} {categoryLabel}
-          </span>
+          {/* Hide category badge for story posts in story-time section */}
+          {!(hideStoryCategory && post.category === 'story') && (
+            <span className={cn(
+              "px-3 py-1 text-xs font-bold rounded-full border-2 shadow-sm whitespace-nowrap",
+              post.isDrama 
+                ? "gradient-drama text-white border-red-300"
+                : categoryColors[post.category] || "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
+            )}>
+              {categoryEmojis[post.category]} {categoryLabel}
+            </span>
+          )}
           {/* Story Type Badge */}
           {post.storyType && (
             <span className={cn(
