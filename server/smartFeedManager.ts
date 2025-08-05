@@ -210,6 +210,7 @@ export class SmartFeedManager {
    */
   static clearSessionState(sessionId: string): void {
     this.sessionBatchState.delete(sessionId);
+    console.log(`[Smart Feed] Cleared session state for: ${sessionId}`);
   }
 
   /**

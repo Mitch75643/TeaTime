@@ -99,16 +99,19 @@ export function useSmartFeed(options: UseSmartFeedOptions) {
   useEffect(() => {
     const unsubscribe = subscribeToMessages((message: any) => {
       if (message.type === 'posts_available') {
-        // Check if this notification applies to our feed
-        const messageSection = message.section;
-        const messagePostContext = message.postContext;
+        // Extract section and context from message
+        const messageSection = message.data?.section || message.section || null;
+        const messagePostContext = message.data?.postContext || message.postContext || 'home';
         
-        const isRelevant = 
-          (!messageSection && !section && messagePostContext === postContext) ||
-          (messageSection === section);
+        console.log('[Smart Feed] Message received:', { messageSection, messagePostContext, section, postContext });
+        
+        // Check if this notification applies to our feed
+        const sectionMatches = (messageSection === section) || (!messageSection && !section);
+        const contextMatches = messagePostContext === (postContext || 'home');
 
-        if (isRelevant) {
-          setNewPostsAvailable(prev => prev + (message.data.count || 1));
+        if (sectionMatches && contextMatches) {
+          console.log('[Smart Feed] New posts available:', message.data?.count || 1);
+          setNewPostsAvailable(prev => prev + (message.data?.count || 1));
         }
       }
     });
@@ -118,22 +121,25 @@ export function useSmartFeed(options: UseSmartFeedOptions) {
 
   // Manual refresh function that clears queue and fetches fresh data
   const refreshFeed = useCallback(async () => {
+    console.log('[Smart Feed] Refreshing feed, clearing new posts count:', newPostsAvailable);
     setNewPostsAvailable(0);
     setLastRefreshTime(Date.now());
     
-    // Add clearQueue parameter for fresh data
+    // Build the refresh URL with clearQueue parameter
     const refreshParams = new URLSearchParams(queryParams);
     refreshParams.set('clearQueue', 'true');
+    refreshParams.set('timestamp', Date.now().toString()); // Force cache bust
     
-    const url = section 
-      ? `/api/posts/${section}/${sortBy}/${userOnly ? 'user' : 'all'}?${refreshParams.toString()}`
-      : `/api/posts?${refreshParams.toString()}`;
+    // Invalidate existing cache
+    await queryClient.invalidateQueries({ queryKey });
     
-    // Invalidate and refetch with fresh data
-    queryClient.invalidateQueries({ queryKey: [...queryKey, queryParams.toString()] });
+    // Force refetch with fresh parameters
+    const result = await refetch();
+    const posts = Array.isArray(result.data) ? result.data : result.data?.posts || [];
+    console.log('[Smart Feed] Refresh complete, new posts:', posts.length);
     
-    return refetch();
-  }, [queryClient, queryKey, queryParams, section, sortBy, userOnly, refetch]);
+    return result;
+  }, [queryClient, queryKey, queryParams, refetch, newPostsAvailable]);
 
   // Load more posts from the queue
   const loadMorePosts = useCallback(async () => {

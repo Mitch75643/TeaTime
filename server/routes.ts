@@ -74,6 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Clear session queue if requested (for manual refresh)
       if (clearQueue === 'true') {
+        console.log(`[Smart Feed] Clearing queue for home feed, session ${sessionId}`);
         SmartFeedManager.clearSessionState(sessionId);
       }
       
@@ -136,6 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Clear session queue if requested (for manual refresh)
       if (clearQueue === 'true') {
+        console.log(`[Smart Feed] Clearing queue for topic ${topicId}, session ${sessionId}`);
         SmartFeedManager.clearSessionState(`${sessionId}_${topicId}`);
       }
       
