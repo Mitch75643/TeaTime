@@ -27,6 +27,8 @@ export function DebateVoting({ postId }: DebateVotingProps) {
   const queryClient = useQueryClient();
   const { subscribeToMessages } = useWebSocket();
 
+  console.log('DebateVoting render:', { postId, userVote, hasVoted, localVotes });
+
   // Get debate results
   const { data: debateResults, isLoading } = useQuery<DebateResults>({
     queryKey: ['/api/debates', postId, 'results'],
@@ -65,8 +67,10 @@ export function DebateVoting({ postId }: DebateVotingProps) {
   useEffect(() => {
     const unsubscribe = subscribeToMessages((message: any) => {
       if (message.type === 'debate_vote' && message.postId === postId) {
+        console.log('Real-time debate vote update received:', message);
         // Invalidate queries to refetch latest data
         queryClient.invalidateQueries({ queryKey: ['/api/debates', postId, 'results'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/debates', postId, 'has-voted'] });
       }
     });
 
@@ -76,12 +80,19 @@ export function DebateVoting({ postId }: DebateVotingProps) {
   // Vote mutation
   const voteMutation = useMutation({
     mutationFn: async (vote: 'up' | 'down') => {
-      return apiRequest('/api/debates/vote', {
+      console.log('Submitting debate vote:', { postId, vote });
+      const response = await apiRequest('/api/debates/vote', {
         method: 'POST',
         body: { postId, vote },
       });
+      console.log('Vote submission response:', response);
+      return response;
     },
     onMutate: async (vote) => {
+      console.log('Optimistic update for vote:', vote);
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/debates', postId] });
+      
       // Optimistic update
       setHasVoted(true);
       setUserVote(vote);
@@ -90,12 +101,19 @@ export function DebateVoting({ postId }: DebateVotingProps) {
         [vote]: prev[vote] + 1
       }));
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Vote submitted successfully:', data);
       // Invalidate queries to get fresh data
       queryClient.invalidateQueries({ queryKey: ['/api/debates', postId] });
       queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      
+      toast({
+        title: "Vote submitted!",
+        description: "Your vote has been recorded",
+      });
     },
     onError: (error: any) => {
+      console.error('Vote submission failed:', error);
       // Revert optimistic update
       setHasVoted(false);
       setUserVote(null);
@@ -171,7 +189,7 @@ export function DebateVoting({ postId }: DebateVotingProps) {
           <div className="flex flex-col items-center">
             <span className="text-lg">👍</span>
             <span className="text-sm font-medium">Yes</span>
-            {hasVoted && (
+            {(hasVoted || totalVotes > 0) && (
               <span className="text-xs opacity-80">{yesPercentage}%</span>
             )}
           </div>
@@ -192,14 +210,14 @@ export function DebateVoting({ postId }: DebateVotingProps) {
           <div className="flex flex-col items-center">
             <span className="text-lg">👎</span>
             <span className="text-sm font-medium">No</span>
-            {hasVoted && (
+            {(hasVoted || totalVotes > 0) && (
               <span className="text-xs opacity-80">{noPercentage}%</span>
             )}
           </div>
         </Button>
       </div>
 
-      {hasVoted && totalVotes > 0 && (
+      {(hasVoted || totalVotes > 0) && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <span>Community Results</span>
