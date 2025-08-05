@@ -13,6 +13,7 @@ import { generateAlias } from "@/lib/aliases";
 import { CelebrationAnimation, useCelebration } from "./celebration-animations";
 import { CommunityTopicAnimation, useCommunityTopicAnimation } from "./community-topic-animations";
 import { getDeviceFingerprint } from "@/lib/deviceFingerprint";
+import { EnhancedHashtagInput } from "./enhanced-hashtag-input";
 import type { InsertPost } from "@shared/schema";
 
 interface SectionPostModalProps {
@@ -152,9 +153,7 @@ export function SectionPostModal({
   onPostSuccess
 }: SectionPostModalProps) {
   const [content, setContent] = useState("");
-  const [tagsInput, setTagsInput] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   
   // Section-specific fields
   const [celebrityName, setCelebrityName] = useState("");
@@ -360,21 +359,8 @@ export function SectionPostModal({
     setTopicTitle("");
     setPollOptionA("");
     setPollOptionB("");
-    setTagsInput("");
     setSelectedTags([]);
-    setShowTagSuggestions(false);
     onClose();
-  };
-
-  const addTag = (tag: string) => {
-    if (!selectedTags.includes(tag) && selectedTags.length < 5) {
-      setSelectedTags([...selectedTags, tag]);
-    }
-    setShowTagSuggestions(false);
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
   };
 
   // Get section-specific tag suggestions
@@ -386,10 +372,7 @@ export function SectionPostModal({
     }
   };
 
-  const filteredTagSuggestions = getSectionTags().filter(tag => 
-    tag.toLowerCase().includes(tagsInput.toLowerCase()) && 
-    !selectedTags.includes(tag)
-  );
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -526,56 +509,14 @@ export function SectionPostModal({
             <p className="text-xs text-gray-500 mt-1">{content.length}/500 characters</p>
           </div>
 
-          {/* Tags Section */}
-          <div>
-            <Label htmlFor="tags">Tags (Optional)</Label>
-            <div className="mt-1 space-y-2">
-              {selectedTags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {selectedTags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full"
-                    >
-                      {tag}
-                      <button
-                        onClick={() => removeTag(tag)}
-                        className="text-purple-500 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-200"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-              
-              <div className="relative">
-                <Input
-                  id="tags"
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  onFocus={() => setShowTagSuggestions(true)}
-                  placeholder="Add tags..."
-                  className="pr-8"
-                />
-                <Hash className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
-
-              {showTagSuggestions && filteredTagSuggestions.length > 0 && (
-                <div className="border rounded-lg bg-white dark:bg-gray-800 shadow-lg max-h-32 overflow-y-auto">
-                  {filteredTagSuggestions.slice(0, 8).map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => addTag(tag)}
-                      className="block w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Enhanced Tags Section */}
+          <EnhancedHashtagInput
+            selectedTags={selectedTags}
+            onTagsChange={setSelectedTags}
+            suggestions={getSectionTags().map(tag => tag.replace("#", ""))}
+            placeholder="Add tags..."
+            label="Tags (Optional)"
+          />
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">

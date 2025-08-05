@@ -16,6 +16,7 @@ import { getAvatarById } from "@/lib/avatars";
 import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/draft-storage";
 import { HomeCategoryAnimation, useHomeCategoryAnimation } from "./home-category-animations";
 import { OtherCategoryEffect, useOtherCategoryEffect } from "./other-category-effect";
+import { EnhancedHashtagInput } from "./enhanced-hashtag-input";
 import type { InsertPost, ModerationResponse } from "@shared/schema";
 import { MentalHealthSupport } from "@/components/ui/mental-health-support";
 import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
@@ -65,9 +66,7 @@ export function PostModal({
 }: PostModalProps) {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
-  const [tagsInput, setTagsInput] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [moderationResponse, setModerationResponse] = useState<{
     severityLevel: 1 | 2 | 3;
     supportMessage?: string;
@@ -80,7 +79,7 @@ export function PostModal({
   const [showMentalHealthSupport, setShowMentalHealthSupport] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const tagInputRef = useRef<HTMLInputElement>(null);
+
   const { userAvatarId } = useUserAvatar();
   const { userAlias } = useUserAlias();
   const { avatarColor } = useAvatarColor();
@@ -117,7 +116,7 @@ export function PostModal({
       setContent("");
       setCategory("");
       setSelectedTags([]);
-      setTagsInput("");
+
     }
   }, [isOpen]); // Only depend on isOpen to prevent constant resets
 
@@ -228,13 +227,7 @@ export function PostModal({
       return;
     }
 
-    // Combine selected tags with any manually typed ones
-    const manualTags = tagsInput
-      .split(/[\s,]+/)
-      .filter(tag => tag.trim())
-      .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
-    
-    const allTags = Array.from(new Set([...selectedTags, ...manualTags])).slice(0, 5);
+    const allTags = selectedTags.slice(0, 5);
 
     createPostMutation.mutate({
       content: content.trim(),
@@ -250,9 +243,7 @@ export function PostModal({
   const handleClose = () => {
     setContent("");
     setCategory("");
-    setTagsInput("");
     setSelectedTags([]);
-    setShowTagSuggestions(false);
     setModerationResponse(null);
     setShowMentalHealthSupport(false);
     onClose();
@@ -270,21 +261,7 @@ export function PostModal({
     handleClose();
   };
 
-  const addTag = (tag: string) => {
-    if (!selectedTags.includes(tag) && selectedTags.length < 5) {
-      setSelectedTags([...selectedTags, tag]);
-    }
-    setShowTagSuggestions(false);
-  };
 
-  const removeTag = (tagToRemove: string) => {
-    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
-  };
-
-  const filteredTagSuggestions = popularTags.filter(tag => 
-    tag.toLowerCase().includes(tagsInput.toLowerCase()) && 
-    !selectedTags.includes(tag)
-  );
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -346,82 +323,14 @@ export function PostModal({
             </div>
           </div>
 
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label htmlFor="tags" className="flex items-center">
-              <Hash className="h-4 w-4 mr-1" />
-              Add tags (optional)
-            </Label>
-            
-            {/* Selected Tags */}
-            {selectedTags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-2">
-                {selectedTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 rounded-full"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-purple-600 dark:hover:text-purple-200"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-            
-            <div className="relative">
-              <Input
-                ref={tagInputRef}
-                id="tags"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                onFocus={() => setShowTagSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowTagSuggestions(false), 150)}
-                placeholder="Type or select tags..."
-                maxLength={50}
-              />
-              
-              {/* Tag Suggestions */}
-              {showTagSuggestions && filteredTagSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10 max-h-32 overflow-y-auto">
-                  {filteredTagSuggestions.slice(0, 8).map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                      onClick={() => addTag(tag)}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            {/* Popular Tags Quick Select */}
-            <div className="flex flex-wrap gap-1">
-              {popularTags.slice(0, 6).filter(tag => !selectedTags.includes(tag)).map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => addTag(tag)}
-                  className="text-xs px-2 py-1 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition-colors"
-                  disabled={selectedTags.length >= 5}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-            
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Select up to 5 tags. Popular suggestions shown above.
-            </p>
-          </div>
+          {/* Enhanced Tags Section */}
+          <EnhancedHashtagInput
+            selectedTags={selectedTags}
+            onTagsChange={setSelectedTags}
+            suggestions={popularTags.map(tag => tag.replace("#", ""))}
+            placeholder="Add tags..."
+            label="Add tags (optional)"
+          />
 
           {/* Submit Button */}
           <Button
