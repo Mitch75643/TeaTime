@@ -179,7 +179,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
           <span className="text-sm font-medium">{commentCount}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] flex flex-col">
+      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] flex flex-col bg-gray-50 dark:bg-gray-800">
         <SheetHeader className="flex-shrink-0">
           <SheetTitle>Comments ({commentCount})</SheetTitle>
         </SheetHeader>
