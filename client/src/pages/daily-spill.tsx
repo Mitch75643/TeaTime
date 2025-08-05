@@ -13,7 +13,7 @@ import { Coffee, Plus, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Tro
 import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import { NotificationLink } from "@/components/ui/notification-link";
-import { useSmartFeed } from "@/hooks/use-smart-feed";
+import { useSmartFeed } from "@/hooks/useSmartFeed";
 import { useDailyPromptStreak } from "@/hooks/use-daily-prompt-streak";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
@@ -364,27 +364,20 @@ export default function DailySpill() {
   // Weekly theme animation hook
   const { animation, triggerAnimation, completeAnimation } = useWeeklyThemeAnimation();
 
-  // Initialize smart feed for daily spills
-  const smartFeed = useSmartFeed({
-    queryKey: ["/api/posts", "daily", "new"],
-    apiEndpoint: "/api/posts",
+  // Use the smart feed hook for daily spills
+  const {
+    posts,
+    isLoading,
+    hasMore,
+    newPostsAvailable,
+    smartFeedActive,
+    refreshFeed,
+    loadMorePosts
+  } = useSmartFeed({
     category: "daily",
     sortBy: "new",
-    postContext: "daily",
+    postContext: "daily"
   });
-
-  // Get posts with daily spill category and context
-  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", "daily", "new"],
-    queryFn: async () => {
-      const response = await fetch("/api/posts?category=daily&sortBy=new&postContext=daily");
-      if (!response.ok) throw new Error("Failed to fetch posts");
-      return response.json();
-    },
-  });
-
-  // Apply smart feed batching
-  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
 
   // Handle post submission success
   const handlePostSuccess = () => {
@@ -402,7 +395,7 @@ export default function DailySpill() {
 
   // Get "Spill of the Day" - highest reacted post
   const spillOfTheDay = posts.length > 0 
-    ? posts.reduce((best, current) => {
+    ? posts.reduce((best: Post, current: Post) => {
         const currentReactions = Object.values(current.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
         const bestReactions = Object.values(best.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
         return currentReactions > bestReactions ? current : best;
@@ -529,10 +522,10 @@ export default function DailySpill() {
       )}
 
       {/* New Posts Banner */}
-      {smartFeed.showNewPostsBanner && (
+      {newPostsAvailable > 0 && (
         <SmartFeedBanner
-          newPostsCount={smartFeed.newPostsCount}
-          onLoadNewPosts={smartFeed.handleLoadNewPosts}
+          newPostsCount={newPostsAvailable}
+          onLoadNewPosts={refreshFeed}
           className={cn(
             "transition-opacity duration-200",
             isPostModalOpen && "opacity-0 pointer-events-none"
@@ -548,16 +541,16 @@ export default function DailySpill() {
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Today's Spills ({allPosts.length})
+              Today's Spills ({posts.length})
             </h2>
             <Button
               variant="ghost"
               size="sm"
-              onClick={smartFeed.handleRefresh}
-              disabled={smartFeed.isRefreshing}
+              onClick={refreshFeed}
+              disabled={isLoading}
               className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
             >
-              <RefreshCw className={`h-3 w-3 ${smartFeed.isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
               <span className="text-xs">Refresh</span>
             </Button>
           </div>
@@ -601,10 +594,10 @@ export default function DailySpill() {
             ))}
             
             {/* Load More Button */}
-            {hasMorePosts && (
+            {hasMore && (
               <LoadMoreButton
-                onLoadMore={smartFeed.handleLoadMore}
-                remainingCount={allPosts.length - posts.length}
+                onLoadMore={loadMorePosts}
+                remainingCount={0}
               />
             )}
         </div>
