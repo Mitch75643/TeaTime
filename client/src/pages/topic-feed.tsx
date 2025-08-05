@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/components/ui/post-card";
+import { DailyDebatePostCard } from "@/components/ui/daily-debate-post-card";
 import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { CelebrityTeaFeatures } from "@/components/ui/celebrity-tea-features";
 import { StoryTimeFeatures } from "@/components/ui/story-time-features";
@@ -609,10 +610,17 @@ export default function TopicFeed() {
                     
                     {/* Regular Community Posts - Full Width */}
                     {communityPosts.map((post: Post) => (
-                      <PostCard 
-                        key={post.id} 
-                        post={post}
-                      />
+                      topicId === "daily-debate" ? (
+                        <DailyDebatePostCard 
+                          key={post.id} 
+                          post={post}
+                        />
+                      ) : (
+                        <PostCard 
+                          key={post.id} 
+                          post={post}
+                        />
+                      )
                     ))}
                     
                     {/* Smart feed info for new feeds */}
@@ -673,10 +681,17 @@ export default function TopicFeed() {
                 ) : (
                   <div className="space-y-6">
                     {userPosts.map((post: Post) => (
-                      <PostCard 
-                        key={post.id} 
-                        post={post}
-                      />
+                      topicId === "daily-debate" ? (
+                        <DailyDebatePostCard 
+                          key={post.id} 
+                          post={post}
+                        />
+                      ) : (
+                        <PostCard 
+                          key={post.id} 
+                          post={post}
+                        />
+                      )
                     ))}
                   </div>
                 )}
