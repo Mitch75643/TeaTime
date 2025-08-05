@@ -13,26 +13,26 @@ const voteOptions = [
   {
     type: "wrong",
     emoji: "❌",
-    label: "You were wrong",
-    colorClass: "bg-red-100 hover:bg-red-200 text-red-800 border-red-300",
+    label: "You Were Wrong",
+    colorClass: "bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-700/50",
   },
   {
     type: "valid",
     emoji: "✅",
-    label: "You're valid",
-    colorClass: "bg-green-100 hover:bg-green-200 text-green-800 border-green-300",
+    label: "You're Valid",
+    colorClass: "bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700/50",
   },
   {
     type: "both_wild",
-    emoji: "🤪",
-    label: "You're both wild",
-    colorClass: "bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300",
+    emoji: "🔄",
+    label: "You're Both Wild",
+    colorClass: "bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-700/50",
   },
   {
     type: "iconic",
     emoji: "👑",
-    label: "Iconic behavior",
-    colorClass: "bg-purple-100 hover:bg-purple-200 text-purple-800 border-purple-300",
+    label: "Iconic Behavior",
+    colorClass: "bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-700/50",
   },
 ];
 
@@ -95,9 +95,13 @@ export function DramaVoting({ postId }: DramaVotingProps) {
 
   return (
     <>
-      <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 space-y-3">
-        <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 text-center">Community Verdict</h4>
-        <div className="grid grid-cols-2 gap-2">
+      <div className="bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 rounded-2xl p-5 space-y-4 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+        <div className="text-center">
+          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Community Verdict</h4>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Cast your vote below</p>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-3">
           {voteOptions.map((option) => {
             const voteCount = votes[option.type] || 0;
             const isSelected = userVote === option.type;
@@ -108,32 +112,44 @@ export function DramaVoting({ postId }: DramaVotingProps) {
                 key={option.type}
                 variant="ghost"
                 className={cn(
-                  "p-3 rounded-lg text-center transition-all border-2 border-transparent hover:scale-105",
+                  "h-auto p-4 rounded-xl text-center transition-all duration-200 border-2",
+                  "flex flex-col items-center justify-center space-y-2",
+                  "hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]",
                   option.colorClass,
-                  isSelected && "border-current shadow-lg",
-                  isDisabled && "opacity-50 cursor-not-allowed",
-                  option.type === "iconic" && voteCount >= 3 && "animate-pulse"
+                  isSelected && "ring-2 ring-current ring-offset-2 ring-offset-white dark:ring-offset-gray-800 shadow-lg scale-[1.02]",
+                  isDisabled && "opacity-50 cursor-not-allowed hover:scale-100",
+                  option.type === "iconic" && voteCount >= 3 && "animate-pulse shadow-purple-200 dark:shadow-purple-900"
                 )}
                 onClick={() => handleVote(option.type)}
                 disabled={voteMutation.isPending || isDisabled}
               >
                 <div className={cn(
-                  "text-2xl mb-1 transition-transform",
-                  option.type === "iconic" && voteCount >= 3 && "animate-bounce"
+                  "text-3xl transition-transform duration-200",
+                  option.type === "iconic" && voteCount >= 3 && "animate-bounce",
+                  isSelected && "scale-110"
                 )}>{option.emoji}</div>
-                <div className="text-xs font-medium">{option.label}</div>
-                <div className={cn(
-                  "text-xs mt-1 opacity-75 font-medium",
-                  option.type === "iconic" && voteCount >= 3 && "text-purple-600 font-bold"
-                )}>{voteCount} votes</div>
+                
+                <div className="space-y-1">
+                  <div className="text-sm font-semibold leading-tight">{option.label}</div>
+                  <div className={cn(
+                    "text-xs font-medium px-2 py-1 rounded-full bg-white/50 dark:bg-gray-800/50",
+                    option.type === "iconic" && voteCount >= 3 && "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold"
+                  )}>
+                    {voteCount} vote{voteCount !== 1 ? 's' : ''}
+                  </div>
+                </div>
               </Button>
             );
           })}
         </div>
+        
         {hasVoted && (
-          <p className="text-xs text-center text-gray-600 dark:text-gray-400 mt-2">
-            Thanks for voting! You can only vote once per post.
-          </p>
+          <div className="text-center pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+            <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
+              <span className="text-green-500">✓</span>
+              Thanks for voting! You can only vote once per post.
+            </p>
+          </div>
         )}
       </div>
       
