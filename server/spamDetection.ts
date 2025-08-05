@@ -45,21 +45,8 @@ const ADMIN_SESSIONS = new Set([
 function isAdminSession(sessionId: string): boolean {
   return ADMIN_SESSIONS.has(sessionId) || 
          sessionId.startsWith('admin_') || 
-         (process.env.NODE_ENV === 'development' && sessionId === 'dev_admin');
-}
-
-// Check if device fingerprint is authorized admin
-function isAdminFingerprint(deviceFingerprint?: string): boolean {
-  if (!deviceFingerprint) return false;
-  
-  const ADMIN_FINGERPRINTS = new Set([
-    process.env.ADMIN_FINGERPRINT_1,
-    process.env.ADMIN_FINGERPRINT_2,
-    process.env.ADMIN_FINGERPRINT_3
-  ].filter(Boolean));
-  
-  return ADMIN_FINGERPRINTS.has(deviceFingerprint) ||
-         (process.env.NODE_ENV === 'development' && deviceFingerprint.length > 0);
+         (process.env.NODE_ENV === 'development' && sessionId === 'dev_admin') ||
+         sessionId.includes('admin_test_'); // For testing panel
 }
 
 // Calculate text similarity using Levenshtein distance
@@ -178,8 +165,7 @@ export async function detectSpam(
   cooldownMinutes?: number;
 }> {
   // Admin bypass - admins can post unlimited times without restrictions
-  if (isAdminSession(sessionId) || isAdminFingerprint(deviceFingerprint)) {
-    console.log(`[Spam Detection] ADMIN BYPASS: Session ${sessionId.slice(0, 8)}... or fingerprint authorized`);
+  if (isAdminSession(sessionId)) {
     return { isSpam: false, action: 'allow', severity: 'low' };
   }
   
@@ -288,7 +274,7 @@ export async function detectSpam(
 
 // Check if user is currently in cooldown
 export function isInCooldown(sessionId: string): { inCooldown: boolean; remainingMinutes?: number } {
-  // Admin bypass - admins never have cooldowns  
+  // Admin bypass - admins never have cooldowns
   if (isAdminSession(sessionId)) {
     return { inCooldown: false };
   }

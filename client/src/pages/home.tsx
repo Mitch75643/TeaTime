@@ -12,6 +12,7 @@ import { Plus, RefreshCw } from "lucide-react";
 import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import { useSmartFeed } from "@/hooks/use-smart-feed";
+import { SpamTestPanel } from "@/components/admin/spam-test-panel";
 import type { Post } from "@shared/schema";
 
 const categories = [
@@ -214,6 +215,8 @@ export default function Home() {
         onClose={() => setIsPostModalOpen(false)}
         postContext={{ page: 'home' }}
       />
+      
+      <SpamTestPanel />
     </div>
   );
 }
