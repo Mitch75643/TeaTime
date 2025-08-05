@@ -531,7 +531,7 @@ export default function TopicFeed() {
 
             {/* Posts Content */}
             <div className="w-full">
-              <div className="px-2">
+              <div className="pl-0 pr-2">
                 {activeTab === 'community' && (
                   <div className="space-y-6">
                     {isLoadingCommunity ? (
