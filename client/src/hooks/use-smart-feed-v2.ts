@@ -135,18 +135,25 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     setState(prev => ({ ...prev, isRefreshing: true }));
 
     try {
-      // Reset displayed post IDs to get fresh content
+      // Clear displayed post IDs to get fresh content
       setDisplayedPostIds([]);
       
-      // Invalidate and refetch
-      await queryClient.invalidateQueries({ queryKey });
-      await refetch();
+      // Force refetch with cleared post IDs
+      await queryClient.invalidateQueries({ 
+        queryKey: [...queryKey, "smartfeed"],
+        exact: false 
+      });
       
-      setState(prev => ({
-        ...prev,
-        newPostsCount: 0,
-        isRefreshing: false,
-      }));
+      // Wait a brief moment for state to update, then refetch
+      setTimeout(async () => {
+        await refetch();
+        setState(prev => ({
+          ...prev,
+          newPostsCount: 0,
+          isRefreshing: false,
+        }));
+      }, 100);
+      
     } catch (error) {
       console.error("Failed to refresh feed:", error);
       setState(prev => ({ ...prev, isRefreshing: false }));
