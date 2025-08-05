@@ -15,6 +15,7 @@ const categories = [
   { id: "money", label: "Money", emoji: "💸" },
   { id: "hot-takes", label: "Hot Takes", emoji: "🌍" },
   { id: "drama", label: "Am I in the Wrong?", emoji: "🎭" },
+  { id: "other", label: "Other", emoji: "📝" },
 ];
 
 // Category colors for active and inactive states
@@ -50,6 +51,10 @@ const categoryStyles = {
   "drama": {
     active: "gradient-drama text-white border-red-300",
     inactive: "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 border-red-200"
+  },
+  "other": {
+    active: "bg-gray-500 text-white dark:bg-gray-600 border-gray-300",
+    inactive: "bg-gray-50 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 border-gray-200"
   }
 };
 

@@ -24,6 +24,7 @@ const categoryEmojis: Record<string, string> = {
   money: "💸",
   "hot-takes": "🌍",
   drama: "🎭",
+  other: "📝",
 };
 
 const categoryColors: Record<string, string> = {
@@ -34,6 +35,7 @@ const categoryColors: Record<string, string> = {
   money: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-700",
   "hot-takes": "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-700",
   drama: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-700",
+  other: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600",
 };
 
 const storyTypeEmojis: Record<string, string> = {
@@ -155,6 +157,7 @@ export function PostCard({ post }: PostCardProps) {
   const timeAgo = formatDistanceToNow(new Date(post.createdAt!), { addSuffix: true });
   const categoryLabel = post.category === "drama" ? "Am I in the Wrong?" : 
     post.category === "hot-takes" ? "Hot Takes" :
+    post.category === "other" ? "Other" :
     post.category.charAt(0).toUpperCase() + post.category.slice(1);
 
   // Calculate trending score for visual indication

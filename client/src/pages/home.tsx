@@ -23,6 +23,7 @@ const categories = [
   { id: "money", label: "Money", emoji: "💸" },
   { id: "hot-takes", label: "Hot Takes", emoji: "🌍" },
   { id: "drama", label: "Am I in the Wrong?", emoji: "🎭" },
+  { id: "other", label: "Other", emoji: "📝" },
 ];
 
 export default function Home() {
