@@ -282,7 +282,6 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
       <Header />
-      
       <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto">
         {/* Profile Header */}
         <Card>
@@ -730,17 +729,13 @@ export default function Profile() {
               <p>Made for anonymous sharing</p>
               <button
                 onClick={() => setAdminPasswordOpen(true)}
-                className="mt-3 text-xs text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-200 opacity-50 hover:opacity-100"
-              >
-                🔒 Admin Only
-              </button>
+                className="mt-3 text-xs dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-200 opacity-50 hover:opacity-100 text-[#8d9ab3]"
+              >Thank you for being apart of our team!</button>
             </div>
           </div>
         )}
       </main>
-
       <BottomNav />
-      
       {/* Avatar Selector Modal */}
       <AvatarSelector
         isOpen={avatarSelectorOpen}
@@ -748,7 +743,6 @@ export default function Profile() {
         currentAvatar={userAvatarId}
         onAvatarSelect={handleAvatarSelect}
       />
-
       {/* Admin Password Modal */}
       <Dialog open={adminPasswordOpen} onOpenChange={setAdminPasswordOpen}>
         <DialogContent className="sm:max-w-[400px]">
