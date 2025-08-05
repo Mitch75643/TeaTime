@@ -68,6 +68,7 @@ export function PostCard({ post }: PostCardProps) {
   const [liveReactions, setLiveReactions] = useState<Record<string, number>>(
     post.reactions as Record<string, number> || { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 }
   );
+  const [liveCommentCount, setLiveCommentCount] = useState<number>(post.commentCount || 0);
   const queryClient = useQueryClient();
   const { profile, getCachedProfile } = useUserProfile();
   const { subscribeToMessages } = useWebSocket();
@@ -135,6 +136,8 @@ export function PostCard({ post }: PostCardProps) {
         });
       } else if (message.type === 'comment_added' && message.postId === post.id) {
         console.log('Real-time comment added:', message);
+        // Update local comment count immediately for real-time UI
+        setLiveCommentCount(prev => prev + 1);
         // Invalidate posts query to refresh comment counts
         queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
         // Also invalidate any community-specific queries
@@ -145,11 +148,12 @@ export function PostCard({ post }: PostCardProps) {
     return unsubscribe;
   }, [post.id, subscribeToMessages, queryClient]);
 
-  // Update live reactions when post data changes (initial load)
+  // Update live reactions and comment count when post data changes (initial load)
   useEffect(() => {
     const postReactions = post.reactions as Record<string, number> || { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 };
     setLiveReactions(postReactions);
-  }, [post.reactions]);
+    setLiveCommentCount(post.commentCount || 0);
+  }, [post.reactions, post.commentCount]);
 
   const reactionMutation = useMutation({
     mutationFn: async ({ type, remove }: { type: string; remove?: boolean }) => {
@@ -330,7 +334,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
         <CommentsDrawer 
           postId={post.id} 
-          commentCount={post.commentCount || 0}
+          commentCount={liveCommentCount}
           isDrama={post.isDrama || false}
         />
       </div>
@@ -340,7 +344,7 @@ export function PostCard({ post }: PostCardProps) {
         postId={post.id}
         isOwner={isOwner}
         viewCount={post.viewCount ?? undefined}
-        commentCount={post.commentCount ?? undefined}
+        commentCount={liveCommentCount}
         reactions={post.reactions ? JSON.parse(JSON.stringify(post.reactions)) : undefined}
         createdAt={post.createdAt ?? undefined}
         compact={true}
