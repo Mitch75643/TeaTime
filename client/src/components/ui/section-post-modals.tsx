@@ -393,7 +393,7 @@ export function SectionPostModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md mx-4">
+      <DialogContent className="w-[calc(100%-1rem)] max-w-md mx-auto">
         <DialogHeader>
           <DialogTitle>{sectionTitle}</DialogTitle>
           <DialogDescription>
