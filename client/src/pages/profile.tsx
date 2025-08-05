@@ -287,12 +287,13 @@ export default function Profile() {
           <Button
             variant="ghost"
             className={cn(
-              "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm",
+              "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm touch-manipulation select-none",
               activeTab === "posts"
                 ? "bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-300"
             )}
             onClick={() => setActiveTab("posts")}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             <FileText className="h-4 w-4 mr-2" />
             My Posts
@@ -300,12 +301,13 @@ export default function Profile() {
           <Button
             variant="ghost"
             className={cn(
-              "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm",
+              "flex-1 py-2 px-3 rounded-md transition-all font-medium text-sm touch-manipulation select-none",
               activeTab === "settings"
                 ? "bg-white dark:bg-gray-600 text-orange-600 dark:text-orange-400 shadow-sm"
                 : "text-gray-600 dark:text-gray-300"
             )}
             onClick={() => setActiveTab("settings")}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             <Settings className="h-4 w-4 mr-2" />
             Settings

@@ -20,7 +20,7 @@ export function BottomNav() {
   return (
     <>
       {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-2xl border-t border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-2xl border-t border-gray-200/50 dark:border-gray-700/50 max-w-md mx-auto touch-manipulation">
         {/* Gradient accent bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600"></div>
         
@@ -33,48 +33,10 @@ export function BottomNav() {
             if (index === 1) {
               return (
                 <div key={`spacer-${index}`} className="flex-1 flex justify-center relative">
-                  <Link href={item.path!}>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
-                        isActive 
-                          ? "text-orange-500 dark:text-orange-400" 
-                          : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                      )}
-                    >
-                      {/* Active glow effect */}
-                      {isActive && (
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
-                      )}
-                      
-                      <Icon className={cn(
-                        "h-6 w-6 transition-all duration-300",
-                        isActive ? "mb-1 scale-110" : "mb-0"
-                      )} />
-                      
-                      {/* Dynamic label - only show when active */}
-                      <span className={cn(
-                        "text-xs font-medium transition-all duration-300 overflow-hidden",
-                        isActive 
-                          ? "max-h-6 opacity-100 mt-1" 
-                          : "max-h-0 opacity-0 mt-0"
-                      )}>
-                        {item.label}
-                      </span>
-                    </Button>
-                  </Link>
-                </div>
-              );
-            }
-            
-            return (
-              <div key={item.id} className="flex-1 flex justify-center relative">
-                <Link href={item.path!}>
-                  <Button
-                    variant="ghost"
+                  <Link 
+                    href={item.path!} 
                     className={cn(
-                      "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group",
+                      "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group cursor-pointer touch-manipulation select-none",
                       isActive 
                         ? "text-orange-500 dark:text-orange-400" 
                         : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
@@ -99,7 +61,41 @@ export function BottomNav() {
                     )}>
                       {item.label}
                     </span>
-                  </Button>
+                  </Link>
+                </div>
+              );
+            }
+            
+            return (
+              <div key={item.id} className="flex-1 flex justify-center relative">
+                <Link 
+                  href={item.path!}
+                  className={cn(
+                    "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group cursor-pointer touch-manipulation select-none",
+                    isActive 
+                      ? "text-orange-500 dark:text-orange-400" 
+                      : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                  )}
+                >
+                  {/* Active glow effect */}
+                  {isActive && (
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-pulse"></div>
+                  )}
+                  
+                  <Icon className={cn(
+                    "h-6 w-6 transition-all duration-300",
+                    isActive ? "mb-1 scale-110" : "mb-0"
+                  )} />
+                  
+                  {/* Dynamic label - only show when active */}
+                  <span className={cn(
+                    "text-xs font-medium transition-all duration-300 overflow-hidden",
+                    isActive 
+                      ? "max-h-6 opacity-100 mt-1" 
+                      : "max-h-0 opacity-0 mt-0"
+                  )}>
+                    {item.label}
+                  </span>
                 </Link>
               </div>
             );

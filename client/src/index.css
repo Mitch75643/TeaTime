@@ -133,6 +133,29 @@ main {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Fix mobile double-tap issues */
+.touch-manipulation {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Ensure buttons are immediately responsive on mobile */
+button, .cursor-pointer, a[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Fix iOS safari double-tap zoom issues */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Gradient backgrounds for Tfess theme - Orange Edition */
 .gradient-primary {
   background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
