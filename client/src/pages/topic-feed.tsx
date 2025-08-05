@@ -472,7 +472,7 @@ export default function TopicFeed() {
             </div>
           )}
 
-            {/* Tab Headers with Refresh Button */}
+            {/* Tab Headers */}
             <div className="flex border-b border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setActiveTab('community')}
@@ -506,20 +506,6 @@ export default function TopicFeed() {
                   {userPosts.length}
                 </span>
               </button>
-              
-              {/* Header Refresh Button - Only show for Community tab and new sort */}
-              {activeTab === 'community' && sortBy === 'new' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={smartFeed.handleRefresh}
-                  disabled={smartFeed.isRefreshing}
-                  className="px-4 py-4 flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
-                >
-                  <RefreshCw className={cn("h-3 w-3", smartFeed.isRefreshing && "animate-spin")} />
-                  <span className="text-xs">Refresh</span>
-                </Button>
-              )}
             </div>
           </div>
         </div>
