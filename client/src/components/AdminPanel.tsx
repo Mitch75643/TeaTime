@@ -114,8 +114,9 @@ export function AdminPanel() {
       
       if (result.success) {
         toast({
-          title: "Admin Added",
-          description: result.message,
+          title: "✅ Admin Added Successfully",
+          description: `${newAdminData.email} has been added to the admin team`,
+          variant: "default",
         });
         
         // Reset form
@@ -129,10 +130,30 @@ export function AdminPanel() {
         closePasswordDialog();
       } else {
         setPasswordError(result.message || 'Failed to add admin');
+        toast({
+          title: "❌ Failed to Add Admin",
+          description: result.message || 'Failed to add admin',
+          variant: "destructive",
+        });
       }
     } catch (err: any) {
       console.error('Add admin error:', err);
-      setPasswordError(err.message || 'Failed to add admin');
+      const errorMessage = err.message || 'Failed to add admin';
+      setPasswordError(errorMessage);
+      
+      if (errorMessage.includes('Invalid management password')) {
+        toast({
+          title: "❌ Incorrect Password",
+          description: "The management password you entered is incorrect. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "❌ Error Adding Admin",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -159,15 +180,36 @@ export function AdminPanel() {
       
       if (result.success) {
         toast({
-          title: "Admin Removed",
-          description: result.message,
+          title: "✅ Admin Removed Successfully",
+          description: `${targetEmail} has been removed from the admin team`,
+          variant: "default",
         });
         closePasswordDialog();
       } else {
         setPasswordError(result.message || 'Failed to remove admin');
+        toast({
+          title: "❌ Failed to Remove Admin",
+          description: result.message || 'Failed to remove admin',
+          variant: "destructive",
+        });
       }
     } catch (err: any) {
-      setPasswordError(err.message || 'Failed to remove admin');
+      const errorMessage = err.message || 'Failed to remove admin';
+      setPasswordError(errorMessage);
+      
+      if (errorMessage.includes('Invalid management password')) {
+        toast({
+          title: "❌ Incorrect Password",
+          description: "The management password you entered is incorrect. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "❌ Error Removing Admin",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     }
   };
 

@@ -1524,18 +1524,39 @@ export class MemStorage implements IStorage {
     const activeEmails = Array.from(this.adminEmails.values())
       .filter(email => email.isActive);
     
-    return activeEmails.map(emailRecord => {
+    // Group by email to show all devices for each admin
+    const adminsByEmail = new Map<string, any>();
+    
+    activeEmails.forEach(emailRecord => {
       const fingerprintRecord = this.adminFingerprints.get(emailRecord.fingerprint);
-      return {
+      const adminInfo = {
         email: emailRecord.email,
         fingerprint: emailRecord.fingerprint,
         fingerprintLabel: fingerprintRecord?.label || 'Unknown Device',
         role: emailRecord.role || 'admin',
-        isRootHost: fingerprintRecord?.isRootHost || false,
+        isRootHost: emailRecord.role === 'root_host',
         lastLogin: emailRecord.lastLogin || undefined,
         createdAt: emailRecord.createdAt,
       };
+      
+      if (!adminsByEmail.has(emailRecord.email)) {
+        adminsByEmail.set(emailRecord.email, adminInfo);
+      } else {
+        // If multiple devices for same email, keep the most recent login
+        const existing = adminsByEmail.get(emailRecord.email);
+        if (!existing.lastLogin || (emailRecord.lastLogin && emailRecord.lastLogin > existing.lastLogin)) {
+          adminsByEmail.set(emailRecord.email, adminInfo);
+        }
+      }
     });
+    
+    return Array.from(adminsByEmail.values())
+      .sort((a, b) => {
+        // Root hosts first, then by creation date
+        if (a.isRootHost && !b.isRootHost) return -1;
+        if (!a.isRootHost && b.isRootHost) return 1;
+        return a.createdAt.getTime() - b.createdAt.getTime();
+      });
   }
   // Initialize root admin - call this on startup
   async initializeRootAdmin(fingerprint: string, email: string, label?: string): Promise<void> {

@@ -1250,22 +1250,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if any admins already exist
       const existingAdmins = await storage.getAllActiveAdmins();
-      if (existingAdmins.length > 0) {
-        return res.status(403).json({ message: "Root admin already exists. Use normal admin creation process." });
-      }
-
-      // Create root admin
-      await storage.initializeRootAdmin(fingerprint, email, 'Root Host Device');
       
-      res.json({ 
-        success: true, 
-        message: "Root admin created successfully",
-        fingerprint: fingerprint.slice(0, 8) + '...',
-        email 
-      });
+      if (existingAdmins.length === 0) {
+        // No admins exist - create root admin
+        await storage.initializeRootAdmin(fingerprint, email, 'Root Host Device');
+        
+        res.json({ 
+          success: true, 
+          message: "Root admin created successfully",
+          fingerprint: fingerprint.slice(0, 8) + '...',
+          email 
+        });
+      } else {
+        // Admins exist - check if this email is already an approved admin
+        const existingAdmin = existingAdmins.find(admin => admin.email === email);
+        
+        if (existingAdmin) {
+          // This email is already an admin - add new device for multi-device access
+          try {
+            // Create new fingerprint record for this device
+            await storage.createAdminFingerprint({
+              fingerprint,
+              label: `${email}'s Device`,
+              addedBy: 'multi-device-setup',
+              isActive: true
+            });
+            
+            // Create new email record with this device fingerprint
+            await storage.createAdminEmail({
+              email,
+              fingerprint,
+              role: existingAdmin.role,
+              addedBy: 'multi-device-setup',
+              isActive: true
+            });
+            
+            res.json({
+              success: true,
+              message: `Multi-device access granted for ${email}`,
+              fingerprint: fingerprint.slice(0, 8) + '...',
+              email,
+              role: existingAdmin.role
+            });
+          } catch (error) {
+            console.error("Error setting up multi-device access:", error);
+            res.status(500).json({ message: "Failed to setup multi-device access" });
+          }
+        } else {
+          // Email not found in admin list
+          res.status(403).json({ 
+            message: "Access denied. This email is not authorized as an admin. Contact the root host to add your email to the admin list first." 
+          });
+        }
+      }
     } catch (error) {
-      console.error("Error setting up root admin:", error);
-      res.status(500).json({ message: "Failed to setup root admin" });
+      console.error("Error in admin setup:", error);
+      res.status(500).json({ message: "Failed to process admin setup" });
     }
   });
   
