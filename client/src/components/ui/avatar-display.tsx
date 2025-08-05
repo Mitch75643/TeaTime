@@ -55,7 +55,7 @@ export function AvatarDisplay({
   // Get cached profile data immediately to prevent flashing - try multiple sources
   const cachedProfile = getCachedProfile();
   const userAvatarId = profile?.avatarId || cachedProfile?.avatarId || localStorage.getItem('userAvatarId') || 'mask-anonymous';
-  const userAvatarColor = profile?.avatarColor || cachedProfile?.avatarColor || localStorage.getItem('userAvatarColor') || 'gradient-purple-blue';
+  const userAvatarColor = profile?.avatarColor || cachedProfile?.avatarColor || localStorage.getItem('userAvatarColor') || 'from-purple-500 to-pink-500';
   
   // Determine if this is the current user's avatar by comparing avatarId
   const isUserAvatar = isCurrentUser || avatarId === userAvatarId;

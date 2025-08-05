@@ -86,7 +86,7 @@ export function useUserProfile() {
       const avatarId = localStorage.getItem('userAvatarId') || 'mask-anonymous';
       const storedAlias = localStorage.getItem('userUsername'); // Use the correct key
       const alias = storedAlias ? JSON.parse(storedAlias).alias : 'Anonymous';
-      const avatarColor = localStorage.getItem('userAvatarColor') || 'gradient-purple-blue';
+      const avatarColor = localStorage.getItem('userAvatarColor') || 'from-purple-500 to-pink-500';
       
       if (avatarId && alias && avatarColor) {
         const immediateProfile: UserProfile = {
@@ -103,6 +103,25 @@ export function useUserProfile() {
         notifyProfileListeners();
       }
     }
+  }, []);
+
+  // Listen for avatar color changes specifically
+  useEffect(() => {
+    const handleAvatarColorChange = (e: CustomEvent) => {
+      const newColor = e.detail.avatarColor;
+      if (globalUserProfile && globalUserProfile.avatarColor !== newColor) {
+        const updatedProfile = { ...globalUserProfile, avatarColor: newColor };
+        globalUserProfile = updatedProfile;
+        saveProfileToCache(updatedProfile);
+        setProfile(updatedProfile);
+        notifyProfileListeners();
+      }
+    };
+
+    window.addEventListener('avatarColorChanged', handleAvatarColorChange as EventListener);
+    return () => {
+      window.removeEventListener('avatarColorChanged', handleAvatarColorChange as EventListener);
+    };
   }, []);
 
   // Update profile when user data changes

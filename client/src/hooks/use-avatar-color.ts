@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import { useAnonymousAuth } from '@/lib/anonymousAuth';
 
-const AVATAR_COLOR_KEY = 'tfess_avatar_color';
+const AVATAR_COLOR_KEY = 'userAvatarColor';
 
 export const avatarColorOptions = [
   { name: 'Purple Pink', value: 'from-purple-500 to-pink-500' },
