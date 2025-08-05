@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog";
 import { Button } from "./button";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CategoryActionSheetProps {
@@ -37,16 +36,8 @@ export function CategoryActionSheet({ isOpen, onClose, onCategorySelect }: Categ
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md mx-4 max-h-[80vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>What kind of tea are you spilling? ☕</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <DialogTitle>
+            What kind of tea are you spilling? ☕
           </DialogTitle>
           <DialogDescription>
             Choose a category that best fits your story
