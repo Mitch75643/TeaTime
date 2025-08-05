@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog";
 import { Button } from "./button";
 import { Textarea } from "./textarea";
@@ -42,6 +42,96 @@ const hotTopicsTags = [
   "#tech", "#hot-takes", "#social", "#entertainment", "#news"
 ];
 
+// Weekly theme configuration with color mappings
+const WEEKLY_THEMES_CONFIG = {
+  "Love Week": { 
+    bgColor: "bg-pink-50", darkBgColor: "dark:bg-pink-900/20",
+    borderColor: "border-pink-200", darkBorderColor: "dark:border-pink-700",
+    textColor: "text-pink-800", darkTextColor: "dark:text-pink-200",
+    accentColor: "text-pink-700", darkAccentColor: "dark:text-pink-300"
+  },
+  "Drama Week": { 
+    bgColor: "bg-red-50", darkBgColor: "dark:bg-red-900/20",
+    borderColor: "border-red-200", darkBorderColor: "dark:border-red-700",
+    textColor: "text-red-800", darkTextColor: "dark:text-red-200",
+    accentColor: "text-red-700", darkAccentColor: "dark:text-red-300"
+  },
+  "Mystery Week": { 
+    bgColor: "bg-gray-50", darkBgColor: "dark:bg-gray-900/20",
+    borderColor: "border-gray-400", darkBorderColor: "dark:border-gray-600",
+    textColor: "text-gray-800", darkTextColor: "dark:text-gray-200",
+    accentColor: "text-gray-700", darkAccentColor: "dark:text-gray-300"
+  },
+  "Fun Week": { 
+    bgColor: "bg-yellow-50", darkBgColor: "dark:bg-yellow-900/20",
+    borderColor: "border-yellow-200", darkBorderColor: "dark:border-yellow-700",
+    textColor: "text-yellow-800", darkTextColor: "dark:text-yellow-200",
+    accentColor: "text-yellow-700", darkAccentColor: "dark:text-yellow-300"
+  },
+  "Rant Week": { 
+    bgColor: "bg-red-50", darkBgColor: "dark:bg-red-900/20",
+    borderColor: "border-red-200", darkBorderColor: "dark:border-red-700",
+    textColor: "text-red-800", darkTextColor: "dark:text-red-200",
+    accentColor: "text-red-700", darkAccentColor: "dark:text-red-300"
+  },
+  "Roast Week": { 
+    bgColor: "bg-orange-50", darkBgColor: "dark:bg-orange-900/20",
+    borderColor: "border-orange-200", darkBorderColor: "dark:border-orange-700",
+    textColor: "text-orange-800", darkTextColor: "dark:text-orange-200",
+    accentColor: "text-orange-700", darkAccentColor: "dark:text-orange-300"
+  },
+  "Unpopular Opinions": { 
+    bgColor: "bg-purple-50", darkBgColor: "dark:bg-purple-900/20",
+    borderColor: "border-purple-200", darkBorderColor: "dark:border-purple-700",
+    textColor: "text-purple-800", darkTextColor: "dark:text-purple-200",
+    accentColor: "text-purple-700", darkAccentColor: "dark:text-purple-300"
+  },
+  "Chaos Week": { 
+    bgColor: "bg-green-50", darkBgColor: "dark:bg-green-900/20",
+    borderColor: "border-green-200", darkBorderColor: "dark:border-green-700",
+    textColor: "text-green-800", darkTextColor: "dark:text-green-200",
+    accentColor: "text-green-700", darkAccentColor: "dark:text-green-300"
+  },
+  "Money Week": { 
+    bgColor: "bg-green-50", darkBgColor: "dark:bg-green-900/20",
+    borderColor: "border-green-200", darkBorderColor: "dark:border-green-700",
+    textColor: "text-green-800", darkTextColor: "dark:text-green-200",
+    accentColor: "text-green-700", darkAccentColor: "dark:text-green-300"
+  },
+  "Self-Care Week": { 
+    bgColor: "bg-blue-50", darkBgColor: "dark:bg-blue-900/20",
+    borderColor: "border-blue-200", darkBorderColor: "dark:border-blue-700",
+    textColor: "text-blue-800", darkTextColor: "dark:text-blue-200",
+    accentColor: "text-blue-700", darkAccentColor: "dark:text-blue-300"
+  }
+};
+
+// Hook to get current weekly theme colors
+function useCurrentWeeklyTheme() {
+  const { data: themeData } = useQuery({
+    queryKey: ["/api/rotation/current"],
+    queryFn: async () => {
+      const response = await fetch("/api/rotation/current");
+      if (!response.ok) throw new Error("Failed to fetch current theme");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+  });
+
+  // Find the active weekly theme from rotation data
+  const activeTheme = themeData?.weeklyThemes?.find((theme: any) => theme.isActive);
+  
+  // Get theme configuration or fallback to Drama Week
+  const themeName = activeTheme?.name || "Drama Week";
+  const themeConfig = WEEKLY_THEMES_CONFIG[themeName as keyof typeof WEEKLY_THEMES_CONFIG] || WEEKLY_THEMES_CONFIG["Drama Week"];
+  
+  return {
+    name: themeName,
+    colors: themeConfig
+  };
+}
+
 const weeklyHotTopics = [
   "AI will replace most jobs in 5 years",
   "Social media is toxic for mental health", 
@@ -76,6 +166,7 @@ export function SectionPostModal({
   const queryClient = useQueryClient();
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
   const { animation: topicAnimation, triggerAnimation: triggerTopicAnimation, completeAnimation: completeTopicAnimation } = useCommunityTopicAnimation();
+  const currentTheme = useCurrentWeeklyTheme();
 
   // Pre-fill topic when modal opens with promptText for hot-topics
   useEffect(() => {
@@ -270,15 +361,15 @@ export function SectionPostModal({
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* Daily Spill Prompt - Prominently displayed */}
+          {/* Daily Spill Prompt - Prominently displayed with theme colors */}
           {(category === "daily" || section === "daily-tea") && promptText && (
-            <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-700 shadow-sm">
+            <div className={`p-4 rounded-lg border-2 shadow-sm ${currentTheme.colors.bgColor} ${currentTheme.colors.darkBgColor} ${currentTheme.colors.borderColor} ${currentTheme.colors.darkBorderColor}`}>
               <div className="flex items-center mb-2">
                 <span className="text-lg mr-2">☕</span>
-                <p className="text-sm font-bold text-yellow-800 dark:text-yellow-200">Today's Prompt:</p>
+                <p className={`text-sm font-bold ${currentTheme.colors.textColor} ${currentTheme.colors.darkTextColor}`}>Today's Prompt:</p>
               </div>
-              <p className="text-yellow-900 dark:text-yellow-100 font-medium text-sm leading-relaxed">"{promptText}"</p>
-              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 italic">
+              <p className={`font-medium text-sm leading-relaxed ${currentTheme.colors.textColor} ${currentTheme.colors.darkTextColor}`}>"{promptText}"</p>
+              <p className={`text-xs mt-2 italic ${currentTheme.colors.accentColor} ${currentTheme.colors.darkAccentColor}`}>
                 Share your response to this prompt in your post below
               </p>
             </div>
