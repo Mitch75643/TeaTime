@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -8,6 +8,7 @@ import { SectionPostModal } from "@/components/ui/section-post-modals";
 import { CommunityModal } from "@/components/ui/community-section-modal";
 import { NotificationLink } from "@/components/ui/notification-link";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -154,6 +155,10 @@ export default function Community() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
   
+  // Query client and WebSocket for real-time updates
+  const queryClient = useQueryClient();
+  const { subscribeToMessages } = useWebSocket();
+  
   const handleSectionClick = (sectionId: string) => {
     // Map section IDs to topic IDs for navigation
     const topicMap: Record<string, string> = {
@@ -186,6 +191,20 @@ export default function Community() {
       setIsRefreshing(false);
     }
   };
+
+  // Subscribe to real-time comment updates for Community page
+  useEffect(() => {
+    const unsubscribe = subscribeToMessages((message: any) => {
+      if (message.type === 'comment_added') {
+        console.log('Community Page: Real-time comment added:', message);
+        // Invalidate community posts to refresh comment counts
+        queryClient.invalidateQueries({ queryKey: ["/api/posts", "community"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      }
+    });
+
+    return unsubscribe;
+  }, [subscribeToMessages, queryClient]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">

@@ -11,6 +11,7 @@ import { TrendingStories } from "@/components/ui/trending-stories";
 import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
 import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
@@ -103,6 +104,10 @@ export default function TopicFeed() {
   // Celebration hook
   const { celebration, triggerCelebration, completeCelebration } = useCelebration();
   
+  // Query client and WebSocket for real-time updates
+  const queryClient = useQueryClient();
+  const { subscribeToMessages } = useWebSocket();
+  
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
   const topic = topicConfig[topicId];
@@ -125,6 +130,21 @@ export default function TopicFeed() {
       window.removeEventListener('setStoryCategory', handleStoryCategoryChange as EventListener);
     };
   }, [topicId]);
+
+  // Subscribe to real-time comment updates for topic feeds
+  useEffect(() => {
+    const unsubscribe = subscribeToMessages((message: any) => {
+      if (message.type === 'comment_added') {
+        console.log('Topic Feed: Real-time comment added:', message);
+        // Invalidate topic-specific queries to refresh comment counts
+        queryClient.invalidateQueries({ queryKey: ['/api/posts/community', topicId] });
+        queryClient.invalidateQueries({ queryKey: ['/api/posts/user', topicId] });
+        queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      }
+    });
+
+    return unsubscribe;
+  }, [topicId, subscribeToMessages, queryClient]);
 
   // Community Feed - All posts from this topic
   const { data: communityPosts = [], isLoading: isLoadingCommunity } = useQuery<Post[]>({
@@ -179,8 +199,6 @@ export default function TopicFeed() {
   const handleBackClick = () => {
     setLocation('/community');
   };
-
-  const queryClient = useQueryClient();
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

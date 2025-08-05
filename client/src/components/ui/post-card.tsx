@@ -114,7 +114,7 @@ export function PostCard({ post }: PostCardProps) {
     }
   }, [post.id]);
 
-  // Subscribe to real-time reaction updates
+  // Subscribe to real-time reaction and comment updates
   useEffect(() => {
     const unsubscribe = subscribeToMessages((message: any) => {
       if (message.type === 'post_reaction' && message.postId === post.id) {
@@ -133,11 +133,17 @@ export function PostCard({ post }: PostCardProps) {
           console.log('Updated reaction counts:', newCounts);
           return newCounts;
         });
+      } else if (message.type === 'comment_added' && message.postId === post.id) {
+        console.log('Real-time comment added:', message);
+        // Invalidate posts query to refresh comment counts
+        queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+        // Also invalidate any community-specific queries
+        queryClient.invalidateQueries({ queryKey: ["/api/posts", "community"] });
       }
     });
 
     return unsubscribe;
-  }, [post.id, subscribeToMessages]);
+  }, [post.id, subscribeToMessages, queryClient]);
 
   // Update live reactions when post data changes (initial load)
   useEffect(() => {
