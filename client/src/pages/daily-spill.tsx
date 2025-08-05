@@ -533,11 +533,18 @@ export default function DailySpill() {
         <SmartFeedBanner
           newPostsCount={smartFeed.newPostsCount}
           onLoadNewPosts={smartFeed.handleLoadNewPosts}
+          className={cn(
+            "transition-opacity duration-200",
+            isPostModalOpen && "opacity-0 pointer-events-none"
+          )}
         />
       )}
 
       {/* Sticky Feed Header */}
-      <div className="sticky top-16 z-10 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+      <div className={cn(
+        "sticky top-16 z-10 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-opacity duration-200",
+        isPostModalOpen && "opacity-0 pointer-events-none"
+      )}>
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
