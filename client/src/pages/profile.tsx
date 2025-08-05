@@ -169,13 +169,16 @@ export default function Profile() {
   const handleAdminAccess = async () => {
     try {
       // Verify password server-side without exposing it
-      const response = await apiRequest("/api/admin/verify-password", {
+      const response = await fetch("/api/admin/verify-password", {
         method: "POST",
         body: JSON.stringify({ password: adminPassword }),
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
       });
 
-      if (response.success) {
+      const data = await response.json();
+
+      if (data.success) {
         // Password verified, redirect to admin page
         setAdminPasswordOpen(false);
         setAdminPassword("");
@@ -186,6 +189,7 @@ export default function Profile() {
         setAdminPassword("");
       }
     } catch (error) {
+      console.error("Admin password verification error:", error);
       setAdminError("Access Denied – Please try again.");
       setAdminPassword("");
     }
@@ -198,6 +202,7 @@ export default function Profile() {
 
   const handleAdminKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       handleAdminAccess();
     }
   };
@@ -759,7 +764,7 @@ export default function Profile() {
                 placeholder="Admin access code"
                 value={adminPassword}
                 onChange={handleAdminPasswordChange}
-                onKeyPress={handleAdminKeyPress}
+                onKeyDown={handleAdminKeyPress}
                 className="text-center"
                 autoFocus
               />
