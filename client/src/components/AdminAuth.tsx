@@ -91,7 +91,12 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
         });
       }
     } catch (err: any) {
-      setError(err.message || 'Fingerprint verification failed');
+      // Provide more helpful error messages
+      if (err.message && err.message.includes('Unauthorized device')) {
+        setError('This device is not authorized for admin access. Please ask an existing admin to add your device fingerprint.');
+      } else {
+        setError(err.message || 'Fingerprint verification failed');
+      }
     }
   };
 
@@ -406,28 +411,33 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
           </div>
         )}
         
-        <Separator />
-        
-        <div className="text-center space-y-2">
-          <p className="text-xs text-muted-foreground">
-            Need to setup the first admin account?
-          </p>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSetupRootAdmin}
-            disabled={isSettingUpRoot || isGettingFingerprint}
-          >
-            {isSettingUpRoot ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Setting up...
-              </>
-            ) : (
-              'Setup Root Admin'
-            )}
-          </Button>
-        </div>
+        {/* Only show setup button if no authorized fingerprint */}
+        {step === 'fingerprint' && (
+          <>
+            <Separator />
+            
+            <div className="text-center space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Need to setup the first admin account?
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSetupRootAdmin}
+                disabled={isSettingUpRoot || isGettingFingerprint}
+              >
+                {isSettingUpRoot ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Setting up...
+                  </>
+                ) : (
+                  'Setup Root Admin'
+                )}
+              </Button>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
