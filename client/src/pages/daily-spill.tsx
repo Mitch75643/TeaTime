@@ -488,11 +488,7 @@ export default function DailySpill() {
                 <span className="inline-block" style={{ fontSize: '1.25rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
                 Daily Spill
               </span>
-              {spillOfTheDay && (
-                <div className="text-sm bg-white/20 rounded-full px-2 py-1">
-                  🏆 Featured
-                </div>
-              )}
+              
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
