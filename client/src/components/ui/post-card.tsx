@@ -219,8 +219,8 @@ export function PostCard({ post }: PostCardProps) {
     <article 
       id={`post-${post.id}`}
       className={cn(
-        "w-full max-w-full rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden break-words",
-        "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
+        "w-full max-w-full rounded-2xl p-6 space-y-4 relative overflow-hidden break-words",
+        "bg-white dark:bg-gray-800/50 backdrop-blur-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200"
       )}>
       {/* Trending Badge */}
       {isTrending && !post.isDrama && (
@@ -290,7 +290,7 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Reactions */}
       <div className={cn(
-        "flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700"
+        "flex items-center justify-between pt-3"
       )}>
         <div className="flex items-center space-x-4">
           {Object.entries(reactionEmojis).map(([type, emoji]) => {

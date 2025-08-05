@@ -533,10 +533,8 @@ export default function TopicFeed() {
             </div>
 
             {/* Posts Content */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
-
-          {/* Tab Content */}
-              <div className="p-8">
+            <div className="w-full">
+              <div className="px-2">
                 {activeTab === 'community' && (
                   <div className="space-y-6">
                     {isLoadingCommunity ? (
@@ -580,9 +578,9 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                     ) : (
-                      <div className="space-y-6">
+                      <div className="space-y-8">
                         {/* Smart Feed Notification */}
-                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 text-center">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 text-center mx-2">
                           <p className="text-blue-700 dark:text-blue-300 font-medium">
                             Smart feed active - posts are distributed fairly for better visibility
                           </p>
@@ -606,7 +604,7 @@ export default function TopicFeed() {
                     
                         {/* Regular Community Posts */}
                         {communityPosts.map((post: Post) => (
-                          <div key={post.id} className="bg-gray-50 dark:bg-gray-700/30 rounded-2xl p-6 border border-gray-200 dark:border-gray-600">
+                          <div key={post.id} className="mx-2">
                             <PostCard post={post} />
                           </div>
                         ))}
@@ -658,9 +656,9 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                     ) : (
-                      <div className="space-y-6">
+                      <div className="space-y-8">
                         {userPosts.map((post: Post) => (
-                          <div key={post.id} className="bg-gray-50 dark:bg-gray-700/30 rounded-2xl p-6 border border-gray-200 dark:border-gray-600">
+                          <div key={post.id} className="mx-2">
                             <PostCard post={post} />
                           </div>
                         ))}
