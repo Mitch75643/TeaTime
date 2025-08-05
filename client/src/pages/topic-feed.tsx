@@ -202,10 +202,28 @@ export default function TopicFeed() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
-    setIsRefreshing(false);
+    try {
+      // Invalidate all relevant queries to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/posts', topicId] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/debates'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/polls'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/comments'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/reactions'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/posts/daily-debate'] });
+      
+      // Force refetch the main queries
+      await queryClient.refetchQueries({ queryKey: ['/api/posts', topicId, sortBy, 'all'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/posts', topicId, sortBy, 'user'] });
+      
+      console.log(`Topic feed refresh completed for ${topicId}`);
+    } catch (error) {
+      console.error('Topic feed refresh error:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const sortOptions: { value: SortOption; label: string }[] = [

@@ -186,7 +186,16 @@ export default function Community() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
+      // Invalidate all relevant queries to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts", "community"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/debates"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/polls"] });
+      
+      // Force refetch the main query
       await refetch();
+      
+      console.log('Community refresh completed - all queries invalidated');
     } finally {
       setIsRefreshing(false);
     }

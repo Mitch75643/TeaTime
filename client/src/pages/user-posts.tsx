@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, MessageCircle, ThumbsUp, Trophy, TrendingUp, Calendar, Filter } from "lucide-react";
+import { Eye, MessageCircle, ThumbsUp, Trophy, TrendingUp, Calendar, Filter, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import type { Post } from "@shared/schema";
@@ -47,6 +48,9 @@ const categoryColors: Record<string, string> = {
 export default function UserPosts() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"recent" | "popular" | "engagement">("recent");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Fetch user's posts
   const { data: posts = [], isLoading: postsLoading } = useQuery<Post[]>({
@@ -92,7 +96,7 @@ export default function UserPosts() {
     });
 
   // Get unique categories from user's posts
-  const userCategories = [...new Set(postStats.map(stat => stat.category))];
+  const userCategories = Array.from(new Set(postStats.map(stat => stat.category)));
 
   const isLoading = postsLoading || statsLoading;
 
@@ -103,6 +107,37 @@ export default function UserPosts() {
     return null;
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidate all relevant queries to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/user/post-stats"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/reactions"] });
+      
+      // Force refetch the main queries
+      await queryClient.refetchQueries({ queryKey: ["/api/posts", { userOnly: true }] });
+      await queryClient.refetchQueries({ queryKey: ["/api/user/post-stats"] });
+      
+      console.log('User posts refresh completed');
+      
+      toast({
+        title: "Posts refreshed!",
+        description: "Latest stats and interactions have been loaded.",
+      });
+    } catch (error) {
+      console.error('User posts refresh error:', error);
+      toast({
+        title: "Refresh failed",
+        description: "Unable to load latest data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -110,12 +145,26 @@ export default function UserPosts() {
       <div className="px-4 pt-4 pb-20">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Your Posts
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Track how your anonymous posts are performing in the community
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Your Posts
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Track how your anonymous posts are performing in the community
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+            >
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-xs">Refresh</span>
+            </Button>
+          </div>
         </div>
 
         {/* Overall Stats Cards */}

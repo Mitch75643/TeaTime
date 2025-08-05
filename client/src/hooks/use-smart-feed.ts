@@ -82,8 +82,16 @@ export function useSmartFeed(options: SmartFeedOptions) {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      // Invalidate queries to force a fresh fetch
+      // Invalidate all relevant queries to ensure fresh data
       await queryClient.invalidateQueries({ queryKey });
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts"] }); // Base posts query
+      await queryClient.invalidateQueries({ queryKey: ["/api/debates"] }); // Debate voting data
+      await queryClient.invalidateQueries({ queryKey: ["/api/polls"] }); // Poll voting data
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts/daily-debate"] }); // Daily debate posts
+      await queryClient.invalidateQueries({ queryKey: ["/api/comments"] }); // Comment counts
+      await queryClient.invalidateQueries({ queryKey: ["/api/reactions"] }); // Reaction counts
+      
+      // Force refetch the main query
       await queryClient.refetchQueries({ queryKey });
       
       // Reset state
@@ -95,11 +103,14 @@ export function useSmartFeed(options: SmartFeedOptions) {
       // Smooth scroll to top
       window.scrollTo({ top: 0, behavior: "smooth" });
       
+      console.log(`Smart feed refresh completed for queryKey:`, queryKey);
+      
       toast({
         title: "Posts refreshed!",
-        description: "Latest content has been loaded.",
+        description: "Latest content and interactions have been loaded.",
       });
     } catch (error) {
+      console.error('Smart feed refresh error:', error);
       toast({
         title: "Refresh failed",
         description: "Unable to load latest posts. Please try again.",

@@ -15,7 +15,7 @@ export function SmartFeedBanner({ newPostsCount, onLoadNewPosts, className = "" 
           className="w-full flex items-center justify-center space-x-2 font-medium hover:bg-white/10 transition-colors rounded px-2 py-1"
         >
           <RefreshCw className="h-4 w-4" />
-          <span>{newPostsCount} New Post{newPostsCount > 1 ? 's' : ''} — Tap to View</span>
+          <span>{newPostsCount} New Post{newPostsCount > 1 ? 's' : ''} — Tap to Refresh</span>
         </button>
       </div>
     </div>

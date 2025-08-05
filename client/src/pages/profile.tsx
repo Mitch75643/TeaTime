@@ -95,7 +95,7 @@ export default function Profile() {
   }, [user?.anonId]);
 
   // Get user's posts (using session ID for identification)
-  const { data: userPosts = [], isLoading } = useQuery<Post[]>({
+  const { data: userPosts = [], isLoading, refetch } = useQuery<Post[]>({
     queryKey: ["/api/posts", "user"],
     queryFn: async () => {
       const response = await fetch("/api/posts?sortBy=new&userOnly=true");
@@ -103,6 +103,38 @@ export default function Profile() {
       return response.json();
     },
   });
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidate all relevant queries to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/posts", "user"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/reactions"] });
+      
+      // Force refetch the main query
+      await refetch();
+      
+      console.log('Profile posts refresh completed');
+      
+      toast({
+        title: "Posts refreshed!",
+        description: "Latest content and interactions have been loaded.",
+      });
+    } catch (error) {
+      console.error('Profile posts refresh error:', error);
+      toast({
+        title: "Refresh failed",
+        description: "Unable to load latest posts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -365,8 +397,20 @@ export default function Profile() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Posts</h3>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {userPosts.length} post{userPosts.length !== 1 ? 's' : ''}
+              <div className="flex items-center space-x-3">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {userPosts.length} post{userPosts.length !== 1 ? 's' : ''}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                >
+                  <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span className="text-xs">Refresh</span>
+                </Button>
               </div>
             </div>
 
