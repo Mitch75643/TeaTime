@@ -100,7 +100,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
       setComment("");
       setReplyText("");
       setReplyingTo(null);
-      setIsComposing(false); // Reset composing state
+      setIsComposing(false);
       toast({
         title: replyingTo ? "Reply posted!" : "Comment posted!",
         description: replyingTo ? "Your reply has been added." : "Your anonymous comment has been added.",
