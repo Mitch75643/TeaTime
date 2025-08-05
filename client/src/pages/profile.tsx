@@ -233,11 +233,10 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
-      <div className="flex-1 overflow-y-auto">
-        <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto min-h-full">
+      <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto mobile-scroll-content">
         {/* Profile Header */}
         <Card>
           <CardHeader className="text-center">
@@ -683,8 +682,7 @@ export default function Profile() {
             </div>
           </div>
         )}
-        </main>
-      </div>
+      </main>
 
       <BottomNav />
       

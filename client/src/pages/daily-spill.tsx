@@ -410,7 +410,7 @@ export default function DailySpill() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
       {/* Theme of the Week Banner with Streak */}
@@ -564,17 +564,16 @@ export default function DailySpill() {
         </div>
       </div>
 
-      {/* Posts Feed - Scrollable Area */}
-      <div className="flex-1 overflow-y-auto">
-        <main className="px-4 pb-24 space-y-4 pt-4 min-h-full">
-          {isLoading && (
+      {/* Posts Feed */}
+      <main className="px-4 pb-24 space-y-4 pt-4 mobile-scroll-content">
+        {isLoading && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
               <p className="text-gray-500 mt-2">Loading today's spills...</p>
             </div>
-          )}
+        )}
 
-          {!isLoading && posts.length === 0 && (
+        {!isLoading && posts.length === 0 && (
             <div className="text-center py-12 min-h-[40vh] flex flex-col items-center justify-center">
               <Coffee className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
@@ -591,9 +590,9 @@ export default function DailySpill() {
                 Share Your Story
               </Button>
             </div>
-          )}
+        )}
 
-          <div className="space-y-4">
+        <div className="space-y-4">
             {posts.map((post: Post) => (
               <PostCard 
                 key={post.id} 
@@ -608,9 +607,8 @@ export default function DailySpill() {
                 remainingCount={allPosts.length - posts.length}
               />
             )}
-          </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       <SectionPostModal 
         isOpen={isPostModalOpen}
