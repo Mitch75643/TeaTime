@@ -496,7 +496,7 @@ export default function TopicFeed() {
                 >
                   <Users className="h-5 w-5" />
                   <span>Community Feed</span>
-                  <span className="ml-2 text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full font-medium">
+                  <span className="ml-1 text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full font-medium">
                     {communityPosts.length}
                   </span>
                 </button>
@@ -512,7 +512,7 @@ export default function TopicFeed() {
                 >
                   <User className="h-5 w-5" />
                   <span>Your Posts</span>
-                  <span className="ml-2 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
+                  <span className="ml-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
                     {userPosts.length}
                   </span>
                 </button>
