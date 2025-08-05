@@ -1342,11 +1342,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sessionId = req.session.id;
       
+      console.log(`[Admin Session] Checking session ID: ${sessionId}`);
+      
       if (!sessionId) {
+        console.log("[Admin Session] No session ID found");
         return res.status(401).json({ authenticated: false });
       }
 
       const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      console.log(`[Admin Session] Verification result:`, verification);
       
       if (verification.valid) {
         res.json({ 

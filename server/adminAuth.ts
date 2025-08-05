@@ -108,16 +108,23 @@ class AdminAuthService {
     };
   }> {
     try {
+      console.log(`[Admin Auth] Verifying session: ${sessionId}`);
       const session = await storage.getAdminSession(sessionId);
       
+      console.log(`[Admin Auth] Session retrieved:`, session);
+      
       if (!session || !session.isActive) {
+        console.log(`[Admin Auth] Session not found or inactive`);
         return { valid: false };
       }
 
       // Check if session has expired
       const now = new Date();
       const expiresAt = new Date(session.expiresAt);
+      console.log(`[Admin Auth] Session expires: ${expiresAt}, Current time: ${now}`);
+      
       if (now > expiresAt) {
+        console.log(`[Admin Auth] Session expired`);
         await storage.deactivateAdminSession(sessionId);
         return { valid: false };
       }
@@ -125,6 +132,8 @@ class AdminAuthService {
       // Update last activity
       await storage.updateAdminSessionActivity(sessionId);
 
+      console.log(`[Admin Auth] Session valid for admin: ${session.email}`);
+      
       return {
         valid: true,
         admin: {
