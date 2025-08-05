@@ -268,7 +268,12 @@ export function PostCard({ post }: PostCardProps) {
                     "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400 opacity-60" :
                     "text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
                 )}
-                onClick={() => handleReaction(type)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Reaction button clicked:', type, 'for post:', post.id);
+                  handleReaction(type);
+                }}
                 disabled={reactionMutation.isPending}
               >
                 <span className={cn(
