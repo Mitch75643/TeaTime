@@ -395,7 +395,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
           {/* Comment Input */}
           <div className="flex-shrink-0 pt-4 pb-safe-area-inset-bottom bg-gray-50 dark:bg-gray-800">
             {!replyingTo && (
-              <div className="mx-4 p-4">
+              <div className="mx-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-600">
                 <div className="flex space-x-3">
                   <AvatarDisplay
                     avatarId={userAvatarId}
