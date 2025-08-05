@@ -60,11 +60,13 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
   const { data: feedData, isLoading, refetch } = useQuery({
     queryKey: [...queryKey, "smartfeed", displayedPostIds.length],
     queryFn: async () => {
+      console.log('Smart Feed: Query function called with displayedPostIds:', displayedPostIds);
       const params = buildApiParams(displayedPostIds);
       const response = await fetch(`${apiEndpoint}?${params}`);
       if (!response.ok) throw new Error("Failed to fetch posts");
       
       const result = await response.json();
+      console.log('Smart Feed: Query function result:', result);
       
       // If smart feed is enabled, expect structured response
       if (enableSmartLogic && result.posts) {
@@ -80,7 +82,8 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
       };
     },
     refetchOnWindowFocus: false,
-    staleTime: 30000, // 30 seconds
+    staleTime: 0, // Always fresh data
+    gcTime: 0, // Don't cache
   });
 
   // Update state when feed data changes
@@ -149,49 +152,37 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
       // Clear displayed post IDs completely to force fresh fetch
       setDisplayedPostIds([]);
       
-      // Clear all cached queries 
+      // Disable the query temporarily and clear all cached data
+      await queryClient.cancelQueries({ queryKey: [...queryKey] });
       await queryClient.removeQueries({ 
         queryKey: [...queryKey],
         exact: false 
       });
       
-      // Force a completely fresh API call with no exclusions
-      const params = buildApiParams([]);
-      const response = await fetch(`${apiEndpoint}?${params}`);
-      if (!response.ok) throw new Error("Failed to refresh posts");
-      
-      const freshData = await response.json();
-      console.log('Smart Feed: Fresh data received from API:', freshData);
-      
-      const newPosts = enableSmartLogic && freshData.posts ? freshData.posts : freshData;
-      const newPostIds = (newPosts || []).map((post: any) => post.id);
-      
-      // Update state with fresh data and force re-render
-      setState(prev => {
-        const newState = {
-          ...prev,
-          posts: newPosts || [],
-          hasMorePosts: enableSmartLogic ? (freshData.hasMorePosts || false) : false,
-          newPostsCount: 0,
-          isRefreshing: false,
-          nextRefreshAvailable: false,
-          lastRefreshTime: new Date(),
-          // Force update by changing a value that React will detect
-          _updateKey: Date.now(),
-        };
-        console.log('Smart Feed: Updated state after refresh:', newState);
-        console.log('Smart Feed: New posts array:', newPosts);
-        return newState;
+      // Force refetch through the query system instead of manual fetch
+      console.log('Smart Feed: Forcing query refetch...');
+      const result = await queryClient.refetchQueries({ 
+        queryKey: [...queryKey],
+        exact: true,
+        type: 'active'
       });
       
-      // Update displayed post IDs
-      setDisplayedPostIds(newPostIds);
+      console.log('Smart Feed: Query refetch result:', result);
+      
+      // Reset refresh state
+      setState(prev => ({
+        ...prev,
+        newPostsCount: 0,
+        isRefreshing: false,
+        nextRefreshAvailable: false,
+        lastRefreshTime: new Date(),
+      }));
       
     } catch (error) {
       console.error("Failed to refresh feed:", error);
       setState(prev => ({ ...prev, isRefreshing: false }));
     }
-  }, [state.isRefreshing, queryClient, queryKey, apiEndpoint, enableSmartLogic, buildApiParams]);
+  }, [state.isRefreshing, queryClient, queryKey]);
 
   // Load more posts function
   const handleLoadMore = useCallback(async () => {

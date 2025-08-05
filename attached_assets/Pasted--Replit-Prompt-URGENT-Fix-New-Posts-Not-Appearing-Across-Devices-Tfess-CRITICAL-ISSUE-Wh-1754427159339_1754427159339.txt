@@ -1,0 +1,83 @@
+🛠️ Replit Prompt — URGENT: Fix New Posts Not Appearing Across Devices (Tfess)
+⚠️ CRITICAL ISSUE:
+When a user submits a new post, it’s not appearing on other devices, even when:
+
+Tapping “X new post – tap to view”
+
+Clicking the Refresh button
+
+Navigating to the correct feed page (like Story Time, Daily Spill, etc.)
+
+✅ What Replit Needs to Do:
+You must fix this bug immediately to ensure post visibility works cross-device and in real-time.
+
+🔍 Suspected Causes:
+Firebase listeners (onSnapshot) may not be scoped correctly.
+
+Local state might not be syncing properly after updates.
+
+Cached or stale queries might be overriding the fresh post data.
+
+Posts might be filtering out due to a missing topic/category check on other devices.
+
+✅ Required Fixes:
+When a post is submitted, make sure it:
+
+Is instantly written to Firestore.
+
+Triggers any subscribed onSnapshot listeners (not just on local device).
+
+Gets pulled into the correct feed on other devices in real-time or upon refresh.
+
+Check filtering logic in each feed:
+
+Ensure that community feed pages (e.g., Story Time, Hot Topics) only show posts from their assigned category, but still update with new ones in that category.
+
+Daily Spill should update if the post was made today.
+
+If category filters are applied before the new post data updates, the post won’t render.
+
+Refresh Button Must Work:
+
+When tapped, force a new query to Firestore.
+
+Bypass any local state or client cache.
+
+Pull the latest data directly from the server.
+
+New Post Banner (“Tap to View”) Must Work:
+
+When clicked, the app must:
+
+Inject the new post into the feed’s UI list
+
+Scroll to top if necessary
+
+Reset the new-post counter
+
+🔄 Pages This Must Apply To:
+✅ Home page (New section)
+
+✅ Daily Spill
+
+✅ Every Community Topic feed (Story Time, Hot Topics, etc.)
+
+✅ Your Posts
+
+✅ Profile page feed
+
+🚫 Do NOT Apply This To:
+Trending (Home)
+
+Spill of the Day (Daily Spill)
+
+✅ Final Confirmation Checklist:
+ Posts made from one device show live or via refresh on another device.
+
+ The “X new posts – tap to view” banner injects content immediately.
+
+ The Refresh button always fetches latest from Firestore.
+
+ This fix works across all relevant topic feeds and user types.
+
+ Categories are properly respected, but do not block the new post from showing.
