@@ -245,17 +245,14 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         </div>
         <div className="flex items-center space-x-2 flex-shrink-0">
-          {/* Hide category badge for story posts to show more username */}
-          {post.category !== 'story' && (
-            <span className={cn(
-              "px-3 py-1 text-xs font-bold rounded-full border-2 shadow-sm whitespace-nowrap",
-              post.isDrama 
-                ? "gradient-drama text-white border-red-300"
-                : categoryColors[post.category] || "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
-            )}>
-              {categoryEmojis[post.category]} {categoryLabel}
-            </span>
-          )}
+          <span className={cn(
+            "px-3 py-1 text-xs font-bold rounded-full border-2 shadow-sm whitespace-nowrap",
+            post.isDrama 
+              ? "gradient-drama text-white border-red-300"
+              : categoryColors[post.category] || "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
+          )}>
+            {categoryEmojis[post.category]} {categoryLabel}
+          </span>
           {/* Story Type Badge */}
           {post.storyType && (
             <span className={cn(
