@@ -34,6 +34,20 @@ const SPAM_CONFIG = {
   MAX_WARNINGS: 3
 };
 
+// Admin session identifiers that bypass spam detection
+const ADMIN_SESSIONS = new Set([
+  process.env.ADMIN_SESSION_1,
+  process.env.ADMIN_SESSION_2, 
+  process.env.ADMIN_SESSION_3
+].filter(Boolean)); // Remove any undefined values
+
+// Check if a session belongs to an admin
+function isAdminSession(sessionId: string): boolean {
+  return ADMIN_SESSIONS.has(sessionId) || 
+         sessionId.startsWith('admin_') || 
+         (process.env.NODE_ENV === 'development' && sessionId === 'dev_admin');
+}
+
 // Calculate text similarity using Levenshtein distance
 function calculateSimilarity(text1: string, text2: string): number {
   const normalize = (text: string) => text.toLowerCase().replace(/[^\w\s]/g, '').trim();
@@ -149,6 +163,11 @@ export async function detectSpam(
   severity: 'low' | 'medium' | 'high';
   cooldownMinutes?: number;
 }> {
+  // Admin bypass - admins can post unlimited times without restrictions
+  if (isAdminSession(sessionId)) {
+    return { isSpam: false, action: 'allow', severity: 'low' };
+  }
+  
   const metrics = getSpamMetrics(sessionId, deviceFingerprint);
   const now = new Date();
   const timeWindow = new Date(now.getTime() - SPAM_CONFIG.TIME_WINDOW_MINUTES * 60 * 1000);
@@ -246,6 +265,11 @@ export async function detectSpam(
 
 // Check if user is currently in cooldown
 export function isInCooldown(sessionId: string): { inCooldown: boolean; remainingMinutes?: number } {
+  // Admin bypass - admins never have cooldowns
+  if (isAdminSession(sessionId)) {
+    return { inCooldown: false };
+  }
+  
   const metrics = spamMetrics.get(sessionId);
   if (!metrics || metrics.violations.length === 0) {
     return { inCooldown: false };
