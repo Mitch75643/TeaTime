@@ -31,6 +31,7 @@ const reactionEmojis = {
 export function CommentsDrawer({ postId, commentCount, isDrama = false }: CommentsDrawerProps) {
   const [comment, setComment] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [sessionId, setSessionId] = useState<string>('');
@@ -99,6 +100,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
       setComment("");
       setReplyText("");
       setReplyingTo(null);
+      setIsComposing(false); // Reset composing state
       toast({
         title: replyingTo ? "Reply posted!" : "Comment posted!",
         description: replyingTo ? "Your reply has been added." : "Your anonymous comment has been added.",
@@ -420,53 +422,90 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
           <div className="flex-shrink-0 pt-4 pb-safe-area-inset-bottom bg-gray-50 dark:bg-gray-800">
             {!replyingTo && (
               <div className="mx-4 p-4 rounded-2xl border border-gray-200 dark:border-gray-600">
-                <div className="flex space-x-3">
-                  <AvatarDisplay
-                    avatarId={userAvatarId}
-                    size="sm"
-                    showBorder={false}
-                    gradientColors={avatarColor}
-                    isCurrentUser={true}
-                  />
-                  <div className="flex-1 space-y-3">
-                    <Textarea
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Add a comment..."
-                      className="resize-none w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl min-h-[2.5rem] max-h-24 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 placeholder:text-gray-400"
-                      maxLength={300}
-                      rows={2}
-                      style={{ 
-                        fontSize: '16px', // Prevents zoom on iOS
-                        zIndex: 10,
-                        position: 'relative'
-                      }}
+                {!isComposing ? (
+                  // Show "Add a comment" button initially
+                  <div className="flex space-x-3">
+                    <AvatarDisplay
+                      avatarId={userAvatarId}
+                      size="sm"
+                      showBorder={false}
+                      gradientColors={avatarColor}
+                      isCurrentUser={true}
                     />
-                    <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
-                      <span className="text-xs text-gray-400 order-2 sm:order-1">
-                        {comment.length}/300
-                      </span>
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={createCommentMutation.isPending || !comment.trim()}
-                        className={cn(
-                          "text-white w-full sm:w-auto order-1 sm:order-2 rounded-xl transition-all duration-200",
-                          isDrama ? "gradient-drama" : "gradient-primary"
-                        )}
-                        size="sm"
-                      >
-                        {createCommentMutation.isPending ? (
-                          "Posting..."
-                        ) : (
-                          <>
-                            <Send className="h-4 w-4 mr-1" />
-                            Post
-                          </>
-                        )}
-                      </Button>
+                    <Button
+                      onClick={() => setIsComposing(true)}
+                      variant="outline"
+                      className="flex-1 justify-start text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200"
+                      size="sm"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Add a comment...
+                    </Button>
+                  </div>
+                ) : (
+                  // Show full textarea when composing
+                  <div className="flex space-x-3">
+                    <AvatarDisplay
+                      avatarId={userAvatarId}
+                      size="sm"
+                      showBorder={false}
+                      gradientColors={avatarColor}
+                      isCurrentUser={true}
+                    />
+                    <div className="flex-1 space-y-3">
+                      <Textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="resize-none w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl min-h-[2.5rem] max-h-24 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 placeholder:text-gray-400"
+                        maxLength={300}
+                        rows={2}
+                        autoFocus
+                        style={{ 
+                          fontSize: '16px', // Prevents zoom on iOS
+                          zIndex: 10,
+                          position: 'relative'
+                        }}
+                      />
+                      <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                        <span className="text-xs text-gray-400 order-2 sm:order-1">
+                          {comment.length}/300
+                        </span>
+                        <div className="flex space-x-2 order-1 sm:order-2">
+                          <Button
+                            onClick={() => {
+                              setIsComposing(false);
+                              setComment("");
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleSubmit}
+                            disabled={createCommentMutation.isPending || !comment.trim()}
+                            className={cn(
+                              "text-white rounded-xl transition-all duration-200",
+                              isDrama ? "gradient-drama" : "gradient-primary"
+                            )}
+                            size="sm"
+                          >
+                            {createCommentMutation.isPending ? (
+                              "Posting..."
+                            ) : (
+                              <>
+                                <Send className="h-4 w-4 mr-1" />
+                                Post
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
