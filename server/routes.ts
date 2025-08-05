@@ -1391,7 +1391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Secure password check (stored as environment variable or config)
-      const adminPassword = "NewYorkVacay2025!";
+      const adminPassword = "NewYork/Boston/Wichita/area2025!";
       
       if (password === adminPassword) {
         // Store temporary admin access in session for direct /admin route access
