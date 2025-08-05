@@ -12,17 +12,18 @@ function generateAnonId(): string {
   return result;
 }
 
-// Generate fun username (from existing system)
+// Generate fun username (server will handle uniqueness)
 function generateFunUsername(): string {
   const dramaPrefixes = ['Spill', 'Tea', 'Drama', 'Chaos', 'Petty', 'Sassy', 'Messy', 'Shady'];
   const chillPrefixes = ['Calm', 'Zen', 'Cool', 'Chill', 'Smooth', 'Easy', 'Laid', 'Mellow'];
   const funnyPrefixes = ['Giggle', 'Laugh', 'Joke', 'Fun', 'Silly', 'Goofy', 'Witty', 'Quirky'];
   const mysteriousPrefixes = ['Shadow', 'Whisper', 'Secret', 'Hidden', 'Mystery', 'Enigma', 'Phantom', 'Ghost'];
+  const coolPrefixes = ['Masked', 'Swift', 'Bold', 'Wild', 'Fierce', 'Rebel', 'Elite', 'Cosmic'];
   
-  const suffixes = ['Queen', 'King', 'Master', 'Expert', 'Pro', 'Legend', 'Boss', 'Star', 'Hero', 'Ninja'];
+  const suffixes = ['Queen', 'King', 'Master', 'Expert', 'Pro', 'Legend', 'Boss', 'Star', 'Hero', 'Ninja', 'Fox', 'Wolf', 'Tiger', 'Eagle', 'Storm', 'Flame', 'Sage', 'Vibe'];
   const numbers = Math.floor(Math.random() * 100) + 1;
   
-  const allPrefixes = [...dramaPrefixes, ...chillPrefixes, ...funnyPrefixes, ...mysteriousPrefixes];
+  const allPrefixes = [...dramaPrefixes, ...chillPrefixes, ...funnyPrefixes, ...mysteriousPrefixes, ...coolPrefixes];
   const randomPrefix = allPrefixes[Math.floor(Math.random() * allPrefixes.length)];
   const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
   

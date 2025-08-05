@@ -60,8 +60,11 @@ export function DramaVoting({ postId }: DramaVotingProps) {
       setShowConfetti(true);
     }
     
-    setPrevVotes(votes);
-  }, [votes]); // Removed prevVotes from dependencies to prevent infinite loop
+    // Only update prevVotes if the values actually changed
+    if (JSON.stringify(votes) !== JSON.stringify(prevVotes)) {
+      setPrevVotes(votes);
+    }
+  }, [votes, prevVotes]);
 
   const { data: hasVoted = false } = useQuery({
     queryKey: ["/api/posts", postId, "has-voted"],

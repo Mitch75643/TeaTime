@@ -903,6 +903,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Add poll and debate voting routes
   addPollVotingRoutes(app);
+
+  // Username uniqueness and generation endpoints
+  app.get("/api/username/check/:username", async (req, res) => {
+    try {
+      const { username } = req.params;
+      const isUnique = await storage.isUsernameUnique(username);
+      res.json({ isUnique });
+    } catch (error) {
+      console.error("Failed to check username uniqueness:", error);
+      res.status(500).json({ message: "Failed to check username" });
+    }
+  });
+
+  app.post("/api/username/generate", async (req, res) => {
+    try {
+      const { baseAlias } = req.body;
+      const uniqueUsername = await storage.generateUniqueUsername(baseAlias);
+      res.json({ username: uniqueUsername });
+    } catch (error) {
+      console.error("Failed to generate unique username:", error);
+      res.status(500).json({ message: "Failed to generate username" });
+    }
+  });
+
+  app.post("/api/username/regenerate", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const user = await storage.getAnonymousUserBySession(sessionId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate a completely new unique username
+      const newUsername = await storage.generateUniqueUsername();
+      
+      // Update the user's alias
+      await storage.updateUserProfile(user.anonId, { alias: newUsername });
+      
+      res.json({ username: newUsername, success: true });
+    } catch (error) {
+      console.error("Failed to regenerate username:", error);
+      res.status(500).json({ message: "Failed to regenerate username" });
+    }
+  });
   
   // Auto-rotation endpoints
   app.get("/api/rotation/current", async (req, res) => {

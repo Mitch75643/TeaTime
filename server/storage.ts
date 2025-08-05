@@ -66,6 +66,10 @@ export interface IStorage {
   updateUserAvatarColor(userId: string, avatarColor: string): Promise<void>;
   createDeviceSession(anonUserId: string, sessionId: string, deviceFingerprint?: string): Promise<DeviceSession>;
   
+  // Username uniqueness checks
+  isUsernameUnique(alias: string): Promise<boolean>;
+  generateUniqueUsername(baseAlias?: string): Promise<string>;
+  
   // Device Ban System
   createBannedDevice(banData: { deviceFingerprint: string; bannedBy?: string; banReason?: string; isTemporary?: boolean; expiresAt?: string; deviceMetadata?: Record<string, any> }): Promise<BannedDevice>;
   getBannedDevice(deviceFingerprint: string): Promise<BannedDevice | undefined>;
@@ -707,12 +711,17 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const anonId = this.generateAnonId();
     
+    // Generate unique username
+    const uniqueAlias = userData.alias ? 
+      await this.generateUniqueUsername(userData.alias) : 
+      await this.generateUniqueUsername();
+    
     const user: AnonymousUser = {
       id,
       anonId,
       sessionId,
       deviceFingerprint: userData.deviceFingerprint || null,
-      alias: userData.alias || `AnonUser${Math.floor(Math.random() * 1000)}`,
+      alias: uniqueAlias,
       avatarId: userData.avatarId || 'happy-face',
       avatarColor: userData.avatarColor || 'from-purple-400 to-pink-500',
       isUpgraded: false,
@@ -843,7 +852,12 @@ export class MemStorage implements IStorage {
       throw new Error('User not found');
     }
 
-    if (updates.alias) user.alias = updates.alias;
+    // If updating alias, ensure it's unique
+    if (updates.alias) {
+      const uniqueAlias = await this.generateUniqueUsername(updates.alias);
+      user.alias = uniqueAlias;
+    }
+    
     if (updates.avatarId) user.avatarId = updates.avatarId;
     
     user.lastActiveAt = new Date();
@@ -883,6 +897,65 @@ export class MemStorage implements IStorage {
 
     this.deviceSessions.set(id, session);
     return session;
+  }
+
+  // Username uniqueness methods
+  async isUsernameUnique(alias: string): Promise<boolean> {
+    // Check if username exists in the entire database
+    const existingUser = Array.from(this.anonymousUsers.values())
+      .find(user => user.alias.toLowerCase() === alias.toLowerCase());
+    
+    return !existingUser;
+  }
+
+  async generateUniqueUsername(baseAlias?: string): Promise<string> {
+    // Username generation with fun prefixes and suffixes
+    const dramaPrefixes = ['Spill', 'Tea', 'Drama', 'Chaos', 'Petty', 'Sassy', 'Messy', 'Shady'];
+    const chillPrefixes = ['Calm', 'Zen', 'Cool', 'Chill', 'Smooth', 'Easy', 'Laid', 'Mellow'];
+    const funnyPrefixes = ['Giggle', 'Laugh', 'Joke', 'Fun', 'Silly', 'Goofy', 'Witty', 'Quirky'];
+    const mysteriousPrefixes = ['Shadow', 'Whisper', 'Secret', 'Hidden', 'Mystery', 'Enigma', 'Phantom', 'Ghost'];
+    const coolPrefixes = ['Masked', 'Swift', 'Bold', 'Wild', 'Fierce', 'Rebel', 'Elite', 'Cosmic'];
+    
+    const suffixes = ['Queen', 'King', 'Master', 'Expert', 'Pro', 'Legend', 'Boss', 'Star', 'Hero', 'Ninja', 'Fox', 'Wolf', 'Tiger', 'Eagle', 'Storm', 'Flame', 'Sage', 'Vibe'];
+    
+    // If a base alias is provided, try variations first
+    if (baseAlias) {
+      // Try the base alias first
+      if (await this.isUsernameUnique(baseAlias)) {
+        return baseAlias;
+      }
+      
+      // Try with numbers appended (e.g., MaskedFox23)
+      for (let i = 1; i <= 99; i++) {
+        const variant = `${baseAlias}${i}`;
+        if (await this.isUsernameUnique(variant)) {
+          return variant;
+        }
+      }
+    }
+    
+    // Generate completely new usernames until unique
+    const allPrefixes = [...dramaPrefixes, ...chillPrefixes, ...funnyPrefixes, ...mysteriousPrefixes, ...coolPrefixes];
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    while (attempts < maxAttempts) {
+      const randomPrefix = allPrefixes[Math.floor(Math.random() * allPrefixes.length)];
+      const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+      const randomNumber = Math.floor(Math.random() * 100) + 1;
+      
+      const newUsername = `${randomPrefix}${randomSuffix}${randomNumber}`;
+      
+      if (await this.isUsernameUnique(newUsername)) {
+        return newUsername;
+      }
+      
+      attempts++;
+    }
+    
+    // Fallback: use timestamp to ensure uniqueness
+    const timestamp = Date.now().toString().slice(-6);
+    return `AnonymousUser${timestamp}`;
   }
 
   // Device Ban System methods
