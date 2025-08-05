@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Zap, Flame, MessageSquare, FlaskConical, Bug, Lightbulb, MessageCircle } from "lucide-react";
 
@@ -8,9 +8,21 @@ interface CelebrationProps {
   type: "celebrity-tea" | "story-time" | "hot-topics" | "daily-debate" | "tea-experiments" | "bug-report" | "feature-request" | "general-feedback";
 }
 
+// Global sound cooldown to prevent spam
+let lastSoundTime = 0;
+const SOUND_COOLDOWN_MS = 3000; // 3 seconds cooldown between sounds
+
 // Audio helper function
 const playSound = (soundType: string) => {
   try {
+    // Check cooldown period
+    const now = Date.now();
+    if (now - lastSoundTime < SOUND_COOLDOWN_MS) {
+      console.log("Sound blocked due to cooldown");
+      return;
+    }
+    lastSoundTime = now;
+
     // Create simple audio using Web Audio API for sound effects
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     

@@ -8,9 +8,21 @@ interface CommunityTopicAnimationProps {
   topic: string;
 }
 
+// Global sound cooldown to prevent spam
+let lastTopicSoundTime = 0;
+const TOPIC_SOUND_COOLDOWN_MS = 3000; // 3 seconds cooldown between sounds
+
 // Topic-specific sound effects
 const playTopicSound = (topic: string) => {
   try {
+    // Check cooldown period
+    const now = Date.now();
+    if (now - lastTopicSoundTime < TOPIC_SOUND_COOLDOWN_MS) {
+      console.log("Topic sound blocked due to cooldown");
+      return;
+    }
+    lastTopicSoundTime = now;
+
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
     switch (topic.toLowerCase()) {
