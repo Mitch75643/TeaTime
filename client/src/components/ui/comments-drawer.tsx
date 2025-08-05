@@ -25,7 +25,7 @@ const reactionEmojis = {
   thumbsUp: "👍",
   thumbsDown: "👎",
   laugh: "😂",
-  sad: "😢",
+  sad: "😲",
 };
 
 export function CommentsDrawer({ postId, commentCount, isDrama = false }: CommentsDrawerProps) {

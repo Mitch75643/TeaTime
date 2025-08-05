@@ -276,7 +276,7 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
       </motion.div>
       
       {/* Floating Reaction Emojis */}
-      {["😍", "😂", "😢", "🤔", "❤️"].map((emoji, i) => (
+      {["😍", "😂", "😲", "🤔", "❤️"].map((emoji, i) => (
         <motion.div
           key={i}
           className="absolute text-3xl"

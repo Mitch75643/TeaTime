@@ -58,7 +58,7 @@ const reactionEmojis = {
   thumbsUp: "👍",
   thumbsDown: "👎",
   laugh: "😂",
-  sad: "😢", 
+  sad: "😲", 
 };
 
 export function PostCard({ post }: PostCardProps) {

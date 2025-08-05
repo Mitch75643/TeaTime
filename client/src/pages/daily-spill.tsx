@@ -321,7 +321,7 @@ function SpillStreak() {
       </div>
       {streakStatus.status === 'broken' && currentStreak === 0 && streak?.longestStreak && streak.longestStreak > 0 && (
         <div className="text-xs text-white/80 bg-white/10 rounded px-2 py-1">
-          😢 You missed a day. Your streak has reset.
+          😲 You missed a day. Your streak has reset.
         </div>
       )}
     </div>

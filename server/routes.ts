@@ -234,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               streak: streakUpdate.streak,
               streakBroken: streakUpdate.streakBroken,
               message: streakUpdate.streakBroken 
-                ? "😢 You missed a day. Your streak has reset."
+                ? "😲 You missed a day. Your streak has reset."
                 : streakUpdate.streak.currentStreak === 1 
                   ? "🎉 Great start! Your daily streak begins!"
                   : `🔥 Amazing! ${streakUpdate.streak.currentStreak} day streak!`
@@ -1163,7 +1163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         streak: result.streak,
         streakBroken: result.streakBroken,
         message: result.streakBroken 
-          ? "😢 You missed a day. Your streak has reset."
+          ? "😲 You missed a day. Your streak has reset."
           : result.streak.currentStreak === 1 
             ? "🎉 Great start! Your daily streak begins!"
             : `🔥 Amazing! ${result.streak.currentStreak} day streak!`
