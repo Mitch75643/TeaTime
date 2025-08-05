@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import type { Post } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
@@ -64,8 +65,12 @@ const reactionEmojis = {
 export function PostCard({ post }: PostCardProps) {
   const [userReactions, setUserReactions] = useState<Record<string, boolean>>({});
   const [sessionId, setSessionId] = useState<string>('');
+  const [liveReactions, setLiveReactions] = useState<Record<string, number>>(
+    post.reactions as Record<string, number> || { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 }
+  );
   const queryClient = useQueryClient();
   const { profile, getCachedProfile } = useUserProfile();
+  const { subscribeToMessages } = useWebSocket();
   
   // Use cached profile data to prevent flashing - try multiple sources immediately
   const cachedProfile = getCachedProfile();
@@ -108,6 +113,37 @@ export function PostCard({ post }: PostCardProps) {
       }
     }
   }, [post.id]);
+
+  // Subscribe to real-time reaction updates
+  useEffect(() => {
+    const unsubscribe = subscribeToMessages((message: any) => {
+      if (message.type === 'post_reaction' && message.postId === post.id) {
+        console.log('Real-time reaction update received:', message);
+        // Update the live reaction counts immediately
+        setLiveReactions(prev => {
+          const newCounts = { ...prev };
+          const { type, action } = message.data;
+          
+          if (action === 'add') {
+            newCounts[type] = (newCounts[type] || 0) + 1;
+          } else if (action === 'remove') {
+            newCounts[type] = Math.max(0, (newCounts[type] || 0) - 1);
+          }
+          
+          console.log('Updated reaction counts:', newCounts);
+          return newCounts;
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [post.id, subscribeToMessages]);
+
+  // Update live reactions when post data changes (initial load)
+  useEffect(() => {
+    const postReactions = post.reactions as Record<string, number> || { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 };
+    setLiveReactions(postReactions);
+  }, [post.reactions]);
 
   const reactionMutation = useMutation({
     mutationFn: async ({ type, remove }: { type: string; remove?: boolean }) => {
@@ -160,8 +196,8 @@ export function PostCard({ post }: PostCardProps) {
     post.category === "other" ? "Other" :
     post.category.charAt(0).toUpperCase() + post.category.slice(1);
 
-  // Calculate trending score for visual indication
-  const reactions = post.reactions as Record<string, number> || { thumbsUp: 0, thumbsDown: 0, laugh: 0, sad: 0 };
+  // Use live reactions for display and calculations
+  const reactions = liveReactions;
   const trendingScore = (reactions.laugh || 0) * 3 + 
                        (reactions.thumbsUp || 0) * 2 + 
                        (reactions.sad || 0) + 
