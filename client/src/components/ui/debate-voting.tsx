@@ -81,10 +81,7 @@ export function DebateVoting({ postId }: DebateVotingProps) {
   const voteMutation = useMutation({
     mutationFn: async (vote: 'up' | 'down') => {
       console.log('Submitting debate vote:', { postId, vote });
-      const response = await apiRequest('/api/debates/vote', {
-        method: 'POST',
-        body: { postId, vote },
-      });
+      const response = await apiRequest('POST', '/api/debates/vote', { postId, vote });
       console.log('Vote submission response:', response);
       return response;
     },
