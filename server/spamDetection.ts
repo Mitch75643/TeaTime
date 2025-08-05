@@ -45,8 +45,7 @@ const ADMIN_SESSIONS = new Set([
 function isAdminSession(sessionId: string): boolean {
   return ADMIN_SESSIONS.has(sessionId) || 
          sessionId.startsWith('admin_') || 
-         (process.env.NODE_ENV === 'development' && sessionId === 'dev_admin') ||
-         sessionId.includes('admin_test_'); // For testing panel
+         (process.env.NODE_ENV === 'development' && sessionId === 'dev_admin');
 }
 
 // Calculate text similarity using Levenshtein distance
