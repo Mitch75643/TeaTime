@@ -1,0 +1,67 @@
+🛠️ Replit Prompt — Expand Community Topic Feed Layout (Tfess)
+📌 What I Need Replit to Do:
+In the Community page, each individual topic (like Hot Topics, Celebrity Tea, Story Time, etc.) currently displays posts in a small, boxed feed area. This limits the visual experience and makes posts harder to read or scroll through.
+
+I want the layout of these Community Topic feeds to be improved to feel more full-screen and immersive, matching the modern feed layout standards used elsewhere in the app.
+
+✅ What to Change:
+Remove or significantly reduce the bordered container that the feed is currently in (see screenshot).
+
+Feeds like Hot Topics are confined to a small centered box.
+
+Make the feed expand full width (or nearly full width) within the content area of the screen.
+
+Increase vertical spacing and layout size:
+
+Posts should appear larger, with better padding and spacing.
+
+Use a layout style that matches the feed from the Home Page or Daily Spill for consistency.
+
+Make the feed scrollable normally (vertically) just like other feed pages.
+
+Avoid double-scroll or small embedded scroll containers.
+
+Content should feel like a fluid feed, not like a restricted card inside a modal.
+
+✅ Apply this change to ALL Community Topic pages, including:
+
+Hot Topics
+
+Celebrity Tea
+
+Story Time
+
+Daily Debate
+
+Tea Experiments
+
+Any others that use this same small feed layout
+
+🚫 Do NOT apply these layout changes to:
+The "Create First Post" button design — that can stay the same, just reposition it better if needed.
+
+Trending feed on Home Page
+
+Daily Spill’s Spill of the Day section
+
+Modals or popups — only apply to the full-page feed views
+
+✅ Final Result I Want:
+A full-width, modern, scrollable feed layout for all Community Topic pages
+
+Bigger, easier-to-read posts
+
+Users shouldn’t feel cramped or confined when viewing posts in those sections
+
+It should feel visually consistent with the Home Page and Daily Spill feeds
+
+Let me know if you need this adapted for dark/light mode styling too.
+
+
+
+
+
+
+
+
+Ask ChatGPT

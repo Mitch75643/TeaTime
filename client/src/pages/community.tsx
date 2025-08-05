@@ -258,10 +258,11 @@ export default function Community() {
           })}
         </div>
 
-        {/* Recent Community Posts */}
-        <div className="space-y-4">
+        {/* Recent Community Posts - Full-Width Modern Layout */}
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Users className="h-5 w-5 text-orange-500" />
               Recent Community Posts
             </h2>
             <Button
@@ -274,24 +275,23 @@ export default function Community() {
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
+          
           {isLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 space-y-3">
-                    <div className="flex space-x-3">
-                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                      </div>
+                <div key={i} className="animate-pulse bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="flex space-x-3">
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 No community posts yet
@@ -301,9 +301,13 @@ export default function Community() {
               </p>
             </div>
           ) : (
-            posts.slice(0, 5).map((post: Post) => (
-              <PostCard key={post.id} post={post} />
-            ))
+            <div className="space-y-6">
+              {posts.slice(0, 5).map((post: Post) => (
+                <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <PostCard post={post} />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

@@ -276,7 +276,7 @@ export default function TopicFeed() {
       </div>
 
       {/* Topic-Specific Features */}
-      <div className="px-4 pt-8 pb-6 space-y-6 max-w-2xl mx-auto">
+      <div className="px-4 pt-8 pb-6 space-y-6">
         {topicId === "celebrity-tea" && (
           <CelebrityTeaFeatures 
             onSpillAbout={(celebName) => {
@@ -357,9 +357,9 @@ export default function TopicFeed() {
         )}
       </div>
 
-      {/* Posts Section with Tabs */}
-      <div className="container mx-auto px-4 py-6 pb-20">
-        <div className="grid grid-cols-1 gap-6 max-w-4xl mx-auto">
+      {/* Posts Section with Tabs - Full Width Modern Feed */}
+      <div className="px-4 py-6 pb-20">
+        <div className="grid grid-cols-1 gap-6">
           {/* Main Posts Section */}
           <div>
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -562,10 +562,10 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                  <div className="space-y-6 p-4">
                     {/* Show Story Recommendations first for Story Time */}
                     {topicId === "story-time" && (
-                      <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+                      <div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
                         <div className="flex items-center gap-2 mb-4">
                           <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
                             ✨ Recommended for You
@@ -579,12 +579,13 @@ export default function TopicFeed() {
                       </div>
                     )}
                     
-                    {/* Regular Community Posts */}
+                    {/* Regular Community Posts - Modern Full-Width Layout */}
                     {communityPosts.map((post: Post) => (
-                      <PostCard 
-                        key={post.id} 
-                        post={post}
-                      />
+                      <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <PostCard 
+                          post={post}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -634,12 +635,14 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                  <div className="space-y-6 p-4">
+                    {/* User Posts - Modern Full-Width Layout */}
                     {userPosts.map((post: Post) => (
-                      <PostCard 
-                        key={post.id} 
-                        post={post}
-                      />
+                      <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <PostCard 
+                          post={post}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}
