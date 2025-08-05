@@ -328,14 +328,22 @@ export default function TopicFeed() {
         )}
         
         {topicId === "tea-experiments" && (
-          <TeaExperimentsFeatures 
-            onCreatePoll={(question, options) => {
-              setIsPostModalOpen(true);
-            }}
-            onVote={(optionId) => {
-              console.log(`Voted ${optionId} on experiment`);
-            }}
-          />
+          <div className="bg-gradient-to-r from-purple-500/10 to-violet-500/10 dark:from-purple-500/5 dark:to-violet-500/5 rounded-2xl p-6 mb-6 border border-purple-200 dark:border-purple-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="text-2xl">🧪</div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Tea Experiments</h2>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Create polls and let the community decide</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setIsPostModalOpen(true)}
+              className="bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create New Experiment
+            </Button>
+          </div>
         )}
         
 

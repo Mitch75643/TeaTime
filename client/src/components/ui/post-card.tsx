@@ -3,6 +3,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "./button";
 import { DramaVoting } from "./drama-voting";
 import { DebateVoting } from "./debate-voting";
+import { PollVoting } from "./poll-voting";
 import { CommentsDrawer } from "./comments-drawer";
 import { PostMenu } from "./post-menu";
 import { PostStats, usePostView } from "./post-stats";
@@ -297,6 +298,9 @@ export function PostCard({ post, hideStoryCategory = false }: PostCardProps) {
       
       {/* Debate Voting Component */}
       {post.postType === 'debate' && <DebateVoting postId={post.id} />}
+      
+      {/* Poll Voting Component */}
+      {post.postType === 'poll' && <PollVoting postId={post.id} />}
 
       {/* Reactions */}
       <div className={cn(
