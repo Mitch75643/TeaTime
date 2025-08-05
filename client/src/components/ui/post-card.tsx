@@ -219,8 +219,8 @@ export function PostCard({ post }: PostCardProps) {
     <article 
       id={`post-${post.id}`}
       className={cn(
-        "w-full max-w-full rounded-2xl shadow-md border p-6 space-y-4 relative overflow-hidden break-words transition-shadow hover:shadow-lg",
-        "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        "w-full max-w-full rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden break-words",
+        "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
       )}>
       {/* Trending Badge */}
       {isTrending && !post.isDrama && (
@@ -269,8 +269,8 @@ export function PostCard({ post }: PostCardProps) {
         </div>
       </div>
 
-      <div className="space-y-3">
-        <p className="text-gray-900 dark:text-gray-100 leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere text-base">{post.content}</p>
+      <div className="space-y-2">
+        <p className="text-gray-900 dark:text-gray-100 leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{post.content}</p>
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {post.tags.map((tag, index) => (
@@ -290,7 +290,7 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Reactions */}
       <div className={cn(
-        "flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700"
+        "flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700"
       )}>
         <div className="flex items-center space-x-4">
           {Object.entries(reactionEmojis).map(([type, emoji]) => {

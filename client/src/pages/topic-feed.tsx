@@ -358,8 +358,8 @@ export default function TopicFeed() {
       </div>
 
       {/* Posts Section with Tabs */}
-      <div className="w-full px-4 py-6 pb-20">
-        <div className="w-full max-w-6xl mx-auto">
+      <div className="container mx-auto px-4 py-6 pb-20">
+        <div className="grid grid-cols-1 gap-6 max-w-4xl mx-auto">
           {/* Main Posts Section */}
           <div>
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -518,7 +518,7 @@ export default function TopicFeed() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-8">
+          <div className="p-6">
             {activeTab === 'community' && (
               <div className="space-y-4">
                 {isLoadingCommunity ? (
@@ -562,10 +562,10 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
                     {/* Show Story Recommendations first for Story Time */}
                     {topicId === "story-time" && (
-                      <div className="border-b border-gray-200 dark:border-gray-700 pb-6 mb-6">
+                      <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
                         <div className="flex items-center gap-2 mb-4">
                           <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
                             ✨ Recommended for You
@@ -592,9 +592,9 @@ export default function TopicFeed() {
             )}
 
             {activeTab === 'user' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {isLoadingUser ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {[...Array(2)].map((_, i) => (
                       <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
                         <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
@@ -634,7 +634,7 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
                     {userPosts.map((post: Post) => (
                       <PostCard 
                         key={post.id} 
