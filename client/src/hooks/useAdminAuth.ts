@@ -27,20 +27,14 @@ export function useAdminAuth() {
   // Verify fingerprint step
   const verifyFingerprintMutation = useMutation({
     mutationFn: async (fingerprint: string) => {
-      return apiRequest('/api/admin/verify-fingerprint', {
-        method: 'POST',
-        body: { fingerprint },
-      });
+      return apiRequest('POST', '/api/admin/verify-fingerprint', { fingerprint });
     },
   });
 
   // Complete admin login
   const loginMutation = useMutation({
     mutationFn: async ({ fingerprint, email }: { fingerprint: string; email: string }) => {
-      return apiRequest('/api/admin/login', {
-        method: 'POST',
-        body: { fingerprint, email },
-      });
+      return apiRequest('POST', '/api/admin/login', { fingerprint, email });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/session'] });
@@ -50,9 +44,7 @@ export function useAdminAuth() {
   // Admin logout
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/admin/logout', {
-        method: 'POST',
-      });
+      return apiRequest('POST', '/api/admin/logout');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/session'] });
@@ -91,10 +83,7 @@ export function useAdminManagement() {
       email: string;
       role: 'admin' | 'root_host';
     }) => {
-      return apiRequest('/api/admin/manage/add', {
-        method: 'POST',
-        body: adminData,
-      });
+      return apiRequest('POST', '/api/admin/manage/add', adminData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/manage/list'] });
@@ -104,10 +93,7 @@ export function useAdminManagement() {
   // Remove admin
   const removeAdminMutation = useMutation({
     mutationFn: async (targetEmail: string) => {
-      return apiRequest('/api/admin/manage/remove', {
-        method: 'POST',
-        body: { targetEmail },
-      });
+      return apiRequest('POST', '/api/admin/manage/remove', { targetEmail });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/manage/list'] });
