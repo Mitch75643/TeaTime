@@ -86,14 +86,19 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
   // Update state when feed data changes
   useEffect(() => {
     if (feedData) {
-      setState(prev => ({
-        ...prev,
-        posts: feedData.posts || [],
-        hasMorePosts: feedData.hasMorePosts || false,
-        nextRefreshAvailable: feedData.nextRefreshAvailable || false,
-        queuedPostsCount: feedData.queuedPostsCount || 0,
-        lastRefreshTime: new Date(),
-      }));
+      console.log('Smart Feed: Processing feed data change:', feedData);
+      setState(prev => {
+        const newState = {
+          ...prev,
+          posts: feedData.posts || [],
+          hasMorePosts: feedData.hasMorePosts || false,
+          nextRefreshAvailable: feedData.nextRefreshAvailable || false,
+          queuedPostsCount: feedData.queuedPostsCount || 0,
+          lastRefreshTime: new Date(),
+        };
+        console.log('Smart Feed: State updated from feed data:', newState);
+        return newState;
+      });
       
       // Update displayed post IDs
       const newPostIds = (feedData.posts || []).map((post: any) => post.id);
@@ -161,7 +166,7 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
       const newPosts = enableSmartLogic && freshData.posts ? freshData.posts : freshData;
       const newPostIds = (newPosts || []).map((post: any) => post.id);
       
-      // Update state with fresh data
+      // Update state with fresh data and force re-render
       setState(prev => {
         const newState = {
           ...prev,
@@ -171,8 +176,11 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
           isRefreshing: false,
           nextRefreshAvailable: false,
           lastRefreshTime: new Date(),
+          // Force update by changing a value that React will detect
+          _updateKey: Date.now(),
         };
         console.log('Smart Feed: Updated state after refresh:', newState);
+        console.log('Smart Feed: New posts array:', newPosts);
         return newState;
       });
       
@@ -242,7 +250,7 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     }
   }, [handleRefresh]);
 
-  return {
+  const returnValue = {
     // State
     posts: state.posts,
     isLoading,
@@ -263,4 +271,9 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     shouldShowLoadMoreButton: state.hasMorePosts && !state.nextRefreshAvailable,
     shouldShowRefreshButton: state.nextRefreshAvailable && state.queuedPostsCount > 0,
   };
+  
+  // Debug logging for return value
+  console.log('Smart Feed Hook: Returning state - posts:', returnValue.posts.length, 'banner:', returnValue.shouldShowRefreshBanner, 'newCount:', returnValue.newPostsCount);
+  
+  return returnValue;
 }
