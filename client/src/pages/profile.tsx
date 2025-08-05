@@ -95,7 +95,7 @@ export default function Profile() {
   }, [user?.anonId]);
 
   // Get user's posts (using session ID for identification)
-  const { data: responseData, isLoading } = useQuery({
+  const { data: userPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", "user"],
     queryFn: async () => {
       const response = await fetch("/api/posts?sortBy=new&userOnly=true");
@@ -103,9 +103,6 @@ export default function Profile() {
       return response.json();
     },
   });
-
-  // Handle both array response (legacy) and object response (smart feed)
-  const userPosts = Array.isArray(responseData) ? responseData : (responseData?.posts || []);
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -369,7 +366,7 @@ export default function Profile() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Posts</h3>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-{Array.isArray(userPosts) ? userPosts.length : 0} post{(Array.isArray(userPosts) ? userPosts.length : 0) !== 1 ? 's' : ''}
+                {userPosts.length} post{userPosts.length !== 1 ? 's' : ''}
               </div>
             </div>
 
@@ -380,7 +377,7 @@ export default function Profile() {
               </div>
             )}
 
-            {!isLoading && Array.isArray(userPosts) && userPosts.length === 0 && (
+            {!isLoading && userPosts.length === 0 && (
               <Card>
                 <CardContent className="text-center py-12 min-h-[40vh] flex flex-col items-center justify-center">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -394,7 +391,7 @@ export default function Profile() {
               </Card>
             )}
 
-            {Array.isArray(userPosts) ? userPosts.map((post: Post) => {
+            {userPosts.map((post: Post) => {
               const sourceInfo = getPostSourceInfo(post);
               return (
                 <div key={post.id} className="space-y-2">
@@ -406,7 +403,7 @@ export default function Profile() {
                   </div>
                 </div>
               );
-            }) : []}
+            })}
           </div>
         )}
 
@@ -423,7 +420,7 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <AliasSelector
-                  currentAlias={{ alias: userAlias, hasEmoji: false, generated: true }}
+                  currentAlias={{ alias: userAlias }}
                   onSelect={(newUsername) => {
                     updateProfile({ alias: newUsername.alias });
                     toast({

@@ -174,7 +174,7 @@ export default function Community() {
     setLocation(`/topic/${topicId}`);
   };
 
-  const { data: responseData, isLoading, refetch } = useQuery({
+  const { data: posts = [], isLoading, refetch } = useQuery<Post[]>({
     queryKey: ["/api/posts", "community"],
     queryFn: async () => {
       const response = await fetch("/api/posts?sortBy=new&postContext=community");
@@ -182,9 +182,6 @@ export default function Community() {
       return response.json();
     },
   });
-
-  // Handle both array response (legacy) and object response (smart feed)
-  const posts = Array.isArray(responseData) ? responseData : (responseData?.posts || []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -304,9 +301,9 @@ export default function Community() {
               </p>
             </div>
           ) : (
-            Array.isArray(posts) ? posts.slice(0, 5).map((post: Post) => (
+            posts.slice(0, 5).map((post: Post) => (
               <PostCard key={post.id} post={post} />
-            )) : []
+            ))
           )}
         </div>
       </div>

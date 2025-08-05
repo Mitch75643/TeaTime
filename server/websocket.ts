@@ -2,11 +2,9 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 
 export interface WebSocketMessage {
-  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote' | 'new_post' | 'posts_available' | 'username_updated' | 'profile_updated';
-  postId?: string;
+  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote';
+  postId: string;
   data: any;
-  section?: string;
-  postContext?: string;
 }
 
 export class WebSocketManager {
@@ -71,35 +69,7 @@ export class WebSocketManager {
       }
     });
 
-    const logPostId = message.postId || 'global';
-    console.log(`[WebSocket] Broadcasted ${message.type} for ${logPostId} to ${sent} clients (${failed} failed)`);
-  }
-
-  // Broadcast new post notification without showing the post immediately
-  broadcastNewPostAvailable(section?: string, postContext?: string, count: number = 1) {
-    this.broadcast({
-      type: 'posts_available',
-      data: {
-        count,
-        section,
-        postContext,
-        timestamp: Date.now()
-      },
-      section,
-      postContext
-    });
-  }
-
-  // Broadcast profile updates across devices
-  broadcastProfileUpdate(sessionId: string, updateData: any) {
-    this.broadcast({
-      type: 'profile_updated',
-      data: {
-        sessionId,
-        ...updateData,
-        timestamp: Date.now()
-      }
-    });
+    console.log(`[WebSocket] Broadcasted ${message.type} for post ${message.postId} to ${sent} clients (${failed} failed)`);
   }
 
   // Get current client count
