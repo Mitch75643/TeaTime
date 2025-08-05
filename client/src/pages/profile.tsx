@@ -233,10 +233,11 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <Header />
       
-      <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto">
+      <div className="flex-1 overflow-y-auto">
+        <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto min-h-full">
         {/* Profile Header */}
         <Card>
           <CardHeader className="text-center">
@@ -331,7 +332,7 @@ export default function Profile() {
 
             {!isLoading && userPosts.length === 0 && (
               <Card>
-                <CardContent className="text-center py-12">
+                <CardContent className="text-center py-12 min-h-[40vh] flex flex-col items-center justify-center">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                     You haven't spilled any tea yet.
@@ -361,7 +362,7 @@ export default function Profile() {
 
         {/* Settings Tab */}
         {activeTab === "settings" && (
-          <div className="space-y-6">
+          <div className="space-y-6 min-h-[60vh] pb-8">
             {/* Username Settings */}
             <Card>
               <CardHeader>
@@ -372,7 +373,7 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <AliasSelector
-                  currentAlias={{ alias: userAlias, emoji: '', category: '' }}
+                  currentAlias={{ alias: userAlias }}
                   onSelect={(newUsername) => {
                     updateProfile({ alias: newUsername.alias });
                     toast({
@@ -682,7 +683,8 @@ export default function Profile() {
             </div>
           </div>
         )}
-      </main>
+        </main>
+      </div>
 
       <BottomNav />
       
