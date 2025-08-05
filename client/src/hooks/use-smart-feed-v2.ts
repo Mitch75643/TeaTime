@@ -116,11 +116,15 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
           
         if (isRelevantPost) {
           console.log('Smart Feed: New post detected for context:', postContext, message);
-          setState(prev => ({
-            ...prev,
-            newPostsCount: prev.newPostsCount + 1,
-            nextRefreshAvailable: true,
-          }));
+          setState(prev => {
+            const newState = {
+              ...prev,
+              newPostsCount: prev.newPostsCount + 1,
+              nextRefreshAvailable: true,
+            };
+            console.log('Smart Feed: Updated state after new post:', newState);
+            return newState;
+          });
         }
       }
     });
@@ -135,24 +139,32 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     setState(prev => ({ ...prev, isRefreshing: true }));
 
     try {
-      // Clear displayed post IDs to get fresh content
+      // Clear displayed post IDs to get completely fresh content
       setDisplayedPostIds([]);
       
-      // Force refetch with cleared post IDs
-      await queryClient.invalidateQueries({ 
+      // Clear all related queries and force fresh fetch
+      await queryClient.removeQueries({ 
         queryKey: [...queryKey, "smartfeed"],
         exact: false 
       });
       
-      // Wait a brief moment for state to update, then refetch
-      setTimeout(async () => {
-        await refetch();
-        setState(prev => ({
+      // Force immediate refetch with fresh data
+      console.log('Smart Feed: Starting refresh...');
+      const freshData = await refetch();
+      console.log('Smart Feed: Fresh data received:', freshData.data);
+      
+      setState(prev => {
+        const newState = {
           ...prev,
           newPostsCount: 0,
           isRefreshing: false,
-        }));
-      }, 100);
+          posts: freshData.data?.posts || [],
+          hasMorePosts: freshData.data?.hasMorePosts || false,
+          nextRefreshAvailable: false,
+        };
+        console.log('Smart Feed: Updated state after refresh:', newState);
+        return newState;
+      });
       
     } catch (error) {
       console.error("Failed to refresh feed:", error);
