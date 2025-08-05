@@ -128,6 +128,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertPostSchema.parse(req.body);
       const sessionId = req.session.id!;
       
+      // Dynamic character limit validation based on section type
+      const postContext = req.body.postContext || 'home';
+      const communitySection = req.body.communitySection || '';
+      const maxLength = communitySection === 'story-time' ? 1250 : 750;
+      
+      if (validatedData.content.length > maxLength) {
+        return res.status(400).json({ 
+          message: `Content must be ${maxLength} characters or less` 
+        });
+      }
+      
       // Check if user is in cooldown from previous spam violations
       const cooldownCheck = isInCooldown(sessionId);
       if (cooldownCheck.inCooldown) {
@@ -138,8 +149,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Spam Detection
-      const postContext = req.body.postContext || 'home';
-      const communitySection = req.body.communitySection || '';
       const pageIdentifier = communitySection || postContext;
       
       const spamResult = await detectSpam(

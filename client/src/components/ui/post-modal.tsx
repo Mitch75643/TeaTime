@@ -314,12 +314,12 @@ export function PostModal({
               onChange={(e) => setContent(e.target.value)}
               placeholder={promptText ? `Responding to: "${promptText}"` : "Share your thoughts anonymously..."}
               className="h-24 resize-none"
-              maxLength={500}
+              maxLength={750}
               autoFocus
             />
             <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
               <span>Your username: <span className="font-medium text-purple-600 dark:text-purple-400">{userAlias}</span></span>
-              <span className={content.length > 450 ? "text-red-500" : ""}>{content.length}/500</span>
+              <span className={content.length > 675 ? "text-red-500" : ""}>{content.length}/750</span>
             </div>
           </div>
 

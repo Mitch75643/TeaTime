@@ -19,13 +19,13 @@ export function containsInappropriateContent(content: string): boolean {
   return filtered !== content;
 }
 
-export function validatePostContent(content: string): { isValid: boolean; error?: string } {
+export function validatePostContent(content: string, maxLength: number = 750): { isValid: boolean; error?: string } {
   if (!content.trim()) {
     return { isValid: false, error: "Content cannot be empty" };
   }
 
-  if (content.length > 500) {
-    return { isValid: false, error: "Content must be 500 characters or less" };
+  if (content.length > maxLength) {
+    return { isValid: false, error: `Content must be ${maxLength} characters or less` };
   }
 
   if (containsInappropriateContent(content)) {

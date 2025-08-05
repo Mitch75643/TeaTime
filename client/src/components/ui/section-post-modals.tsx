@@ -154,6 +154,17 @@ export function SectionPostModal({
 }: SectionPostModalProps) {
   const [content, setContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // Get character limit based on section type
+  const getCharacterLimit = () => {
+    return section === "story-time" ? 1250 : 750;
+  };
+
+  // Get warning threshold (90% of limit)
+  const getWarningThreshold = () => {
+    const limit = getCharacterLimit();
+    return Math.floor(limit * 0.9);
+  };
   
   // Section-specific fields
   const [celebrityName, setCelebrityName] = useState("");
@@ -313,13 +324,9 @@ export function SectionPostModal({
       return;
     }
 
-    // Combine selected tags with any manually typed ones
-    const manualTags = tagsInput
-      .split(/[\s,]+/)
-      .filter(tag => tag.trim())
-      .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+    // Use selected tags from EnhancedHashtagInput
     
-    const allTags = Array.from(new Set([...selectedTags, ...manualTags])).slice(0, 5);
+    const allTags = selectedTags.slice(0, 5);
 
     // Build the post data based on section
     const postData: InsertPost = {
@@ -503,10 +510,15 @@ export function SectionPostModal({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={getContentPlaceholder(section)}
-              className="mt-1 min-h-[100px] resize-none"
-              maxLength={500}
+              className={`mt-1 resize-none ${section === "story-time" ? "min-h-[150px]" : "min-h-[100px]"}`}
+              maxLength={getCharacterLimit()}
             />
-            <p className="text-xs text-gray-500 mt-1">{content.length}/500 characters</p>
+            <p className={`text-xs mt-1 ${content.length > getWarningThreshold() ? "text-red-500" : "text-gray-500"}`}>
+              {content.length}/{getCharacterLimit()} characters
+              {section === "story-time" && content.length <= getWarningThreshold() && (
+                <span className="ml-2 text-blue-500">📖 Story Mode - Tell your full story!</span>
+              )}
+            </p>
           </div>
 
           {/* Enhanced Tags Section */}
