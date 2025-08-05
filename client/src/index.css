@@ -77,6 +77,21 @@
   display: none;
 }
 
+/* Hide scrollbar when modal is open to prevent visual artifacts */
+body[data-modal-open="true"] {
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body[data-modal-open="true"]::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Gradient backgrounds for Tfess theme - Orange Edition */
 .gradient-primary {
   background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
