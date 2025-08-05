@@ -124,6 +124,9 @@ export interface IStorage {
     lastLogin?: Date;
     createdAt: Date;
   }>>;
+  
+  // Get all banned users for admin panel
+  getAllBannedUsers(): Promise<BannedDevice[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -1515,6 +1518,11 @@ export class MemStorage implements IStorage {
     }
 
     console.log('[Admin System] Root admin initialization complete');
+  }
+  
+  // Get all banned users for admin panel (alias for getAllBannedDevices)
+  async getAllBannedUsers(): Promise<BannedDevice[]> {
+    return this.getAllBannedDevices();
   }
 }
 

@@ -1460,6 +1460,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get banned users (root host only)
+  app.get("/api/admin/banned-users", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const bannedUsers = await storage.getAllBannedUsers();
+      res.json(bannedUsers);
+    } catch (error) {
+      console.error("Get banned users error:", error);
+      res.status(500).json({ message: "Failed to get banned users" });
+    }
+  });
+
   // Add test routes for development
   if (process.env.NODE_ENV === 'development') {
     addTestRoute(app);

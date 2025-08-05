@@ -7,9 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAdminAuth, useAdminManagement } from "@/hooks/useAdminAuth";
 import { getDeviceFingerprint } from "@/lib/fingerprint";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Shield, 
   ShieldCheck, 
@@ -20,11 +22,14 @@ import {
   Settings,
   Trash2,
   AlertTriangle,
-  Loader2
+  Loader2,
+  UserX
 } from "lucide-react";
 
 export function AdminPanel() {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showBannedUsers, setShowBannedUsers] = useState(false);
+  const [showRootHostConfirm, setShowRootHostConfirm] = useState(false);
   const [newAdminData, setNewAdminData] = useState({
     fingerprint: '',
     fingerprintLabel: '',
@@ -43,6 +48,13 @@ export function AdminPanel() {
     isAddingAdmin,
     isRemovingAdmin
   } = useAdminManagement();
+
+  // Fetch banned users
+  const { data: bannedUsers, isLoading: isLoadingBanned } = useQuery({
+    queryKey: ['/api/admin/banned-users'],
+    enabled: showBannedUsers,
+    retry: false,
+  });
 
   // Only root host can access admin panel
   if (!isAuthenticated || !isRootHost) {
@@ -171,13 +183,22 @@ export function AdminPanel() {
               <Shield className="w-5 h-5" />
               Current Admins ({adminList.length})
             </span>
-            <Button
-              onClick={() => setShowAddForm(!showAddForm)}
-              disabled={isAddingAdmin}
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add Admin
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowAddForm(!showAddForm)}
+                disabled={isAddingAdmin}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add Admin
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowBannedUsers(!showBannedUsers)}
+              >
+                <UserX className="w-4 h-4 mr-2" />
+                View Banned Users
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         
@@ -300,9 +321,13 @@ export function AdminPanel() {
                 <Label htmlFor="role">Role</Label>
                 <Select
                   value={newAdminData.role}
-                  onValueChange={(value: 'admin' | 'root_host') => 
-                    setNewAdminData(prev => ({ ...prev, role: value }))
-                  }
+                  onValueChange={(value: 'admin' | 'root_host') => {
+                    if (value === 'root_host') {
+                      setShowRootHostConfirm(true);
+                    } else {
+                      setNewAdminData(prev => ({ ...prev, role: value }));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -312,6 +337,37 @@ export function AdminPanel() {
                     <SelectItem value="root_host">Root Host</SelectItem>
                   </SelectContent>
                 </Select>
+                
+                {/* Root Host Confirmation Dialog */}
+                <AlertDialog open={showRootHostConfirm} onOpenChange={setShowRootHostConfirm}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                        Confirm Root Host Role
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to assign Root Host privileges to this user? Root hosts have full administrative control and can manage all admins, including removing other administrators.
+                        <br /><br />
+                        <strong>Warning:</strong> This gives them the same level of access as you.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setShowRootHostConfirm(false)}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => {
+                          setNewAdminData(prev => ({ ...prev, role: 'root_host' }));
+                          setShowRootHostConfirm(false);
+                        }}
+                        className="bg-yellow-600 hover:bg-yellow-700"
+                      >
+                        Yes, Assign Root Host
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
               
               <Separator />
@@ -343,6 +399,73 @@ export function AdminPanel() {
                 </Button>
               </div>
             </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Banned Users Section */}
+      {showBannedUsers && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserX className="w-5 h-5 text-red-600" />
+              Banned Users
+            </CardTitle>
+            <CardDescription>
+              View all users that have been banned from the platform with their device fingerprints.
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            {isLoadingBanned ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span className="ml-2">Loading banned users...</span>
+              </div>
+            ) : bannedUsers && bannedUsers.length > 0 ? (
+              <div className="space-y-3">
+                {bannedUsers.map((ban: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg bg-red-50 dark:bg-red-950/20">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="destructive">BANNED</Badge>
+                        <span className="font-medium">Device #{index + 1}</span>
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <strong>Fingerprint:</strong> {ban.fingerprint}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <strong>Reason:</strong> {ban.reason || 'Violation of platform rules'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Banned: {new Date(ban.bannedAt).toLocaleString()}
+                      </div>
+                      {ban.expiresAt && (
+                        <div className="text-xs text-gray-500">
+                          Expires: {new Date(ban.expiresAt).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge variant={ban.isActive ? "destructive" : "secondary"}>
+                        {ban.isActive ? "Active" : "Expired"}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <UserX className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">
+                  No Banned Users
+                </h3>
+                <p className="text-muted-foreground">
+                  There are currently no banned users on the platform.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
