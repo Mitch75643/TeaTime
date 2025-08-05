@@ -88,13 +88,15 @@ export function PostModal({
 
   console.log("PostModal render - isOpen:", isOpen, "category:", category);
 
-  // Load draft and set defaults when modal opens
+  // Initialize state when modal opens (only run once per modal open)
   useEffect(() => {
     if (isOpen) {
       // Set default values if provided
       if (defaultCategory) {
+        console.log("Setting default category:", defaultCategory);
         setCategory(defaultCategory);
       }
+      
       if (defaultTags.length > 0) {
         setSelectedTags(defaultTags);
       }
@@ -108,8 +110,22 @@ export function PostModal({
           setSelectedTags(draft.tags);
         }
       }
+    } else {
+      // Reset state when modal closes
+      setContent("");
+      setCategory("");
+      setSelectedTags([]);
+      setTagsInput("");
     }
-  }, [isOpen, defaultCategory, defaultTags]);
+  }, [isOpen]); // Remove dependencies that cause unwanted re-runs
+
+  // Separate effect to handle default category changes (only when modal is already open)
+  useEffect(() => {
+    if (isOpen && defaultCategory && category !== defaultCategory) {
+      console.log("Updating category from defaultCategory:", defaultCategory);
+      setCategory(defaultCategory);
+    }
+  }, [defaultCategory, isOpen, category]);
 
   // Auto-save draft as user types
   useEffect(() => {
