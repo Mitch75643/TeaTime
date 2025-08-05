@@ -14,6 +14,8 @@ import { memoryStoryRecommendationEngine } from "./storyRecommendationEngine";
 import { detectSpam, isInCooldown, updateEngagementScore, getSpamDetectionStats, getRecentViolations, clearSessionSpamHistory } from "./spamDetection";
 import { adminAuthService } from "./adminAuth";
 import { adminLoginSchema, addAdminSchema } from "../shared/admin-schema";
+import { initializeWebSocket, wsManager } from "./websocket";
+import { addPollVotingRoutes } from "./pollVotingRoutes";
 
 declare module 'express-session' {
   interface SessionData {
@@ -372,6 +374,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const comment = await storage.createComment(commentData, alias, sessionId);
       
+      // Broadcast new comment via WebSocket
+      if (wsManager) {
+        wsManager.broadcast({
+          type: 'comment_added',
+          postId: validatedData.postId,
+          data: { comment, alias }
+        });
+      }
+      
       // Create notification for post owner or parent comment owner
       try {
         if (validatedData.parentCommentId) {
@@ -447,6 +458,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = req.params.postId;
       const sessionId = req.session.id!;
       await storage.trackPostView(postId, sessionId);
+      
+      // Broadcast post view update via WebSocket
+      if (wsManager) {
+        wsManager.broadcast({
+          type: 'post_view',
+          postId,
+          data: { sessionId }
+        });
+      }
+      
       res.json({ success: true });
     } catch (error) {
       console.error("Failed to track post view:", error);
@@ -500,6 +521,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Add new reaction
           await storage.addReaction({ type, commentId }, sessionId);
         }
+        
+        // Get the post ID for the comment to broadcast the update
+        const comments = await storage.getComments(postId || '');
+        const comment = comments.find(c => c.id === commentId);
+        if (comment && wsManager) {
+          // Broadcast comment reaction update
+          wsManager.broadcast({
+            type: 'post_reaction',
+            postId: comment.postId,
+            data: { commentId, type, action: remove ? 'remove' : 'add' }
+          });
+        }
       } else if (postId) {
         // Handle post reactions
         const currentReaction = await storage.getUserReactionForPost(postId, sessionId);
@@ -515,6 +548,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Add new reaction
           await storage.addReaction({ type, postId }, sessionId);
+        }
+        
+        // Broadcast post reaction update via WebSocket
+        if (wsManager) {
+          wsManager.broadcast({
+            type: 'post_reaction',
+            postId,
+            data: { type, action: remove ? 'remove' : 'add' }
+          });
         }
       } else {
         throw new Error("Either postId or commentId must be provided");
@@ -537,6 +579,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessionId = req.session.id!;
       
       await storage.addDramaVote(validatedData, sessionId);
+      
+      // Broadcast drama vote update via WebSocket
+      if (wsManager) {
+        wsManager.broadcast({
+          type: 'drama_vote',
+          postId: validatedData.postId,
+          data: { voteType: validatedData.voteType }
+        });
+      }
+      
       res.json({ success: true });
     } catch (error) {
       if (error instanceof Error) {
@@ -845,6 +897,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket server for real-time updates
+  initializeWebSocket(httpServer);
+  
+  // Add poll and debate voting routes
+  addPollVotingRoutes(app);
+  
   // Auto-rotation endpoints
   app.get("/api/rotation/current", async (req, res) => {
     try {

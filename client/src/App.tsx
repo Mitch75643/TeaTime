@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { AnonymousAuthProvider } from "@/lib/anonymousAuth";
 import { DeviceBanGuard } from "@/components/ui/device-ban-guard";
+import { WebSocketProvider } from "@/components/providers/WebSocketProvider";
+import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import Home from "@/pages/home";
 import Trending from "@/pages/trending";
 import Community from "@/pages/community";
@@ -18,6 +20,9 @@ import { AuthPage } from "@/pages/AuthPage";
 import { SecureAdminRoute } from "@/components/admin/secure-admin-route";
 
 function Router() {
+  // Initialize real-time updates for the entire app
+  useRealtimeUpdates();
+  
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -40,12 +45,14 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <AnonymousAuthProvider>
-            <DeviceBanGuard allowPartialAccess={false}>
-              <div className="app-container bg-background text-foreground">
-                <Toaster />
-                <Router />
-              </div>
-            </DeviceBanGuard>
+            <WebSocketProvider>
+              <DeviceBanGuard allowPartialAccess={false}>
+                <div className="app-container bg-background text-foreground">
+                  <Toaster />
+                  <Router />
+                </div>
+              </DeviceBanGuard>
+            </WebSocketProvider>
           </AnonymousAuthProvider>
         </TooltipProvider>
       </ThemeProvider>

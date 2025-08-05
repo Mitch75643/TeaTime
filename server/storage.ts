@@ -36,6 +36,12 @@ export interface IStorage {
   getDramaVotes(postId: string): Promise<Record<string, number>>;
   hasUserVoted(postId: string, sessionId: string): Promise<boolean>;
   
+  // Poll and Debate Voting
+  addPollVote(postId: string, sessionId: string, option: 'optionA' | 'optionB'): Promise<void>;
+  addDebateVote(postId: string, sessionId: string, vote: 'up' | 'down'): Promise<void>;
+  hasUserVotedInPoll(postId: string, sessionId: string): Promise<boolean>;
+  hasUserVotedInDebate(postId: string, sessionId: string): Promise<boolean>;
+  
   // Reports and Moderation
   reportPost(postId: string, reporterSessionId: string, reason: string): Promise<{ success: boolean; error?: string; postRemoved?: boolean; userFlagged?: boolean }>;
   getUserFlags(sessionId: string): Promise<UserFlag | undefined>;
@@ -161,6 +167,8 @@ export class MemStorage implements IStorage {
   private adminEmails: Map<string, AdminEmail>;
   private adminSessions: Map<string, AdminSession>;
   private adminActivityLogs: Map<string, AdminActivityLog>;
+  private pollVotes: Map<string, { sessionId: string; postId: string; option: 'optionA' | 'optionB' }>;
+  private debateVotes: Map<string, { sessionId: string; postId: string; vote: 'up' | 'down' }>;
 
   constructor() {
     this.posts = new Map();
@@ -186,6 +194,8 @@ export class MemStorage implements IStorage {
     this.adminEmails = new Map();
     this.adminSessions = new Map();
     this.adminActivityLogs = new Map();
+    this.pollVotes = new Map();
+    this.debateVotes = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -1612,6 +1622,45 @@ export class MemStorage implements IStorage {
     console.log('[Admin System] Root admin initialization complete');
   }
   
+  // Poll and Debate Voting Methods
+  async addPollVote(postId: string, sessionId: string, option: 'optionA' | 'optionB'): Promise<void> {
+    const voteId = randomUUID();
+    const vote = { sessionId, postId, option };
+    this.pollVotes.set(voteId, vote);
+    
+    // Update post vote counts
+    const post = this.posts.get(postId);
+    if (post && post.postType === 'poll' && post.pollVotes) {
+      post.pollVotes[option] = (post.pollVotes[option] || 0) + 1;
+      this.posts.set(postId, post);
+    }
+  }
+
+  async addDebateVote(postId: string, sessionId: string, vote: 'up' | 'down'): Promise<void> {
+    const voteId = randomUUID();
+    const debateVote = { sessionId, postId, vote };
+    this.debateVotes.set(voteId, debateVote);
+    
+    // Update post vote counts
+    const post = this.posts.get(postId);
+    if (post && post.postType === 'debate' && post.debateVotes) {
+      post.debateVotes[vote] = (post.debateVotes[vote] || 0) + 1;
+      this.posts.set(postId, post);
+    }
+  }
+
+  async hasUserVotedInPoll(postId: string, sessionId: string): Promise<boolean> {
+    return Array.from(this.pollVotes.values()).some(
+      vote => vote.postId === postId && vote.sessionId === sessionId
+    );
+  }
+
+  async hasUserVotedInDebate(postId: string, sessionId: string): Promise<boolean> {
+    return Array.from(this.debateVotes.values()).some(
+      vote => vote.postId === postId && vote.sessionId === sessionId
+    );
+  }
+
   // Get all banned users for admin panel (alias for getAllBannedDevices)
   async getAllBannedUsers(): Promise<BannedDevice[]> {
     return this.getAllBannedDevices();
