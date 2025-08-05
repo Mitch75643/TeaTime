@@ -188,6 +188,50 @@ const playCategorySound = (category: string) => {
         suspenseOsc.stop(audioContext.currentTime + 0.6);
         break;
         
+      case "other":
+        // Soft scribble sound + whisper chime
+        // Pencil scribble (rapid filtered noise)
+        const scribbleOsc = audioContext.createOscillator();
+        const scribbleGain = audioContext.createGain();
+        const scribbleFilter = audioContext.createBiquadFilter();
+        scribbleOsc.connect(scribbleFilter);
+        scribbleFilter.connect(scribbleGain);
+        scribbleGain.connect(audioContext.destination);
+        scribbleOsc.type = "sawtooth";
+        scribbleFilter.type = "highpass";
+        scribbleFilter.frequency.setValueAtTime(800, audioContext.currentTime);
+        scribbleOsc.frequency.setValueAtTime(150, audioContext.currentTime);
+        scribbleOsc.frequency.linearRampToValueAtTime(200, audioContext.currentTime + 0.3);
+        scribbleGain.gain.setValueAtTime(0.03, audioContext.currentTime);
+        scribbleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        scribbleOsc.start(audioContext.currentTime);
+        scribbleOsc.stop(audioContext.currentTime + 0.3);
+        
+        // Soft whisper chime
+        setTimeout(() => {
+          const chimeOsc1 = audioContext.createOscillator();
+          const chimeOsc2 = audioContext.createOscillator();
+          const chimeGain = audioContext.createGain();
+          const chimeFilter = audioContext.createBiquadFilter();
+          chimeOsc1.connect(chimeFilter);
+          chimeOsc2.connect(chimeFilter);
+          chimeFilter.connect(chimeGain);
+          chimeGain.connect(audioContext.destination);
+          chimeOsc1.type = "sine";
+          chimeOsc2.type = "sine";
+          chimeFilter.type = "lowpass";
+          chimeFilter.frequency.setValueAtTime(1000, audioContext.currentTime);
+          chimeOsc1.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+          chimeOsc2.frequency.setValueAtTime(659, audioContext.currentTime); // E5
+          chimeGain.gain.setValueAtTime(0.04, audioContext.currentTime);
+          chimeGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+          chimeOsc1.start(audioContext.currentTime);
+          chimeOsc2.start(audioContext.currentTime);
+          chimeOsc1.stop(audioContext.currentTime + 0.8);
+          chimeOsc2.stop(audioContext.currentTime + 0.8);
+        }, 400);
+        break;
+        
       default:
         // Default gentle sound
         const defaultOsc = audioContext.createOscillator();
@@ -215,11 +259,12 @@ export function HomeCategoryAnimation({ isVisible, onComplete, category }: HomeC
       setShowAnimation(true);
       playCategorySound(category);
       
-      // Auto-hide after animation
+      // Auto-hide after animation (1.5 seconds for "Other", standard for others)
+      const animationDuration = category.toLowerCase() === 'other' ? 1500 : 1500;
       const timer = setTimeout(() => {
         setShowAnimation(false);
         onComplete();
-      }, 1500);
+      }, animationDuration);
       
       return () => clearTimeout(timer);
     }
@@ -657,6 +702,106 @@ export function HomeCategoryAnimation({ isVisible, onComplete, category }: HomeC
     </div>
   );
 
+  const renderOtherAnimation = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Central Pencil Icon with Scribbling Motion */}
+      <motion.div
+        className="relative text-6xl"
+        initial={{ scale: 0, rotate: 0 }}
+        animate={{ 
+          scale: [0, 1.2, 1],
+          rotate: [0, -15, 15, -10, 10, 0],
+          x: [0, -5, 5, -3, 3, 0]
+        }}
+        transition={{ 
+          duration: 0.8, 
+          ease: "easeInOut",
+          times: [0, 0.2, 0.4, 0.6, 0.8, 1]
+        }}
+      >
+        📝
+      </motion.div>
+      
+      {/* Scribble Trail Effect */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-8 bg-gray-400 rounded-full opacity-60"
+          style={{
+            transformOrigin: 'bottom center'
+          }}
+          initial={{ 
+            scale: 0,
+            rotate: Math.random() * 360,
+            x: (Math.random() - 0.5) * 120,
+            y: (Math.random() - 0.5) * 80,
+            opacity: 0
+          }}
+          animate={{
+            scale: [0, 1, 0.8, 0],
+            opacity: [0, 0.6, 0.4, 0],
+            rotate: Math.random() * 180
+          }}
+          transition={{
+            duration: 1.0,
+            delay: 0.2 + i * 0.05,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+      
+      {/* Paper Dust Particles */}
+      {[...Array(12)].map((_, i) => (
+        <motion.div
+          key={`dust-${i}`}
+          className="absolute w-1 h-1 bg-gray-300 rounded-full"
+          initial={{ 
+            scale: 0,
+            x: (Math.random() - 0.5) * 150,
+            y: (Math.random() - 0.5) * 100,
+            opacity: 0
+          }}
+          animate={{
+            scale: [0, 1, 0],
+            opacity: [0, 0.7, 0],
+            y: Math.random() * -60 - 30,
+            x: (Math.random() - 0.5) * 200
+          }}
+          transition={{
+            duration: 1.2,
+            delay: 0.4 + Math.random() * 0.6,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+      
+      {/* Soft Gray Glow */}
+      <motion.div
+        className="absolute inset-0 bg-gray-200 dark:bg-gray-700 rounded-full blur-3xl"
+        style={{ width: '200px', height: '200px', margin: 'auto' }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ 
+          opacity: [0, 0.1, 0.05, 0],
+          scale: [0, 1, 1.2, 0]
+        }}
+        transition={{
+          duration: 1.3,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Success Message */}
+      <motion.div
+        className="absolute bottom-20 bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-full shadow-lg"
+        initial={{ scale: 0, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.7, ease: "backOut" }}
+      >
+        <span className="text-sm font-medium">📝 Writing in the shadows...</span>
+      </motion.div>
+    </div>
+  );
+
   const getCategoryAnimation = () => {
     switch (category.toLowerCase()) {
       case "school":
@@ -673,6 +818,8 @@ export function HomeCategoryAnimation({ isVisible, onComplete, category }: HomeC
         return renderHotTakesAnimation();
       case "wrong":
         return renderWrongAnimation();
+      case "other":
+        return renderOtherAnimation();
       default:
         return null;
     }
