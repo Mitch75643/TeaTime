@@ -183,12 +183,19 @@ export async function detectSpam(
   
   // Check frequency limit - allow 4 posts before cooldown
   const recentPostCount = metrics.recentPosts.length;
+  
+  // Debug logging for troubleshooting
+  console.log(`[Spam Detection] Session: ${sessionId.slice(0, 8)}... | Recent posts: ${recentPostCount}/${SPAM_CONFIG.POST_LIMIT} | Time window: ${SPAM_CONFIG.TIME_WINDOW_MINUTES}min`);
+  
+  // Block on the 5th post (when recentPostCount is 4, meaning 4 previous posts exist)
   if (recentPostCount >= SPAM_CONFIG.POST_LIMIT) {
     metrics.violations.push({
       type: 'frequency',
       timestamp: now,
       severity: 'medium'
     });
+    
+    console.log(`[Spam Detection] BLOCKED: User ${sessionId.slice(0, 8)}... hit ${SPAM_CONFIG.POST_LIMIT}-post limit`);
     
     return {
       isSpam: true,
@@ -256,9 +263,10 @@ export async function detectSpam(
     };
   }
   
-  // Add to recent posts if not spam
+  // Add to recent posts if not spam (important for counting)
   metrics.recentPosts.push({ content, timestamp: now, category, page });
   metrics.lastPostTime = now;
+  metrics.postCount++;
   
   return { isSpam: false, action: 'allow', severity: 'low' };
 }
