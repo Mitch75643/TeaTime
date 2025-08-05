@@ -186,17 +186,8 @@ export function PostModal({
       
       // Only close if no mental health support needed
       if (!response.moderationResponse) {
-        if (category === 'other') {
-          // Longer delay for Other category effect
-          setTimeout(() => {
-            handleClose();
-          }, 1500);
-        } else {
-          // Standard delay for regular animations
-          setTimeout(() => {
-            handleClose();
-          }, 1000);
-        }
+        // Close modal immediately after successful submission
+        handleClose();
       }
     },
     onError: (error: any) => {
