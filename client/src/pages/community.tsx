@@ -14,6 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useSmartFeedV2 } from "@/hooks/use-smart-feed-v2";
+import { SmartRefreshButton } from "@/components/ui/smart-refresh-button";
 import { 
   Star, 
   BookOpen, 
@@ -174,14 +176,17 @@ export default function Community() {
     setLocation(`/topic/${topicId}`);
   };
 
-  const { data: posts = [], isLoading, refetch } = useQuery<Post[]>({
+  const smartFeed = useSmartFeedV2({
     queryKey: ["/api/posts", "community"],
-    queryFn: async () => {
-      const response = await fetch("/api/posts?sortBy=new&postContext=community");
-      if (!response.ok) throw new Error("Failed to fetch posts");
-      return response.json();
-    },
+    apiEndpoint: "/api/posts",
+    sortBy: "new",
+    postContext: "community",
+    enableSmartLogic: true,
   });
+
+  const posts = smartFeed.posts;
+  const isLoading = smartFeed.isLoading;
+  const shouldShowRefreshButton = smartFeed.shouldShowRefreshButton;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -264,15 +269,14 @@ export default function Community() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Recent Community Posts
             </h2>
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              variant="outline"
-              size="sm"
-              className="text-xs p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
+            <SmartRefreshButton
+              onRefresh={smartFeed.handleRefresh}
+              isRefreshing={smartFeed.isRefreshing}
+              newPostsCount={smartFeed.newPostsCount}
+              queuedPostsCount={smartFeed.queuedPostsCount}
+              variant="button"
+              className="text-xs p-2 rounded-full"
+            />
           </div>
           {isLoading ? (
             <div className="space-y-4">

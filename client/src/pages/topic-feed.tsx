@@ -146,7 +146,7 @@ export default function TopicFeed() {
     return unsubscribe;
   }, [topicId, subscribeToMessages, queryClient]);
 
-  // Community Feed - All posts from this topic
+  // Community Feed - All posts from this topic  
   const { data: communityPosts = [], isLoading: isLoadingCommunity } = useQuery<Post[]>({
     queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter],
     queryFn: async () => {
@@ -161,9 +161,18 @@ export default function TopicFeed() {
       if (hotTopicFilter !== "all") {
         params.append('hotTopicFilter', hotTopicFilter);
       }
+      
+      // Add smart feed logic for 'new' feeds
+      if (sortBy === 'new') {
+        params.append('smartFeed', 'true');
+      }
+      
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
       if (!response.ok) throw new Error("Failed to fetch community posts");
-      return response.json();
+      const result = await response.json();
+      
+      // Handle smart feed response structure
+      return result.posts || result;
     }
   });
 
@@ -563,6 +572,23 @@ export default function TopicFeed() {
                   </div>
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {/* Smart Feed Refresh for new feeds */}
+                    {sortBy === 'new' && (
+                      <div className="mb-4">
+                        <button
+                          onClick={() => {
+                            queryClient.invalidateQueries({ 
+                              queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter] 
+                            });
+                          }}
+                          className="w-full px-3 py-2 text-sm bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          Refresh Feed
+                        </button>
+                      </div>
+                    )}
+                  
                     {/* Show Story Recommendations first for Story Time */}
                     {topicId === "story-time" && (
                       <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
