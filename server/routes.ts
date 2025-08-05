@@ -16,6 +16,7 @@ import { adminAuthService } from "./adminAuth";
 import { adminLoginSchema, addAdminSchema } from "../shared/admin-schema";
 import { initializeWebSocket, wsManager } from "./websocket";
 import { addPollVotingRoutes } from "./pollVotingRoutes";
+import { SmartFeedManager } from "./smartFeedManager";
 
 declare module 'express-session' {
   interface SessionData {
@@ -56,11 +57,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ sessionId: req.session.id });
   });
 
-  // Get posts
+  // Get posts with smart feed logic
   app.get("/api/posts", async (req, res) => {
     try {
-      const { category, sortBy = 'new', tags, userOnly, postContext, section } = req.query;
+      const { 
+        category, 
+        sortBy = 'new', 
+        tags, 
+        userOnly, 
+        postContext, 
+        section,
+        smartFeed = 'false',
+        clearQueue = 'false'
+      } = req.query;
       const sessionId = req.session.id!;
+      
+      // Clear session queue if requested (for manual refresh)
+      if (clearQueue === 'true') {
+        SmartFeedManager.clearSessionState(sessionId);
+      }
       
       const posts = await storage.getPosts(
         category as string,
@@ -70,18 +85,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         postContext as string,
         section as string
       );
-      res.json(posts);
+
+      // Apply smart feed logic for "new" posts in eligible contexts
+      if (smartFeed === 'true' && sortBy === 'new' && !userOnly) {
+        const shouldApplyVisibilityBoost = postContext === 'home' || section;
+        
+        const smartResult = await SmartFeedManager.applySmartFeed(posts, {
+          maxPostsPerBatch: 30,
+          lowEngagementBoostPercent: 0.2,
+          fairnessChunkSize: 15,
+          sessionId,
+          includeVisibilityBoost: shouldApplyVisibilityBoost
+        });
+
+        res.json({
+          posts: smartResult.posts,
+          hasMore: smartResult.hasMore,
+          nextBatchAvailable: smartResult.nextBatchAvailable,
+          totalAvailable: smartResult.totalAvailable,
+          smartFeedActive: true
+        });
+      } else {
+        res.json({
+          posts,
+          hasMore: false,
+          nextBatchAvailable: 0,
+          totalAvailable: posts.length,
+          smartFeedActive: false
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch posts:", error);
       res.status(500).json({ message: "Failed to fetch posts" });
     }
   });
 
-  // Community topic posts - all posts for a specific topic
+  // Community topic posts - all posts for a specific topic with smart feed
   app.get("/api/posts/:topicId/:sortBy/all", async (req, res) => {
     try {
       const { topicId, sortBy } = req.params;
-      const { postContext = 'community', section, storyCategory, hotTopicFilter } = req.query;
+      const { 
+        postContext = 'community', 
+        section, 
+        storyCategory, 
+        hotTopicFilter,
+        smartFeed = 'false',
+        clearQueue = 'false'
+      } = req.query;
+      const sessionId = req.session.id!;
+      
+      // Clear session queue if requested (for manual refresh)
+      if (clearQueue === 'true') {
+        SmartFeedManager.clearSessionState(`${sessionId}_${topicId}`);
+      }
       
       const posts = await storage.getPosts(
         undefined, // category
@@ -93,7 +149,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storyCategory as string, // storyCategory
         hotTopicFilter as string // hotTopicFilter
       );
-      res.json(posts);
+
+      // Apply smart feed logic for "new" posts only (not trending)
+      if (smartFeed === 'true' && sortBy === 'new') {
+        const smartResult = await SmartFeedManager.applySmartFeed(posts, {
+          maxPostsPerBatch: 30,
+          lowEngagementBoostPercent: 0.2,
+          fairnessChunkSize: 15,
+          sessionId: `${sessionId}_${topicId}`,
+          includeVisibilityBoost: true
+        });
+
+        res.json({
+          posts: smartResult.posts,
+          hasMore: smartResult.hasMore,
+          nextBatchAvailable: smartResult.nextBatchAvailable,
+          totalAvailable: smartResult.totalAvailable,
+          smartFeedActive: true
+        });
+      } else {
+        res.json({
+          posts,
+          hasMore: false,
+          nextBatchAvailable: 0,
+          totalAvailable: posts.length,
+          smartFeedActive: false
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch community posts:", error);
       res.status(500).json({ message: "Failed to fetch community posts" });
@@ -267,6 +349,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateEngagementScore(sessionId, post.id).catch(console.error);
       }, 1000);
       
+      // Broadcast new post available notification (don't auto-show)
+      wsManager.broadcastNewPostAvailable(
+        post.communitySection,
+        post.postContext,
+        1
+      );
+
       // Return post with moderation response, streak data, and spam warning for frontend handling
       const response = {
         ...post,

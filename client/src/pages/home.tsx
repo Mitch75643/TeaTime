@@ -9,9 +9,8 @@ import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
-import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
-import { LoadMoreButton } from "@/components/ui/load-more-button";
-import { useSmartFeed } from "@/hooks/use-smart-feed";
+// Smart feed components will be inline for now
+import { useSmartFeed } from "@/hooks/useSmartFeed";
 import type { Post } from "@shared/schema";
 
 const categories = [
@@ -57,34 +56,23 @@ export default function Home() {
     }
   }, []);
 
-  // Initialize smart feed
-  const smartFeed = useSmartFeed({
-    queryKey: ["/api/posts", activeCategory, feedType],
-    apiEndpoint: "/api/posts",
-    category: activeCategory,
+  // Use smart feed hook
+  const {
+    posts,
+    isLoading,
+    error,
+    hasMore,
+    nextBatchAvailable,
+    smartFeedActive,
+    newPostsAvailable,
+    refreshFeed,
+    loadMorePosts
+  } = useSmartFeed({
+    category: activeCategory !== "all" ? activeCategory : undefined,
     sortBy: feedType,
     postContext: "home",
+    smartFeedEnabled: feedType === "new"
   });
-
-  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (activeCategory !== "all") {
-        params.append("category", activeCategory);
-      }
-      params.append("sortBy", feedType);
-      
-      params.append("postContext", "home");
-      
-      const response = await fetch(`/api/posts?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch posts");
-      return response.json();
-    },
-  });
-
-  // Apply smart feed batching
-  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
@@ -116,11 +104,11 @@ export default function Home() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={smartFeed.handleRefresh}
-              disabled={smartFeed.isRefreshing}
+              onClick={refreshFeed}
+              disabled={isLoading}
               className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
             >
-              <RefreshCw className={`h-3 w-3 ${smartFeed.isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
               <span className="text-xs">Refresh</span>
             </Button>
           </div>
@@ -128,11 +116,15 @@ export default function Home() {
       </div>
 
       {/* New Posts Banner */}
-      {smartFeed.showNewPostsBanner && (
-        <SmartFeedBanner
-          newPostsCount={smartFeed.newPostsCount}
-          onLoadNewPosts={smartFeed.handleLoadNewPosts}
-        />
+      {newPostsAvailable > 0 && (
+        <div className="sticky top-32 z-20 px-4 py-2">
+          <Button
+            onClick={refreshFeed}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl shadow-sm"
+          >
+            🔄 {newPostsAvailable} New Posts – Tap to View
+          </Button>
+        </div>
       )}
 
       <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
@@ -195,11 +187,25 @@ export default function Home() {
             ))}
             
             {/* Load More Button */}
-            {hasMorePosts && (
-              <LoadMoreButton
-                onLoadMore={smartFeed.handleLoadMore}
-                remainingCount={allPosts.length - posts.length}
-              />
+            {hasMore && (
+              <div className="text-center pt-6">
+                <Button
+                  onClick={loadMorePosts}
+                  variant="outline"
+                  className="px-6 py-3 rounded-xl border-2 border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400 font-medium"
+                >
+                  Refresh to see more posts ({nextBatchAvailable} available)
+                </Button>
+              </div>
+            )}
+            
+            {/* Smart Feed Active Indicator */}
+            {smartFeedActive && (
+              <div className="text-center py-4">
+                <p className="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg">
+                  Smart feed active - posts are distributed fairly for better visibility
+                </p>
+              </div>
             )}
           </div>
         )}

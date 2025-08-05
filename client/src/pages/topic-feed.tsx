@@ -12,6 +12,8 @@ import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
 import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useSmartFeed } from "@/hooks/useSmartFeed";
+import { SmartFeedRefreshButton } from "@/components/ui/smart-feed-refresh-button";
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
@@ -146,50 +148,45 @@ export default function TopicFeed() {
     return unsubscribe;
   }, [topicId, subscribeToMessages, queryClient]);
 
-  // Community Feed - All posts from this topic
-  const { data: communityPosts = [], isLoading: isLoadingCommunity } = useQuery<Post[]>({
-    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        sortBy,
-        postContext: 'community',
-        section: topicId
-      });
-      if (storyCategory !== "all") {
-        params.append('storyCategory', storyCategory);
-      }
-      if (hotTopicFilter !== "all") {
-        params.append('hotTopicFilter', hotTopicFilter);
-      }
-      const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch community posts");
-      return response.json();
-    }
+  // Smart Feed for Community Posts
+  const communitySmartFeed = useSmartFeed({
+    section: topicId,
+    sortBy: sortBy === 'new' ? 'new' : 'trending',
+    postContext: 'community',
+    userOnly: false,
+    enabled: activeTab === 'community',
+    smartFeedEnabled: sortBy === 'new'
   });
 
-  // Your Posts - Only posts by current user for this topic
-  const { data: userPosts = [], isLoading: isLoadingUser } = useQuery<Post[]>({
-    queryKey: ['/api/posts/user', topicId, sortBy, storyCategory, hotTopicFilter],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        sortBy,
-        userOnly: 'true',
-        postContext: 'community',
-        section: topicId
-      });
-      if (storyCategory !== "all") {
-        params.append('storyCategory', storyCategory);
-      }
-      if (hotTopicFilter !== "all") {
-        params.append('hotTopicFilter', hotTopicFilter);
-      }
-      const response = await fetch(`/api/posts/${topicId}/${sortBy}/user?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch user posts");
-      return response.json();
-    }
+  // Smart Feed for User Posts
+  const userSmartFeed = useSmartFeed({
+    section: topicId,
+    sortBy: sortBy === 'new' ? 'new' : 'trending',
+    postContext: 'community',
+    userOnly: true,
+    enabled: activeTab === 'user',
+    smartFeedEnabled: false // No smart batching for user's own posts
   });
 
-  const isLoading = isLoadingCommunity || isLoadingUser;
+  // Use the appropriate feed based on active tab
+  const activeFeed = activeTab === 'community' ? communitySmartFeed : userSmartFeed;
+  const { 
+    posts: activePosts, 
+    isLoading: activeIsLoading, 
+    hasMore: activeHasMore, 
+    nextBatchAvailable: activeNextBatchAvailable, 
+    smartFeedActive: activeSmartFeedActive, 
+    newPostsAvailable: activeNewPostsAvailable, 
+    refreshFeed: activeRefreshFeed, 
+    loadMorePosts: activeLoadMorePosts 
+  } = activeFeed;
+
+  // Legacy data for backward compatibility (will be removed)
+  const communityPosts = activeTab === 'community' ? activePosts : [];
+  const userPosts = activeTab === 'user' ? activePosts : [];
+  const isLoadingCommunity = activeTab === 'community' ? activeIsLoading : false;
+  const isLoadingUser = activeTab === 'user' ? activeIsLoading : false;
+  const isLoading = activeIsLoading;
 
   if (!topic) {
     setLocation('/community');
@@ -202,9 +199,7 @@ export default function TopicFeed() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
+    await activeRefreshFeed();
     setIsRefreshing(false);
   };
 
@@ -255,18 +250,16 @@ export default function TopicFeed() {
               <div className={cn("text-sm opacity-75", topic.textColor)}>
                 {topic.count} posts • {communityPosts.length} showing
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
+              <SmartFeedRefreshButton
+                onRefresh={handleRefresh}
+                isLoading={isRefreshing}
+                newPostsAvailable={activeNewPostsAvailable}
+                hasMore={false}
                 className={cn(
                   "text-xs p-2 rounded-full border border-white/20 hover:bg-white/10",
                   topic.textColor
                 )}
-              >
-                <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-              </Button>
+              />
             </div>
           </div>
         </div>
@@ -516,18 +509,15 @@ export default function TopicFeed() {
               </div>
             </div>
             
-            {/* Refresh Feed Button */}
-            <div className="w-full">
-              <Button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                variant="outline"
-                className="w-full py-4 rounded-2xl border-2 border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400 font-medium text-base transition-all duration-200 shadow-sm"
-              >
-                <RefreshCw className={`h-5 w-5 mr-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh Feed
-              </Button>
-            </div>
+            {/* Smart Feed Refresh Button */}
+            <SmartFeedRefreshButton
+              onRefresh={handleRefresh}
+              isLoading={isRefreshing}
+              newPostsAvailable={activeNewPostsAvailable}
+              hasMore={activeHasMore}
+              nextBatchAvailable={activeNextBatchAvailable}
+              className="w-full"
+            />
 
             {/* Posts Content */}
             <div className="w-full">
@@ -576,12 +566,14 @@ export default function TopicFeed() {
                   </div>
                     ) : (
                       <div className="space-y-6">
-                        {/* Smart Feed Notification */}
-                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 text-center">
-                          <p className="text-blue-700 dark:text-blue-300 font-medium">
-                            Smart feed active - posts are distributed fairly for better visibility
-                          </p>
-                        </div>
+                        {/* Smart Feed Active Indicator */}
+                        {activeSmartFeedActive && (
+                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 text-center">
+                            <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                              Smart feed active - posts are distributed fairly for better visibility
+                            </p>
+                          </div>
+                        )}
                         
                         {/* Show Story Recommendations first for Story Time */}
                     {topicId === "story-time" && (
@@ -608,6 +600,19 @@ export default function TopicFeed() {
                             />
                           </div>
                         ))}
+                        
+                        {/* Load More Button for Community Posts */}
+                        {activeHasMore && (
+                          <div className="text-center pt-6">
+                            <Button
+                              onClick={activeLoadMorePosts}
+                              variant="outline"
+                              className="px-6 py-3 rounded-xl border-2 border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400 font-medium"
+                            >
+                              Refresh to see more posts ({activeNextBatchAvailable} available)
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -665,6 +670,19 @@ export default function TopicFeed() {
                             />
                           </div>
                         ))}
+                        
+                        {/* Load More Button for User Posts */}
+                        {activeTab === 'user' && activeHasMore && (
+                          <div className="text-center pt-6">
+                            <Button
+                              onClick={activeLoadMorePosts}
+                              variant="outline"
+                              className="px-6 py-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
+                            >
+                              Load more of your posts
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

@@ -1,0 +1,117 @@
+🛠️ Replit Prompt — FIXED Smart Feed Sync + Visibility Logic Without Breaking Live Post Sync (Tfess)
+
+📌 What I Need Replit to Do:
+
+I need a fixed, smart feed distribution and sync system for Tfess that works without breaking the ability for new posts to show up across devices. The version I previously used created a bug where posts wouldn’t show live on other devices or only showed in Trending. I want the updated version below to fix that and work reliably for all users, across all pages.
+
+🔄 Part 1: Smart Post Distribution (Anti-Flooding)
+
+✅ Main Goals:
+
+Avoid flooding the screen with too many new posts.
+
+But NEVER prevent new posts from showing up on other devices or across pages.
+
+✔️ Updated Logic:
+
+Show 30 max new posts per refresh.
+
+If more than 30 exist, queue them for next refresh.
+
+At the bottom of the 30-post limit, add a button that says:
+
+"Refresh to see more posts"
+
+Do not block other posts from being seen due to batching.
+
+Every new post should still be accessible to other users in normal time.
+
+🚫 DO NOT delay or hide new posts in a way that causes them to only show in Trending or disappear across devices.
+
+🔄 Live Posting Behavior
+
+✅ Maintain:
+
+New posts DO NOT automatically appear in the feed.
+
+New posts should only show when the user taps:
+
+“Refresh” or
+
+“🔄 X New Posts – Tap to View”
+
+⚠️ Fix the bug that prevented new posts from appearing at all after refresh when posted from a different device.
+
+Ensure refresh and live updates work across all devices.
+
+🎯 Part 2: Post Visibility Fairness Logic
+
+✅ Implement logic so that when 100+ users post:
+
+Break them into small chunks (~10–15).
+
+Randomly assign subsets to users so everyone gets seen.
+
+Make this logic apply to the "New" section on Home Page only.
+
+Keep time-based order mixed with light randomization — but never lose posts.
+
+✨ Part 3: Posts Needing Attention Logic (Visibility Boost)
+
+✅ Updated Rule:
+
+When feed is refreshed:
+
+10–20% of the shown posts should have 0 reactions or 0 comments
+
+10–20% of the shown posts should have low reactions/comments
+
+Do not make them dominate — just include them subtly.
+
+Apply this to the “New” section only.
+
+✅ Part 4: Real-Time Interactions (Across Devices)
+
+Make sure the following update LIVE across all devices immediately:
+
+Poll votes
+
+Emoji reactions
+
+Comment counts
+
+Live comment threads
+
+Updated usernames and profile pics
+
+Use Firebase onSnapshot or WebSocket-style listeners.
+
+🔧 Fix the bug where interactions or new posts weren’t updating unless users manually refreshed.
+
+✅ Part 5: Cross-Device, Multi-Page Behavior
+
+This system MUST:
+
+Prevent stale data (no lagging usernames or profile pics).
+
+Prevent jittery screen behavior.
+
+Be fast and smooth on mobile (use lazy loading/virtual lists).
+
+✅ Apply the system to:
+
+Home Page
+
+Daily Spill
+
+All Community Topic Pages
+
+Profile Feed
+
+🚫 DO NOT apply batching, refresh, or smart visibility logic to:
+
+Trending section (Home Page)
+
+Spill of the Day section (Daily Spill Page)
+
+✅ Every Community Topic must include a visible refresh button in the feed area.

@@ -2,9 +2,11 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface WebSocketMessage {
-  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote';
-  postId: string;
+  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote' | 'new_post' | 'posts_available' | 'username_updated' | 'profile_updated';
+  postId?: string;
   data: any;
+  section?: string;
+  postContext?: string;
 }
 
 export function useWebSocket() {
@@ -46,31 +48,55 @@ export function useWebSocket() {
           switch (message.type) {
             case 'post_reaction':
               // Invalidate post reactions and main posts list
-              queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'reactions'] });
+              if (message.postId) {
+                queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'reactions'] });
+              }
               queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
               break;
 
             case 'drama_vote':
               // Invalidate drama votes
-              queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'drama-votes'] });
+              if (message.postId) {
+                queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'drama-votes'] });
+              }
               queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
               break;
 
             case 'comment_added':
               // Invalidate comments and comment count
-              queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'comments'] });
+              if (message.postId) {
+                queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'comments'] });
+              }
               queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
               break;
 
             case 'post_view':
               // Update view stats
-              queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'stats'] });
+              if (message.postId) {
+                queryClient.invalidateQueries({ queryKey: ['/api/posts', message.postId, 'stats'] });
+              }
               break;
 
             case 'poll_vote':
             case 'debate_vote':
               // Invalidate polls/debates and main posts
               queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+              break;
+
+            case 'posts_available':
+              // New posts are available - don't auto-refresh, just notify subscribers
+              console.log('[WebSocket] New posts available:', message.data);
+              break;
+
+            case 'profile_updated':
+              // Profile/username updated across devices
+              queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+              break;
+
+            case 'new_post':
+              // A new post was created - notify but don't auto-show
+              console.log('[WebSocket] New post created:', message.data);
               break;
 
             default:
