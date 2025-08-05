@@ -393,9 +393,9 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
           </ScrollArea>
 
           {/* Comment Input */}
-          <div className="flex-shrink-0 pt-4 pb-safe-area-inset-bottom bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
+          <div className="flex-shrink-0 pt-4 pb-safe-area-inset-bottom bg-gray-50 dark:bg-gray-800">
             {!replyingTo && (
-              <div className="mx-4 p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
+              <div className="mx-4 p-4">
                 <div className="flex space-x-3">
                   <AvatarDisplay
                     avatarId={userAvatarId}
@@ -409,7 +409,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       placeholder="Add a comment..."
-                      className="resize-none w-full bg-gray-50 dark:bg-gray-700/50 border-0 rounded-xl min-h-[2.5rem] max-h-24 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 placeholder:text-gray-400"
+                      className="resize-none w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl min-h-[2.5rem] max-h-24 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-800 transition-all duration-200 placeholder:text-gray-400"
                       maxLength={300}
                       rows={2}
                       style={{ 
@@ -426,7 +426,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
                         onClick={handleSubmit}
                         disabled={createCommentMutation.isPending || !comment.trim()}
                         className={cn(
-                          "text-white w-full sm:w-auto order-1 sm:order-2 rounded-xl shadow-md hover:shadow-lg transition-all duration-200",
+                          "text-white w-full sm:w-auto order-1 sm:order-2 rounded-xl transition-all duration-200",
                           isDrama ? "gradient-drama" : "gradient-primary"
                         )}
                         size="sm"
