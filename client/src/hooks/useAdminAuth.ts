@@ -73,6 +73,10 @@ export function useAdminManagement() {
   const { data: adminList, isLoading: isLoadingAdmins } = useQuery({
     queryKey: ['/api/admin/manage/list'],
     retry: false,
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Add admin
@@ -88,9 +92,16 @@ export function useAdminManagement() {
     },
     onSuccess: (data) => {
       console.log('Admin add success, invalidating cache:', data);
-      // Force invalidate and refetch the admin list
+      // Multiple cache invalidation strategies to force refresh
+      queryClient.removeQueries({ queryKey: ['/api/admin/manage/list'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/manage/list'] });
       queryClient.refetchQueries({ queryKey: ['/api/admin/manage/list'] });
+      
+      // Force reload with cache busting
+      setTimeout(() => {
+        queryClient.removeQueries({ queryKey: ['/api/admin/manage/list'] });
+        queryClient.refetchQueries({ queryKey: ['/api/admin/manage/list'] });
+      }, 100);
     },
   });
 
@@ -101,9 +112,15 @@ export function useAdminManagement() {
     },
     onSuccess: (data) => {
       console.log('Admin remove success, invalidating cache:', data);
-      // Force invalidate and refetch the admin list
+      // Multiple cache invalidation strategies to force refresh
+      queryClient.removeQueries({ queryKey: ['/api/admin/manage/list'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/manage/list'] });
       queryClient.refetchQueries({ queryKey: ['/api/admin/manage/list'] });
+      
+      // Force reload after short delay
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/admin/manage/list'] });
+      }, 500);
     },
   });
 

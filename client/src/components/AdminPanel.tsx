@@ -27,7 +27,8 @@ import {
   UserX,
   Search,
   Calendar,
-  Clock
+  Clock,
+  RefreshCw
 } from "lucide-react";
 
 export function AdminPanel() {
@@ -264,9 +265,13 @@ export function AdminPanel() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  // Force refresh admin list
+                  window.location.reload();
+                }}
               >
-                Refresh List
+                <RefreshCw className="w-4 h-4 mr-1" />
+                Refresh
               </Button>
               <Button
                 onClick={() => setShowAddForm(!showAddForm)}

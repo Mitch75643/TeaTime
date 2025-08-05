@@ -1515,6 +1515,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       if (result.success) {
+        // Disable caching for admin list to ensure fresh data
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
         res.json(result.admins);
       } else {
         res.status(403).json({ message: result.message });
