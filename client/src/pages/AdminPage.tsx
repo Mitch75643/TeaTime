@@ -25,14 +25,14 @@ export default function AdminPage() {
           <AdminAuth onSuccess={() => setActiveTab("management")} />
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 max-w-3xl mx-auto mb-8">
-              <TabsTrigger value="auth" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-4 gap-2 max-w-4xl mx-auto mb-8 p-2 h-auto">
+              <TabsTrigger value="auth" className="flex items-center gap-2 px-4 py-3 text-sm font-medium">
                 <Shield className="w-4 h-4" />
                 Authentication
               </TabsTrigger>
               <TabsTrigger 
                 value="management" 
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 px-4 py-3 text-sm font-medium"
                 disabled={!isRootHost}
               >
                 <Users className="w-4 h-4" />
@@ -40,7 +40,7 @@ export default function AdminPage() {
               </TabsTrigger>
               <TabsTrigger 
                 value="banned" 
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 px-4 py-3 text-sm font-medium"
                 disabled={!isRootHost}
               >
                 <UserX className="w-4 h-4" />
@@ -48,7 +48,7 @@ export default function AdminPage() {
               </TabsTrigger>
               <TabsTrigger 
                 value="restricted" 
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 px-4 py-3 text-sm font-medium"
                 disabled={!isRootHost}
               >
                 <UserMinus className="w-4 h-4" />
