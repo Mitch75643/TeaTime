@@ -34,7 +34,7 @@ const getCategoryStyles = (categoryId: string) => {
 export function CategoryActionSheet({ isOpen, onClose, onCategorySelect }: CategoryActionSheetProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md mx-4 max-h-[80vh] overflow-hidden">
+      <DialogContent className="sm:max-w-md mx-auto w-[calc(100%-2rem)] max-w-[400px] max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>
             What kind of tea are you spilling? ☕
