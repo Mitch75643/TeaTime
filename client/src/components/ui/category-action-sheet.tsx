@@ -34,9 +34,11 @@ const getCategoryStyles = (categoryId: string) => {
 };
 
 export function CategoryActionSheet({ isOpen, onClose, onCategorySelect }: CategoryActionSheetProps) {
+  console.log("CategoryActionSheet render - isOpen:", isOpen);
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[calc(100%-1rem)] max-w-md mx-auto max-h-[80vh] overflow-hidden">
+      <DialogContent className="w-[calc(100%-1rem)] max-w-md mx-auto max-h-[80vh] overflow-hidden z-[70]">
         <DialogHeader>
           <DialogTitle>
             What kind of tea are you spilling? ☕
@@ -52,7 +54,10 @@ export function CategoryActionSheet({ isOpen, onClose, onCategorySelect }: Categ
               key={category.id}
               variant="ghost"
               className="w-full justify-start p-4 h-auto text-left hover:bg-purple-50 dark:hover:bg-purple-900/20"
-              onClick={() => onCategorySelect(category.id)}
+              onClick={() => {
+                console.log("Category selected:", category.id);
+                onCategorySelect(category.id);
+              }}
             >
               <div className="flex items-start space-x-3">
                 <div className={cn(
