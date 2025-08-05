@@ -27,7 +27,7 @@ export function FloatingPostButton() {
         onClick={() => setIsActionSheetOpen(true)}
         onTouchStart={(e) => e.stopPropagation()}
         className={cn(
-          "fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50",
+          "fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50",
           "w-14 h-14 rounded-full shadow-lg",
           "bg-gradient-to-r from-orange-500 to-orange-600 text-white",
           "hover:scale-105 active:scale-95 transition-all duration-200",
