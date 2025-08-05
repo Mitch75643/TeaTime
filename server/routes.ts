@@ -512,26 +512,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (remove || currentReaction === type) {
           // Remove current reaction (toggle off)
           await storage.removeAllUserReactionsForComment(commentId, sessionId);
+          
+          // Get the post ID for the comment to broadcast the update
+          const comments = await storage.getComments(postId || '');
+          const comment = comments.find(c => c.id === commentId);
+          if (comment && wsManager) {
+            // Broadcast comment reaction removal
+            wsManager.broadcast({
+              type: 'post_reaction',
+              postId: comment.postId,
+              data: { commentId, type: currentReaction || type, action: 'remove' }
+            });
+          }
         } else {
           // Remove any existing reaction first, then add new one
           if (currentReaction) {
             await storage.removeAllUserReactionsForComment(commentId, sessionId);
+            
+            // Get the post ID for the comment to broadcast the removal
+            const comments = await storage.getComments(postId || '');
+            const comment = comments.find(c => c.id === commentId);
+            if (comment && wsManager) {
+              // Broadcast removal of old reaction
+              wsManager.broadcast({
+                type: 'post_reaction',
+                postId: comment.postId,
+                data: { commentId, type: currentReaction, action: 'remove' }
+              });
+            }
           }
           
           // Add new reaction
           await storage.addReaction({ type, commentId }, sessionId);
-        }
-        
-        // Get the post ID for the comment to broadcast the update
-        const comments = await storage.getComments(postId || '');
-        const comment = comments.find(c => c.id === commentId);
-        if (comment && wsManager) {
-          // Broadcast comment reaction update
-          wsManager.broadcast({
-            type: 'post_reaction',
-            postId: comment.postId,
-            data: { commentId, type, action: remove ? 'remove' : 'add' }
-          });
+          
+          // Get the post ID for the comment to broadcast the addition
+          const comments = await storage.getComments(postId || '');
+          const comment = comments.find(c => c.id === commentId);
+          if (comment && wsManager) {
+            // Broadcast addition of new reaction
+            wsManager.broadcast({
+              type: 'post_reaction',
+              postId: comment.postId,
+              data: { commentId, type, action: 'add' }
+            });
+          }
         }
       } else if (postId) {
         // Handle post reactions
@@ -540,23 +564,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (remove || currentReaction === type) {
           // Remove current reaction (toggle off)
           await storage.removeAllUserReactionsForPost(postId, sessionId);
+          
+          // Broadcast removal via WebSocket
+          if (wsManager) {
+            wsManager.broadcast({
+              type: 'post_reaction',
+              postId,
+              data: { type: currentReaction || type, action: 'remove' }
+            });
+          }
         } else {
           // Remove any existing reaction first, then add new one
           if (currentReaction) {
             await storage.removeAllUserReactionsForPost(postId, sessionId);
+            
+            // Broadcast removal of old reaction
+            if (wsManager) {
+              wsManager.broadcast({
+                type: 'post_reaction',
+                postId,
+                data: { type: currentReaction, action: 'remove' }
+              });
+            }
           }
           
           // Add new reaction
           await storage.addReaction({ type, postId }, sessionId);
-        }
-        
-        // Broadcast post reaction update via WebSocket
-        if (wsManager) {
-          wsManager.broadcast({
-            type: 'post_reaction',
-            postId,
-            data: { type, action: remove ? 'remove' : 'add' }
-          });
+          
+          // Broadcast addition of new reaction
+          if (wsManager) {
+            wsManager.broadcast({
+              type: 'post_reaction',
+              postId,
+              data: { type, action: 'add' }
+            });
+          }
         }
       } else {
         throw new Error("Either postId or commentId must be provided");
