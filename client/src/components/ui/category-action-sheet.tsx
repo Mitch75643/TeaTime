@@ -16,6 +16,7 @@ const categories = [
   { id: "money", label: "Money", emoji: "💸", description: "Finances, spending, debt" },
   { id: "hot-takes", label: "Hot Takes", emoji: "🌍", description: "Trending topics, controversial opinions" },
   { id: "drama", label: "Am I in the Wrong?", emoji: "🎭", description: "Let the community judge" },
+  { id: "other", label: "Other", emoji: "📝", description: "Everything else" },
 ];
 
 const getCategoryStyles = (categoryId: string) => {
@@ -27,6 +28,7 @@ const getCategoryStyles = (categoryId: string) => {
     "money": "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700",
     "hot-takes": "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700",
     "drama": "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700",
+    "other": "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600",
   };
   return styles[categoryId as keyof typeof styles] || "bg-gray-50 text-gray-700 border-gray-200";
 };

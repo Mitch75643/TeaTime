@@ -38,6 +38,7 @@ const categories = [
   { value: "money", label: "💸 Money" },
   { value: "hot-takes", label: "🌍 Hot Takes" },
   { value: "drama", label: "🎭 Am I in the Wrong?" },
+  { value: "other", label: "📝 Other" },
 ];
 
 const popularTags = [
