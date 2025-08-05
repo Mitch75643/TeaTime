@@ -14,6 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useSmartFeedV2 } from "@/hooks/use-smart-feed-v2";
+import { SmartRefreshButton } from "@/components/ui/smart-refresh-button";
 import { 
   Star, 
   BookOpen, 
@@ -174,14 +176,17 @@ export default function Community() {
     setLocation(`/topic/${topicId}`);
   };
 
-  const { data: posts = [], isLoading, refetch } = useQuery<Post[]>({
+  const smartFeed = useSmartFeedV2({
     queryKey: ["/api/posts", "community"],
-    queryFn: async () => {
-      const response = await fetch("/api/posts?sortBy=new&postContext=community");
-      if (!response.ok) throw new Error("Failed to fetch posts");
-      return response.json();
-    },
+    apiEndpoint: "/api/posts",
+    sortBy: "new",
+    postContext: "community",
+    enableSmartLogic: true,
   });
+
+  const posts = smartFeed.posts;
+  const isLoading = smartFeed.isLoading;
+  const shouldShowRefreshButton = smartFeed.shouldShowRefreshButton;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -258,40 +263,39 @@ export default function Community() {
           })}
         </div>
 
-        {/* Recent Community Posts - Full-Width Modern Layout */}
-        <div className="space-y-6">
+        {/* Recent Community Posts */}
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Users className="h-5 w-5 text-orange-500" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Recent Community Posts
             </h2>
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              variant="outline"
-              size="sm"
-              className="text-xs p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
+            <SmartRefreshButton
+              onRefresh={smartFeed.handleRefresh}
+              isRefreshing={smartFeed.isRefreshing}
+              newPostsCount={smartFeed.newPostsCount}
+              queuedPostsCount={smartFeed.queuedPostsCount}
+              variant="button"
+              className="text-xs p-2 rounded-full"
+            />
           </div>
-          
           {isLoading ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                  <div className="flex space-x-3">
-                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div key={i} className="animate-pulse">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 space-y-3">
+                    <div className="flex space-x-3">
+                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="text-center py-12">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 No community posts yet
@@ -301,11 +305,9 @@ export default function Community() {
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
-              {posts.slice(0, 5).map((post: Post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
+            posts.slice(0, 5).map((post: Post) => (
+              <PostCard key={post.id} post={post} />
+            ))
           )}
         </div>
       </div>

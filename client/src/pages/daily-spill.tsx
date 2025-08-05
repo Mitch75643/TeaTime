@@ -13,7 +13,8 @@ import { Coffee, Plus, Users, MessageCircle, Star, Crown, Flame, Heart, Zap, Tro
 import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import { NotificationLink } from "@/components/ui/notification-link";
-import { useSmartFeed } from "@/hooks/use-smart-feed";
+import { useSmartFeedV2 } from "@/hooks/use-smart-feed-v2";
+import { SmartRefreshButton } from "@/components/ui/smart-refresh-button";
 import { useDailyPromptStreak } from "@/hooks/use-daily-prompt-streak";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
@@ -364,27 +365,22 @@ export default function DailySpill() {
   // Weekly theme animation hook
   const { animation, triggerAnimation, completeAnimation } = useWeeklyThemeAnimation();
 
-  // Initialize smart feed for daily spills
-  const smartFeed = useSmartFeed({
+  // Initialize smart feed v2 for daily spills
+  const smartFeed = useSmartFeedV2({
     queryKey: ["/api/posts", "daily", "new"],
     apiEndpoint: "/api/posts",
     category: "daily",
     sortBy: "new",
     postContext: "daily",
+    enableSmartLogic: true,
   });
 
-  // Get posts with daily spill category and context
-  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", "daily", "new"],
-    queryFn: async () => {
-      const response = await fetch("/api/posts?category=daily&sortBy=new&postContext=daily");
-      if (!response.ok) throw new Error("Failed to fetch posts");
-      return response.json();
-    },
-  });
-
-  // Apply smart feed batching
-  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
+  // Use smart feed data
+  const posts = smartFeed.posts;
+  const isLoading = smartFeed.isLoading;
+  const hasMorePosts = smartFeed.hasMorePosts;
+  const shouldShowRefreshBanner = smartFeed.shouldShowRefreshBanner;
+  const shouldShowRefreshButton = smartFeed.shouldShowRefreshButton;
 
   // Handle post submission success
   const handlePostSuccess = () => {
@@ -394,15 +390,15 @@ export default function DailySpill() {
     // Trigger weekly theme animation
     triggerAnimation(currentTheme.animation);
     
-    // Refresh the posts feed to show new post immediately
-    queryClient.invalidateQueries({ queryKey: ["/api/posts", "daily", "new"] });
+    // Refresh the smart feed to show new post immediately
+    smartFeed.handleRefresh();
     
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };
 
   // Get "Spill of the Day" - highest reacted post
   const spillOfTheDay = posts.length > 0 
-    ? posts.reduce((best, current) => {
+    ? posts.reduce((best: Post, current: Post) => {
         const currentReactions = Object.values(current.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
         const bestReactions = Object.values(best.reactions || {}).reduce((sum: number, count) => sum + (count as number), 0);
         return currentReactions > bestReactions ? current : best;
@@ -564,6 +560,17 @@ export default function DailySpill() {
         </div>
       </div>
 
+      {/* Smart Feed Refresh Banner */}
+      {shouldShowRefreshBanner && (
+        <SmartRefreshButton
+          onRefresh={smartFeed.handleRefresh}
+          isRefreshing={smartFeed.isRefreshing}
+          newPostsCount={smartFeed.newPostsCount}
+          queuedPostsCount={smartFeed.queuedPostsCount}
+          variant="banner"
+        />
+      )}
+
       {/* Posts Feed */}
       <main className="px-4 pb-24 space-y-4 pt-4">
         {isLoading && (
@@ -600,11 +607,24 @@ export default function DailySpill() {
               />
             ))}
             
-            {/* Load More Button */}
-            {hasMorePosts && (
+            {/* Smart Feed Controls */}
+            {shouldShowRefreshButton && (
+              <div className="text-center pt-4">
+                <SmartRefreshButton
+                  onRefresh={smartFeed.handleRefresh}
+                  isRefreshing={smartFeed.isRefreshing}
+                  newPostsCount={smartFeed.newPostsCount}
+                  queuedPostsCount={smartFeed.queuedPostsCount}
+                  variant="button"
+                />
+              </div>
+            )}
+            
+            {/* Load More Button for additional content */}
+            {hasMorePosts && !shouldShowRefreshButton && (
               <LoadMoreButton
                 onLoadMore={smartFeed.handleLoadMore}
-                remainingCount={allPosts.length - posts.length}
+                remainingCount={0}
               />
             )}
         </div>
