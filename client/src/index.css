@@ -64,6 +64,12 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    overflow-y: auto !important;
+    height: auto !important;
+  }
+  
+  html {
+    overflow-y: auto !important;
   }
 }
 
@@ -92,29 +98,23 @@ body[data-modal-open="true"]::-webkit-scrollbar {
   display: none;
 }
 
-/* Enhanced scrolling for all devices */
-body {
+/* Force scrolling to work properly */
+html, body {
+  overflow-y: auto !important;
+  height: auto !important;
   -webkit-overflow-scrolling: touch;
-  overflow-scrolling: touch;
 }
 
+/* Ensure page content is always scrollable */
+.min-h-screen {
+  min-height: 120vh !important; /* Force content to be taller than viewport */
+}
+
+/* Make sure main content areas can scroll */
 main {
+  overflow: visible !important;
+  height: auto !important;
   -webkit-overflow-scrolling: touch;
-  overflow-scrolling: touch;
-}
-
-/* Ensure content areas are properly scrollable on all devices */
-.mobile-scroll-content {
-  -webkit-overflow-scrolling: touch;
-  overflow-y: visible;
-  position: relative;
-}
-
-/* Mobile-specific optimizations */
-@media (max-width: 768px) {
-  main {
-    min-height: calc(100vh - 160px); /* Account for header and nav */
-  }
 }
 
 /* Gradient backgrounds for Tfess theme - Orange Edition */
