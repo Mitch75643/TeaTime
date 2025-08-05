@@ -358,11 +358,12 @@ export default function TopicFeed() {
       </div>
 
       {/* Posts Section with Tabs */}
-      <div className="container mx-auto px-4 py-6 pb-20">
-        <div className="grid grid-cols-1 gap-6 max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 py-8 pb-20">
+        <div className="grid grid-cols-1 gap-8 max-w-4xl mx-auto">
           {/* Main Posts Section */}
-          <div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="space-y-6">
+            {/* Tab Navigation */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
               {/* Story Category Filter Bar - Only for Story Time */}
               {topicId === "story-time" && (
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -482,55 +483,72 @@ export default function TopicFeed() {
           )}
 
           {/* Tab Headers */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setActiveTab('community')}
-              className={cn(
-                "flex-1 px-6 py-4 text-sm font-medium transition-colors",
-                "flex items-center justify-center space-x-2",
-                activeTab === 'community'
-                  ? "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-b-2 border-purple-500"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-              )}
-            >
-              <Users className="h-4 w-4" />
-              <span>Community Feed</span>
-              <span className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                {communityPosts.length}
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveTab('user')}
-              className={cn(
-                "flex-1 px-6 py-4 text-sm font-medium transition-colors",
-                "flex items-center justify-center space-x-2",
-                activeTab === 'user'
-                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-b-2 border-blue-500"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-              )}
-            >
-              <User className="h-4 w-4" />
-              <span>Your Posts</span>
-              <span className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                {userPosts.length}
-              </span>
-            </button>
-          </div>
+              <div className="flex border-b border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setActiveTab('community')}
+                  className={cn(
+                    "flex-1 px-8 py-5 text-base font-medium transition-all duration-200",
+                    "flex items-center justify-center space-x-3",
+                    activeTab === 'community'
+                      ? "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border-b-3 border-orange-500 shadow-sm"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  )}
+                >
+                  <Users className="h-5 w-5" />
+                  <span>Community Feed</span>
+                  <span className="ml-2 text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full font-medium">
+                    {communityPosts.length}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('user')}
+                  className={cn(
+                    "flex-1 px-8 py-5 text-base font-medium transition-all duration-200",
+                    "flex items-center justify-center space-x-3",
+                    activeTab === 'user'
+                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-3 border-blue-500 shadow-sm"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  )}
+                >
+                  <User className="h-5 w-5" />
+                  <span>Your Posts</span>
+                  <span className="ml-2 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
+                    {userPosts.length}
+                  </span>
+                </button>
+              </div>
+            </div>
+            
+            {/* Refresh Feed Button */}
+            <div className="w-full">
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                variant="outline"
+                className="w-full py-4 rounded-2xl border-2 border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400 font-medium text-base transition-all duration-200 shadow-sm"
+              >
+                <RefreshCw className={`h-5 w-5 mr-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh Feed
+              </Button>
+            </div>
+
+            {/* Posts Content */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
 
           {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'community' && (
-              <div className="space-y-4">
-                {isLoadingCommunity ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+              <div className="p-8">
+                {activeTab === 'community' && (
+                  <div className="space-y-6">
+                    {isLoadingCommunity ? (
+                      <div className="space-y-6">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 animate-pulse">
+                            <div className="h-5 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-3"></div>
+                            <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : communityPosts.length === 0 ? (
+                    ) : communityPosts.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-4xl mb-4">{topic.emoji}</div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -561,9 +579,16 @@ export default function TopicFeed() {
                       }
                     </Button>
                   </div>
-                ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {/* Show Story Recommendations first for Story Time */}
+                    ) : (
+                      <div className="space-y-6">
+                        {/* Smart Feed Notification */}
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 text-center">
+                          <p className="text-blue-700 dark:text-blue-300 font-medium">
+                            Smart feed active - posts are distributed fairly for better visibility
+                          </p>
+                        </div>
+                        
+                        {/* Show Story Recommendations first for Story Time */}
                     {topicId === "story-time" && (
                       <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
                         <div className="flex items-center gap-2 mb-4">
@@ -579,27 +604,26 @@ export default function TopicFeed() {
                       </div>
                     )}
                     
-                    {/* Regular Community Posts */}
-                    {communityPosts.map((post: Post) => (
-                      <PostCard 
-                        key={post.id} 
-                        post={post}
-                      />
-                    ))}
+                        {/* Regular Community Posts */}
+                        {communityPosts.map((post: Post) => (
+                          <div key={post.id} className="bg-gray-50 dark:bg-gray-700/30 rounded-2xl p-6 border border-gray-200 dark:border-gray-600">
+                            <PostCard post={post} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
 
-            {activeTab === 'user' && (
-              <div className="space-y-4">
-                {isLoadingUser ? (
-                  <div className="space-y-4">
-                    {[...Array(2)].map((_, i) => (
-                      <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
-                      </div>
+                {activeTab === 'user' && (
+                  <div className="space-y-6">
+                    {isLoadingUser ? (
+                      <div className="space-y-6">
+                        {[...Array(2)].map((_, i) => (
+                          <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 animate-pulse">
+                            <div className="h-5 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-3"></div>
+                            <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                          </div>
                     ))}
                   </div>
                 ) : userPosts.length === 0 ? (
@@ -633,25 +657,22 @@ export default function TopicFeed() {
                       }
                     </Button>
                   </div>
-                ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {userPosts.map((post: Post) => (
-                      <PostCard 
-                        key={post.id} 
-                        post={post}
-                      />
-                    ))}
+                    ) : (
+                      <div className="space-y-6">
+                        {userPosts.map((post: Post) => (
+                          <div key={post.id} className="bg-gray-50 dark:bg-gray-700/30 rounded-2xl p-6 border border-gray-200 dark:border-gray-600">
+                            <PostCard post={post} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
-          </div>
             </div>
-          
-
+          </div>
         </div>
       </div>
-    </div>
 
       {/* Floating Add Button */}
       <Button
