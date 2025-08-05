@@ -13,15 +13,5 @@ export function NotificationLink({ className = "" }: NotificationLinkProps) {
     setLocation('/settings');
   };
 
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={handleClick}
-      className={`text-xs text-muted-foreground hover:text-foreground transition-colors ${className}`}
-    >
-      <Settings className="h-3 w-3 mr-1" />
-      Manage your notifications in Settings →
-    </Button>
-  );
+  return null;
 }
