@@ -1521,6 +1521,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve admin page separately at /admin route
+  app.get("/admin", (req, res) => {
+    const path = require('path');
+    res.sendFile(path.join(__dirname, "../public/admin.html"));
+  });
+
   // Add test routes for development
   if (process.env.NODE_ENV === 'development') {
     addTestRoute(app);
