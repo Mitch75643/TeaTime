@@ -48,11 +48,11 @@ class SmartFeedService {
       return this.applySmartDistribution(sessionId, allPosts, excludePostIds);
     }
 
-    // For trending feeds or other contexts, always show 30 posts when available
+    // For trending feeds or other contexts, return normal pagination
     return {
       posts: allPosts.slice(0, this.config.maxPostsPerRefresh),
       hasMorePosts: allPosts.length > this.config.maxPostsPerRefresh,
-      nextRefreshAvailable: true, // Allow refresh for new posts
+      nextRefreshAvailable: false,
       queuedPostsCount: 0,
     };
   }
@@ -71,16 +71,6 @@ class SmartFeedService {
         posts: [],
         hasMorePosts: false,
         nextRefreshAvailable: false,
-        queuedPostsCount: 0,
-      };
-    }
-
-    // ALWAYS show 30 posts if available - only apply smart logic when there are 30+ posts
-    if (availablePosts.length <= 30) {
-      return {
-        posts: availablePosts,
-        hasMorePosts: false,
-        nextRefreshAvailable: true, // Allow refresh for new posts
         queuedPostsCount: 0,
       };
     }

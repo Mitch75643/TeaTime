@@ -13,8 +13,6 @@ import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
 import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { useSmartFeedV2 } from "@/hooks/use-smart-feed-v2";
-import { SmartRefreshButton } from "@/components/ui/smart-refresh-button";
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
@@ -114,12 +112,6 @@ export default function TopicFeed() {
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
   const topic = topicConfig[topicId];
-  
-  // Smart feed integration for refresh functionality
-  const smartFeed = useSmartFeedV2({
-    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter],
-    category: 'all' // Community pages don't filter by category in the same way
-  });
 
   // Scroll to top when topic changes
   useEffect(() => {
@@ -140,7 +132,7 @@ export default function TopicFeed() {
     };
   }, [topicId]);
 
-  // Subscribe to real-time updates for topic feeds
+  // Subscribe to real-time comment updates for topic feeds
   useEffect(() => {
     const unsubscribe = subscribeToMessages((message: any) => {
       if (message.type === 'comment_added') {
@@ -149,25 +141,41 @@ export default function TopicFeed() {
         queryClient.invalidateQueries({ queryKey: ['/api/posts/community', topicId] });
         queryClient.invalidateQueries({ queryKey: ['/api/posts/user', topicId] });
         queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-      } else if (message.type === 'post_created') {
-        console.log('Topic Feed: Real-time post created:', message);
-        // Check if the post belongs to current topic
-        const messageData = message.data;
-        if (messageData?.communitySection === topicId || messageData?.postContext === 'community') {
-          console.log('Topic Feed: New post relevant to topic:', topicId, messageData);
-          // Force refresh for both community and user posts
-          queryClient.refetchQueries({ queryKey: ['/api/posts/user', topicId] });
-          queryClient.refetchQueries({ queryKey: ['/api/posts'] });
-        }
       }
     });
 
     return unsubscribe;
   }, [topicId, subscribeToMessages, queryClient]);
 
-  // Use smart feed data for community posts
-  const communityPosts = smartFeed.posts;
-  const isLoadingCommunity = smartFeed.isLoading;
+  // Community Feed - All posts from this topic  
+  const { data: communityPosts = [], isLoading: isLoadingCommunity } = useQuery<Post[]>({
+    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        sortBy,
+        postContext: 'community',
+        section: topicId
+      });
+      if (storyCategory !== "all") {
+        params.append('storyCategory', storyCategory);
+      }
+      if (hotTopicFilter !== "all") {
+        params.append('hotTopicFilter', hotTopicFilter);
+      }
+      
+      // Add smart feed logic for 'new' feeds
+      if (sortBy === 'new') {
+        params.append('smartFeed', 'true');
+      }
+      
+      const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch community posts");
+      const result = await response.json();
+      
+      // Handle smart feed response structure
+      return result.posts || result;
+    }
+  });
 
   // Your Posts - Only posts by current user for this topic
   const { data: userPosts = [], isLoading: isLoadingUser } = useQuery<Post[]>({
@@ -204,29 +212,9 @@ export default function TopicFeed() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    console.log('Topic Feed: Starting manual refresh for topic:', topicId);
-    
-    try {
-      // Clear all cached queries and force fresh fetch
-      await queryClient.removeQueries({ 
-        queryKey: ['/api/posts'],
-        exact: false 
-      });
-      
-      // Use smart feed refresh for community posts
-      await smartFeed.handleRefresh();
-      
-      // Force fresh fetch for user posts
-      await queryClient.refetchQueries({ 
-        queryKey: ['/api/posts/user', topicId, sortBy, storyCategory, hotTopicFilter],
-        exact: true 
-      });
-      
-      console.log('Topic Feed: Manual refresh completed');
-    } catch (error) {
-      console.error('Topic Feed: Failed to refresh:', error);
-    }
-    
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
     setIsRefreshing(false);
   };
 
@@ -588,29 +576,20 @@ export default function TopicFeed() {
                 ) : (
                   <div className="space-y-6">
                     {/* Smart Feed Refresh for new feeds */}
-                    {sortBy === 'new' && smartFeed.shouldShowRefreshButton && (
+                    {sortBy === 'new' && (
                       <div className="mb-6">
-                        <SmartRefreshButton
-                          onRefresh={smartFeed.handleRefresh}
-                          isRefreshing={smartFeed.isRefreshing}
-                          newPostsCount={smartFeed.newPostsCount}
-                          queuedPostsCount={smartFeed.queuedPostsCount}
-                          variant="button"
+                        <button
+                          onClick={() => {
+                            queryClient.invalidateQueries({ 
+                              queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter] 
+                            });
+                          }}
                           className="w-full px-4 py-3 text-sm bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors flex items-center justify-center gap-2 border border-orange-200 dark:border-orange-800"
-                        />
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          Refresh Feed
+                        </button>
                       </div>
-                    )}
-                    
-                    {/* Smart Feed Refresh Banner - Shows at top when new posts available */}
-                    {sortBy === 'new' && smartFeed.shouldShowRefreshBanner && (
-                      <SmartRefreshButton
-                        onRefresh={smartFeed.handleRefresh}
-                        isRefreshing={smartFeed.isRefreshing}
-                        newPostsCount={smartFeed.newPostsCount}
-                        queuedPostsCount={smartFeed.queuedPostsCount}
-                        variant="banner"
-                        className="mb-6"
-                      />
                     )}
                   
                     {/* Show Story Recommendations first for Story Time */}

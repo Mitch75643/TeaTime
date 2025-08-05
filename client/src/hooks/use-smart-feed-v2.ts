@@ -60,13 +60,11 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
   const { data: feedData, isLoading, refetch } = useQuery({
     queryKey: [...queryKey, "smartfeed", displayedPostIds.length],
     queryFn: async () => {
-      console.log('Smart Feed: Query function called with displayedPostIds:', displayedPostIds);
       const params = buildApiParams(displayedPostIds);
       const response = await fetch(`${apiEndpoint}?${params}`);
       if (!response.ok) throw new Error("Failed to fetch posts");
       
       const result = await response.json();
-      console.log('Smart Feed: Query function result:', result);
       
       // If smart feed is enabled, expect structured response
       if (enableSmartLogic && result.posts) {
@@ -82,26 +80,20 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
       };
     },
     refetchOnWindowFocus: false,
-    staleTime: 0, // Always fresh data
-    gcTime: 0, // Don't cache
+    staleTime: 30000, // 30 seconds
   });
 
   // Update state when feed data changes
   useEffect(() => {
     if (feedData) {
-      console.log('Smart Feed: Processing feed data change:', feedData);
-      setState(prev => {
-        const newState = {
-          ...prev,
-          posts: feedData.posts || [],
-          hasMorePosts: feedData.hasMorePosts || false,
-          nextRefreshAvailable: feedData.nextRefreshAvailable || false,
-          queuedPostsCount: feedData.queuedPostsCount || 0,
-          lastRefreshTime: new Date(),
-        };
-        console.log('Smart Feed: State updated from feed data:', newState);
-        return newState;
-      });
+      setState(prev => ({
+        ...prev,
+        posts: feedData.posts || [],
+        hasMorePosts: feedData.hasMorePosts || false,
+        nextRefreshAvailable: feedData.nextRefreshAvailable || false,
+        queuedPostsCount: feedData.queuedPostsCount || 0,
+        lastRefreshTime: new Date(),
+      }));
       
       // Update displayed post IDs
       const newPostIds = (feedData.posts || []).map((post: any) => post.id);
@@ -114,26 +106,12 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     if (!enableSmartLogic || sortBy !== 'new') return;
 
     const unsubscribe = subscribeToMessages((message: any) => {
-      if (message.type === 'post_created') {
-        // Check if this post is relevant to current feed context
-        const messageData = message.data;
-        const isRelevantPost = 
-          postContext === 'home' || // Home page shows all posts
-          (postContext === 'community' && messageData?.communitySection) || // Community posts
-          messageData?.postContext === postContext; // Exact context match
-          
-        if (isRelevantPost) {
-          console.log('Smart Feed: New post detected for context:', postContext, message);
-          setState(prev => {
-            const newState = {
-              ...prev,
-              newPostsCount: prev.newPostsCount + 1,
-              nextRefreshAvailable: true,
-            };
-            console.log('Smart Feed: Updated state after new post:', newState);
-            return newState;
-          });
-        }
+      if (message.type === 'post_created' && message.postContext === postContext) {
+        setState(prev => ({
+          ...prev,
+          newPostsCount: prev.newPostsCount + 1,
+          nextRefreshAvailable: true,
+        }));
       }
     });
 
@@ -147,42 +125,23 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     setState(prev => ({ ...prev, isRefreshing: true }));
 
     try {
-      console.log('Smart Feed: Starting refresh...');
-      
-      // Clear displayed post IDs completely to force fresh fetch
+      // Reset displayed post IDs to get fresh content
       setDisplayedPostIds([]);
       
-      // Disable the query temporarily and clear all cached data
-      await queryClient.cancelQueries({ queryKey: [...queryKey] });
-      await queryClient.removeQueries({ 
-        queryKey: [...queryKey],
-        exact: false 
-      });
+      // Invalidate and refetch
+      await queryClient.invalidateQueries({ queryKey });
+      await refetch();
       
-      // Force refetch through the query system instead of manual fetch
-      console.log('Smart Feed: Forcing query refetch...');
-      const result = await queryClient.refetchQueries({ 
-        queryKey: [...queryKey],
-        exact: true,
-        type: 'active'
-      });
-      
-      console.log('Smart Feed: Query refetch result:', result);
-      
-      // Reset refresh state
       setState(prev => ({
         ...prev,
         newPostsCount: 0,
         isRefreshing: false,
-        nextRefreshAvailable: false,
-        lastRefreshTime: new Date(),
       }));
-      
     } catch (error) {
       console.error("Failed to refresh feed:", error);
       setState(prev => ({ ...prev, isRefreshing: false }));
     }
-  }, [state.isRefreshing, queryClient, queryKey]);
+  }, [state.isRefreshing, queryClient, queryKey, refetch]);
 
   // Load more posts function
   const handleLoadMore = useCallback(async () => {
@@ -241,7 +200,7 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     }
   }, [handleRefresh]);
 
-  const returnValue = {
+  return {
     // State
     posts: state.posts,
     isLoading,
@@ -262,9 +221,4 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     shouldShowLoadMoreButton: state.hasMorePosts && !state.nextRefreshAvailable,
     shouldShowRefreshButton: state.nextRefreshAvailable && state.queuedPostsCount > 0,
   };
-  
-  // Debug logging for return value
-  console.log('Smart Feed Hook: Returning state - posts:', returnValue.posts.length, 'banner:', returnValue.shouldShowRefreshBanner, 'newCount:', returnValue.newPostsCount);
-  
-  return returnValue;
 }

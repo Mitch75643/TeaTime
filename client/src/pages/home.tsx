@@ -68,21 +68,12 @@ export default function Home() {
     enableSmartLogic: feedType === 'new', // Only enable smart logic for "new" feeds
   });
 
-  // Use smart feed data with debugging
+  // Use smart feed data
   const posts = smartFeed.posts;
   const isLoading = smartFeed.isLoading;
   const hasMorePosts = smartFeed.hasMorePosts;
   const shouldShowRefreshBanner = smartFeed.shouldShowRefreshBanner;
   const shouldShowRefreshButton = smartFeed.shouldShowRefreshButton;
-  
-  // Debug logging to track state changes
-  useEffect(() => {
-    console.log('Home: Posts updated, count:', posts.length, 'posts:', posts);
-  }, [posts]);
-  
-  useEffect(() => {
-    console.log('Home: Should show refresh banner:', shouldShowRefreshBanner, 'newPostsCount:', smartFeed.newPostsCount);
-  }, [shouldShowRefreshBanner, smartFeed.newPostsCount]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
