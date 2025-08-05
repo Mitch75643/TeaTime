@@ -16,6 +16,7 @@ import { adminAuthService } from "./adminAuth";
 import { adminLoginSchema, addAdminSchema } from "../shared/admin-schema";
 import { initializeWebSocket, wsManager } from "./websocket";
 import { addPollVotingRoutes } from "./pollVotingRoutes";
+import { SmartFeedManager } from "./smartFeedManager";
 
 declare module 'express-session' {
   interface SessionData {
@@ -56,10 +57,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ sessionId: req.session.id });
   });
 
-  // Get posts
+  // Get posts with smart feed distribution
   app.get("/api/posts", async (req, res) => {
     try {
-      const { category, sortBy = 'new', tags, userOnly, postContext, section } = req.query;
+      const { category, sortBy = 'new', tags, userOnly, postContext, section, smartFeed } = req.query;
       const sessionId = req.session.id!;
       
       const posts = await storage.getPosts(
@@ -70,10 +71,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
         postContext as string,
         section as string
       );
+
+      // Apply smart feed distribution for home page
+      if (smartFeed === 'true' && sortBy === 'new' && !category) {
+        const feedManager = SmartFeedManager.getInstance();
+        feedManager.registerUser(sessionId);
+        
+        // Add new posts to the smart feed system
+        feedManager.addNewPosts(posts);
+        
+        // Get throttled posts for this user with engagement boost
+        const result = feedManager.getPostsForUser(sessionId, true);
+        
+        res.json({
+          posts: result.posts,
+          hasMore: result.hasMore,
+          queuedCount: result.totalQueued,
+          isSmartFeed: true
+        });
+        return;
+      }
+      
       res.json(posts);
     } catch (error) {
       console.error("Failed to fetch posts:", error);
       res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  // Smart feed specific endpoints
+  app.get("/api/feed/smart/queued-count", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const feedManager = SmartFeedManager.getInstance();
+      const queuedCount = feedManager.getQueuedCount(sessionId);
+      res.json({ count: queuedCount });
+    } catch (error) {
+      console.error("Failed to get queued count:", error);
+      res.status(500).json({ message: "Failed to get queued count" });
+    }
+  });
+
+  app.post("/api/feed/smart/refresh", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const { includeLowEngagement = false } = req.body;
+      const feedManager = SmartFeedManager.getInstance();
+      
+      // Get fresh posts with smart distribution
+      const result = feedManager.getPostsForUser(sessionId, includeLowEngagement);
+      
+      res.json({
+        posts: result.posts,
+        hasMore: result.hasMore,
+        queuedCount: result.totalQueued
+      });
+    } catch (error) {
+      console.error("Failed to refresh smart feed:", error);
+      res.status(500).json({ message: "Failed to refresh smart feed" });
+    }
+  });
+
+  app.post("/api/feed/smart/reset", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      const feedManager = SmartFeedManager.getInstance();
+      feedManager.resetUserQueue(sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to reset smart feed:", error);
+      res.status(500).json({ message: "Failed to reset smart feed" });
+    }
+  });
+
+  app.get("/api/feed/smart/stats", async (req, res) => {
+    try {
+      const feedManager = SmartFeedManager.getInstance();
+      const stats = feedManager.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Failed to get smart feed stats:", error);
+      res.status(500).json({ message: "Failed to get smart feed stats" });
     }
   });
 
