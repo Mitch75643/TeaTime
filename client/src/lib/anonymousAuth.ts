@@ -104,8 +104,46 @@ class AnonymousAuthService {
       return existingUser;
     }
     
-    // Create new user
-    return this.createNewUser();
+    // Try to find existing user by device fingerprint first
+    return this.findOrCreateUser();
+  }
+
+  // Find existing user by device fingerprint or create new one
+  private async findOrCreateUser(): Promise<LocalUserData> {
+    const deviceFingerprint = generateDeviceFingerprint();
+    const alias = generateFunUsername();
+    
+    const userData: CreateAnonymousUserInput = {
+      deviceFingerprint,
+      alias,
+      avatarId: 'happy-face'
+    };
+
+    try {
+      // Server will check if user exists with this fingerprint and return existing user or create new one
+      const serverUser = await apiRequest('POST', '/api/auth/create-anon', userData) as unknown as AnonymousUser;
+
+      // Store locally
+      const localUserData: LocalUserData = {
+        anonId: serverUser.anonId,
+        alias: serverUser.alias,
+        avatarId: serverUser.avatarId || 'happy-face',
+        deviceFingerprint,
+        isUpgraded: serverUser.isUpgraded || false,
+        sessionId: serverUser.sessionId
+      };
+
+      this.currentUser = localUserData;
+      this.saveToLocalStorage();
+      this.notify();
+      return localUserData;
+      
+    } catch (error) {
+      console.error('Failed to find or create user on server:', error);
+      
+      // Offline fallback
+      return this.createNewUser();
+    }
   }
 
   // Initialize or restore user on app start
@@ -123,8 +161,8 @@ class AnonymousAuthService {
         // Sync with server to get updated session
         await this.syncWithServer(userData.anonId);
       } else {
-        // Create new anonymous user
-        await this.createNewUser();
+        // Try to find existing user by device fingerprint first
+        await this.findOrCreateUser();
       }
       
       this.notify();
@@ -138,53 +176,25 @@ class AnonymousAuthService {
 
   // Create new anonymous user
   private async createNewUser(): Promise<LocalUserData> {
+    // This method now creates a truly new user (fallback only)
     const anonId = generateAnonId();
     const alias = generateFunUsername();
     const deviceFingerprint = generateDeviceFingerprint();
     
-    const userData: CreateAnonymousUserInput = {
-      deviceFingerprint,
+    // Offline fallback - create local user data
+    const localUserData: LocalUserData = {
+      anonId,
       alias,
-      avatarId: 'happy-face'
+      avatarId: 'happy-face',
+      deviceFingerprint,
+      isUpgraded: false,
+      sessionId: `session_${Date.now()}`
     };
 
-    try {
-      // Register with server
-      const serverUser = await apiRequest('POST', '/api/auth/create-anon', userData) as unknown as AnonymousUser;
-
-      // Store locally
-      const localUserData: LocalUserData = {
-        anonId: serverUser.anonId,
-        alias: serverUser.alias,
-        avatarId: serverUser.avatarId || 'happy-face',
-        deviceFingerprint,
-        isUpgraded: false,
-        sessionId: serverUser.sessionId
-      };
-
-      this.currentUser = localUserData;
-      this.saveToLocalStorage();
-      this.notify();
-      return localUserData;
-      
-    } catch (error) {
-      console.error('Failed to create user on server:', error);
-      
-      // Offline fallback
-      const localUserData: LocalUserData = {
-        anonId,
-        alias,
-        avatarId: 'happy-face',
-        deviceFingerprint,
-        isUpgraded: false,
-        sessionId: `session_${Date.now()}`
-      };
-
-      this.currentUser = localUserData;
-      this.saveToLocalStorage();
-      this.notify();
-      return localUserData;
-    }
+    this.currentUser = localUserData;
+    this.saveToLocalStorage();
+    this.notify();
+    return localUserData;
   }
 
   // Load user from localStorage

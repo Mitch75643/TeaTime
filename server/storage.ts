@@ -49,6 +49,7 @@ export interface IStorage {
   getUnreadNotificationCount(sessionId: string): Promise<number>;
   
   // Anonymous User System
+  findUserByDeviceFingerprint(deviceFingerprint: string): Promise<AnonymousUser | undefined>;
   createAnonymousUser(userData: CreateAnonymousUserInput, sessionId: string): Promise<AnonymousUser>;
   getAnonymousUser(anonId: string): Promise<AnonymousUser | undefined>;
   getAnonymousUserBySession(sessionId: string): Promise<AnonymousUser | undefined>;
@@ -676,7 +677,23 @@ export class MemStorage implements IStorage {
     return createHash('sha256').update(password).digest('hex');
   }
 
+  async findUserByDeviceFingerprint(deviceFingerprint: string): Promise<AnonymousUser | undefined> {
+    return Array.from(this.anonymousUsers.values())
+      .find(user => user.deviceFingerprint === deviceFingerprint);
+  }
+
   async createAnonymousUser(userData: CreateAnonymousUserInput, sessionId: string): Promise<AnonymousUser> {
+    // First check if a user already exists with this device fingerprint
+    if (userData.deviceFingerprint) {
+      const existingUser = await this.findUserByDeviceFingerprint(userData.deviceFingerprint);
+      if (existingUser) {
+        // User exists on this device, sync the session and return existing user
+        console.log(`Found existing user for device fingerprint: ${userData.deviceFingerprint}`);
+        return await this.syncUserSession(existingUser.anonId, sessionId, userData.deviceFingerprint);
+      }
+    }
+
+    // No existing user found, create new one
     const id = randomUUID();
     const anonId = this.generateAnonId();
     
@@ -705,6 +722,7 @@ export class MemStorage implements IStorage {
     };
 
     this.anonymousUsers.set(id, user);
+    console.log(`Created new user with device fingerprint: ${userData.deviceFingerprint}`);
     
     // Create device session
     await this.createDeviceSession(id, sessionId, userData.deviceFingerprint);
