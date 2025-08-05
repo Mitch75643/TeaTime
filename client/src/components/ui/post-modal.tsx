@@ -15,6 +15,7 @@ import { useAvatarColor } from "@/hooks/use-avatar-color";
 import { getAvatarById } from "@/lib/avatars";
 import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/draft-storage";
 import { HomeCategoryAnimation, useHomeCategoryAnimation } from "./home-category-animations";
+import { OtherCategoryEffect, useOtherCategoryEffect } from "./other-category-effect";
 import type { InsertPost, ModerationResponse } from "@shared/schema";
 import { MentalHealthSupport } from "@/components/ui/mental-health-support";
 import { useDeviceFingerprint } from "@/hooks/use-device-fingerprint";
@@ -84,6 +85,7 @@ export function PostModal({
   const { userAlias } = useUserAlias();
   const { avatarColor } = useAvatarColor();
   const { animation, triggerAnimation, completeAnimation } = useHomeCategoryAnimation();
+  const { isVisible: otherEffectVisible, triggerEffect: triggerOtherEffect, completeEffect: completeOtherEffect } = useOtherCategoryEffect();
   const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
 
   console.log("PostModal render - isOpen:", isOpen, "category:", category, "defaultCategory:", defaultCategory);
@@ -165,11 +167,16 @@ export function PostModal({
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       clearDraft(); // Clear draft after successful post
       
-      // Trigger animation for home page posts
+      // Trigger effects for home page posts
       if (postContext.page === 'home' && category) {
-        // Map category values to animation categories
-        const animationCategory = category === 'drama' ? 'wrong' : category;
-        triggerAnimation(animationCategory);
+        if (category === 'other') {
+          // Special effect for "Other" category
+          triggerOtherEffect();
+        } else {
+          // Regular category animation for other categories
+          const animationCategory = category === 'drama' ? 'wrong' : category;
+          triggerAnimation(animationCategory);
+        }
       }
       
       toast({
@@ -179,7 +186,17 @@ export function PostModal({
       
       // Only close if no mental health support needed
       if (!response.moderationResponse) {
-        handleClose();
+        if (category === 'other') {
+          // Longer delay for Other category effect
+          setTimeout(() => {
+            handleClose();
+          }, 1500);
+        } else {
+          // Standard delay for regular animations
+          setTimeout(() => {
+            handleClose();
+          }, 1000);
+        }
       }
     },
     onError: (error: any) => {
@@ -431,6 +448,12 @@ export function PostModal({
         isVisible={animation.isVisible}
         onComplete={completeAnimation}
         category={animation.category}
+      />
+
+      {/* Other Category Effect */}
+      <OtherCategoryEffect
+        isVisible={otherEffectVisible}
+        onComplete={completeOtherEffect}
       />
 
       {/* Mental Health Support Modal */}
