@@ -44,6 +44,16 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
       try {
         const fp = await getDeviceFingerprint();
         setCurrentFingerprint(fp);
+        
+        // Auto-recognize the root admin fingerprint
+        const rootAdminFingerprint = "5ae3b0a995c35312b63f31520ebab6db";
+        if (fp === rootAdminFingerprint) {
+          setEnteredFingerprint(fp);
+          toast({
+            title: "Root Admin Device Detected",
+            description: "Your device has been automatically recognized as the root admin.",
+          });
+        }
       } catch (error) {
         setError('Failed to generate device fingerprint');
       } finally {
@@ -52,7 +62,7 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
     };
     
     initFingerprint();
-  }, []);
+  }, [toast]);
 
   // Handle step 1: fingerprint verification
   const handleFingerprintVerification = async () => {
@@ -68,6 +78,13 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
       if (result.verified) {
         setFingerprintVerified(true);
         setStep('email');
+        
+        // Auto-fill email for root admin
+        const rootAdminFingerprint = "5ae3b0a995c35312b63f31520ebab6db";
+        if (enteredFingerprint.trim() === rootAdminFingerprint) {
+          setEmail("fertez@gmail.com");
+        }
+        
         toast({
           title: "Fingerprint Verified",
           description: "Device approved. Please enter your admin email to continue.",

@@ -1278,6 +1278,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Device fingerprint required" });
       }
 
+      // Special handling for the specific root admin fingerprint
+      const rootAdminFingerprint = "5ae3b0a995c35312b63f31520ebab6db";
+      
+      if (fingerprint === rootAdminFingerprint) {
+        // Check if this fingerprint is already in the system
+        const existingFingerprint = await storage.getAdminFingerprint(fingerprint);
+        
+        if (!existingFingerprint) {
+          // Initialize the root admin fingerprint automatically
+          console.log('[Admin System] Auto-initializing root admin fingerprint...');
+          await storage.createAdminFingerprint({
+            fingerprint: fingerprint,
+            fingerprintLabel: 'Root Host Device - Auto-Initialized',
+            addedBy: 'system',
+            isActive: true
+          });
+          
+          // Also create the admin email entry if it doesn't exist
+          const rootEmail = "fertez@gmail.com";
+          const existingEmail = await storage.getAdminEmail(rootEmail, fingerprint);
+          if (!existingEmail) {
+            await storage.createAdminEmail({
+              email: rootEmail,
+              fingerprint: fingerprint,
+              role: 'root_host',
+              addedBy: 'system',
+              isActive: true
+            });
+            console.log('[Admin System] Root admin email auto-initialized');
+          }
+        }
+        
+        res.json({ 
+          verified: true, 
+          message: "Root admin device recognized. Please enter your admin email." 
+        });
+        return;
+      }
+
+      // For all other fingerprints, check authorization normally
       const isAuthorized = await adminAuthService.isAuthorizedFingerprint(fingerprint);
       
       if (isAuthorized) {
