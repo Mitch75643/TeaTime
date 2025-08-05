@@ -303,9 +303,7 @@ export default function Community() {
           ) : (
             <div className="space-y-6">
               {posts.slice(0, 5).map((post: Post) => (
-                <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <PostCard post={post} />
-                </div>
+                <PostCard key={post.id} post={post} />
               ))}
             </div>
           )}

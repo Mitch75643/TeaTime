@@ -362,7 +362,7 @@ export default function TopicFeed() {
         <div className="grid grid-cols-1 gap-6">
           {/* Main Posts Section */}
           <div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div>
               {/* Story Category Filter Bar - Only for Story Time */}
               {topicId === "story-time" && (
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -579,13 +579,12 @@ export default function TopicFeed() {
                       </div>
                     )}
                     
-                    {/* Regular Community Posts - Modern Full-Width Layout */}
+                    {/* Regular Community Posts - Clean Layout */}
                     {communityPosts.map((post: Post) => (
-                      <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <PostCard 
-                          post={post}
-                        />
-                      </div>
+                      <PostCard 
+                        key={post.id}
+                        post={post}
+                      />
                     ))}
                   </div>
                 )}
@@ -636,13 +635,12 @@ export default function TopicFeed() {
                   </div>
                 ) : (
                   <div className="space-y-6 p-4">
-                    {/* User Posts - Modern Full-Width Layout */}
+                    {/* User Posts - Clean Layout */}
                     {userPosts.map((post: Post) => (
-                      <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <PostCard 
-                          post={post}
-                        />
-                      </div>
+                      <PostCard 
+                        key={post.id}
+                        post={post}
+                      />
                     ))}
                   </div>
                 )}

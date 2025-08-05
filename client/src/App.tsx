@@ -11,7 +11,7 @@ import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import Home from "@/pages/home";
 import Trending from "@/pages/trending";
 import Community from "@/pages/community";
-import TopicFeed from "@/pages/topic-feed";
+import TopicFeed from "@/pages/topic-feed-new";
 import DailySpill from "@/pages/daily-spill";
 import Profile from "@/pages/profile";
 import UserPosts from "@/pages/user-posts";
