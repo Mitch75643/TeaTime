@@ -56,12 +56,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BanTestingPanel } from "@/components/admin/ban-testing-panel";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
+  const [adminPasswordOpen, setAdminPasswordOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState("");
   const { profile, getCachedProfile, updateProfile } = useUserProfile();
   
   // Use cached profile data to prevent flashing - try multiple sources immediately
@@ -158,6 +163,43 @@ export default function Profile() {
     a.download = 'tfess-data.json';
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // Admin password verification
+  const handleAdminAccess = async () => {
+    try {
+      // Verify password server-side without exposing it
+      const response = await apiRequest("/api/admin/verify-password", {
+        method: "POST",
+        body: JSON.stringify({ password: adminPassword }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.success) {
+        // Password verified, redirect to admin page
+        setAdminPasswordOpen(false);
+        setAdminPassword("");
+        setAdminError("");
+        window.location.href = "/admin";
+      } else {
+        setAdminError("Access Denied – Please try again.");
+        setAdminPassword("");
+      }
+    } catch (error) {
+      setAdminError("Access Denied – Please try again.");
+      setAdminPassword("");
+    }
+  };
+
+  const handleAdminPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAdminPassword(e.target.value);
+    setAdminError(""); // Clear error when typing
+  };
+
+  const handleAdminKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleAdminAccess();
+    }
   };
 
   const deletePostMutation = useMutation({
@@ -677,10 +719,16 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-            {/* App Info */}
-            <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4">
+            {/* Hidden Admin Access - Only visible when scrolled to bottom */}
+            <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4 pb-2">
               <p>Tfess v1.0.0</p>
               <p>Made for anonymous sharing</p>
+              <button
+                onClick={() => setAdminPasswordOpen(true)}
+                className="mt-3 text-xs text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-200 opacity-50 hover:opacity-100"
+              >
+                🔒 Admin Only
+              </button>
             </div>
           </div>
         )}
@@ -695,6 +743,57 @@ export default function Profile() {
         currentAvatar={userAvatarId}
         onAvatarSelect={handleAvatarSelect}
       />
+
+      {/* Admin Password Modal */}
+      <Dialog open={adminPasswordOpen} onOpenChange={setAdminPasswordOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">Enter Admin Access Code</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin-password" className="sr-only">Admin Password</Label>
+              <Input
+                id="admin-password"
+                type="password"
+                placeholder="Admin access code"
+                value={adminPassword}
+                onChange={handleAdminPasswordChange}
+                onKeyPress={handleAdminKeyPress}
+                className="text-center"
+                autoFocus
+              />
+            </div>
+            {adminError && (
+              <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+                <AlertDescription className="text-red-800 dark:text-red-200 text-center">
+                  {adminError}
+                </AlertDescription>
+              </Alert>
+            )}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setAdminPasswordOpen(false);
+                  setAdminPassword("");
+                  setAdminError("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAdminAccess}
+                disabled={!adminPassword.trim()}
+                className="flex-1"
+              >
+                Access
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

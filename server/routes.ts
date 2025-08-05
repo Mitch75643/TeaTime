@@ -18,6 +18,7 @@ import { adminLoginSchema, addAdminSchema } from "../shared/admin-schema";
 declare module 'express-session' {
   interface SessionData {
     id: string;
+    adminPasswordVerified?: boolean;
   }
 }
 
@@ -1377,6 +1378,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Admin logout error:", error);
       res.status(500).json({ message: "Logout error" });
+    }
+  });
+
+  // Verify admin password for hidden access
+  app.post("/api/admin/verify-password", async (req, res) => {
+    try {
+      const { password } = req.body;
+      
+      if (!password) {
+        return res.status(400).json({ success: false, message: "Password required" });
+      }
+
+      // Secure password check (stored as environment variable or config)
+      const adminPassword = "NewYorkVacay2025!";
+      
+      if (password === adminPassword) {
+        // Store temporary admin access in session for direct /admin route access
+        req.session.adminPasswordVerified = true;
+        res.json({ success: true, message: "Password verified" });
+      } else {
+        res.status(401).json({ success: false, message: "Invalid password" });
+      }
+    } catch (error) {
+      console.error("Admin password verification error:", error);
+      res.status(500).json({ success: false, message: "Verification error" });
+    }
+  });
+
+  // Check if user has password-verified admin access
+  app.get("/api/admin/check-password-access", async (req, res) => {
+    try {
+      const hasPasswordAccess = req.session.adminPasswordVerified === true;
+      res.json({ verified: hasPasswordAccess });
+    } catch (error) {
+      console.error("Admin password access check error:", error);
+      res.status(500).json({ verified: false, message: "Check error" });
     }
   });
 

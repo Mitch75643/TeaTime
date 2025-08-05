@@ -15,7 +15,7 @@ import Profile from "@/pages/profile";
 import UserPosts from "@/pages/user-posts";
 import NotFound from "@/pages/not-found";
 import { AuthPage } from "@/pages/AuthPage";
-import AdminPage from "@/pages/AdminPage";
+import { SecureAdminRoute } from "@/components/admin/secure-admin-route";
 
 function Router() {
   return (
@@ -28,7 +28,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/user-posts" component={UserPosts} />
       <Route path="/auth" component={AuthPage} />
-      <Route path="/admin" component={AdminPage} />
+      <Route path="/admin" component={SecureAdminRoute} />
       <Route component={NotFound} />
     </Switch>
   );
