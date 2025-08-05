@@ -14,6 +14,7 @@ import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import { NotificationLink } from "@/components/ui/notification-link";
 import { useSmartFeed } from "@/hooks/use-smart-feed";
+import { useDailyPromptStreak } from "@/hooks/use-daily-prompt-streak";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
@@ -287,37 +288,42 @@ function CountdownTimer() {
 }
 
 function SpillStreak() {
-  const [streak, setStreak] = useState(3); // This would come from user data in real app
-  
-  const getStreakMessage = (days: number) => {
-    if (days === 0) return "Start your spill streak today!";
-    if (days < 3) return `${days}-day streak! Keep going!`;
-    if (days < 7) return `${days}-day streak! You're on fire! 🔥`;
-    if (days < 14) return `${days}-day streak! Legendary spiller! 👑`;
-    return (
-      <span className="flex items-center gap-1">
-        {days}-day streak! Tea master! 
-        <span className="inline-block" style={{ fontSize: '0.875rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
-        👑
-      </span>
-    );
-  };
+  const { streak, streakStatus, getStreakIcon, getStreakMessage, isLoading } = useDailyPromptStreak();
 
-  const getStreakIcon = (days: number) => {
-    if (days < 3) return <Star className="h-3 w-3" />;
-    if (days < 7) return <Flame className="h-3 w-3" />;
-    if (days < 14) return <Crown className="h-3 w-3" />;
-    return <Trophy className="h-3 w-3" />;
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-2 bg-white/10 rounded-md px-2 py-1">
+        <div className="w-3 h-3 bg-white/20 rounded animate-pulse"></div>
+        <span className="text-xs font-medium text-white">Loading streak...</span>
+      </div>
+    );
+  }
+
+  const currentStreak = streak?.currentStreak || 0;
+  const longestStreak = streak?.longestStreak || 0;
 
   return (
-    <div className="flex items-center space-x-2 bg-white/10 rounded-md px-2 py-1">
-      <div className="text-white">
-        {getStreakIcon(streak)}
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 bg-white/10 rounded-md px-2 py-1">
+          <div className="text-white text-sm">
+            {getStreakIcon(currentStreak)}
+          </div>
+          <span className="text-xs font-medium text-white">
+            {getStreakMessage(currentStreak)}
+          </span>
+        </div>
+        {longestStreak > currentStreak && (
+          <div className="text-xs text-white/70">
+            Best: {longestStreak} days
+          </div>
+        )}
       </div>
-      <span className="text-xs font-medium text-white">
-        {getStreakMessage(streak)}
-      </span>
+      {streakStatus.status === 'broken' && currentStreak === 0 && streak?.longestStreak && streak.longestStreak > 0 && (
+        <div className="text-xs text-white/80 bg-white/10 rounded px-2 py-1">
+          😢 You missed a day. Your streak has reset.
+        </div>
+      )}
     </div>
   );
 }

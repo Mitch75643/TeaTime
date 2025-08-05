@@ -283,6 +283,31 @@ export const storyPreferences = pgTable("story_preferences", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Daily Prompt Streak Tracking
+export const dailyPromptStreaks = pgTable("daily_prompt_streaks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull().unique(),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastSubmissionDate: varchar("last_submission_date"), // YYYY-MM-DD format for easy date comparison
+  lastPromptId: varchar("last_prompt_id"), // Track which prompt was last completed
+  submissionDates: text("submission_dates").array().default([]), // Array of YYYY-MM-DD dates for history
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Track individual daily prompt submissions for validation
+export const dailyPromptSubmissions = pgTable("daily_prompt_submissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull(),
+  postId: varchar("post_id").notNull().references(() => posts.id),
+  promptId: varchar("prompt_id").notNull(), // Reference to the daily prompt
+  promptContent: text("prompt_content").notNull(), // Store the actual prompt for validation
+  submissionDate: varchar("submission_date").notNull(), // YYYY-MM-DD format
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  isValid: boolean("is_valid").default(true), // Track if submission counts for streak
+});
+
 export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   category: true,
@@ -446,6 +471,45 @@ export const banDeviceSchema = z.object({
   expiresAt: z.date().optional(),
   deviceMetadata: z.object({}).optional().default({}),
 });
+
+// Daily Prompt Streak schemas
+export const insertDailyPromptStreakSchema = createInsertSchema(dailyPromptStreaks).pick({
+  sessionId: true,
+  currentStreak: true,
+  longestStreak: true,
+  lastSubmissionDate: true,
+  lastPromptId: true,
+  submissionDates: true,
+}).extend({
+  sessionId: z.string(),
+  currentStreak: z.number().min(0).optional().default(0),
+  longestStreak: z.number().min(0).optional().default(0),
+  lastSubmissionDate: z.string().optional(),
+  lastPromptId: z.string().optional(),
+  submissionDates: z.array(z.string()).optional().default([]),
+});
+
+export const insertDailyPromptSubmissionSchema = createInsertSchema(dailyPromptSubmissions).pick({
+  sessionId: true,
+  postId: true,
+  promptId: true,
+  promptContent: true,
+  submissionDate: true,
+  isValid: true,
+}).extend({
+  sessionId: z.string(),
+  postId: z.string(),
+  promptId: z.string(),
+  promptContent: z.string(),
+  submissionDate: z.string(), // YYYY-MM-DD format
+  isValid: z.boolean().optional().default(true),
+});
+
+// Types for streak tracking
+export type DailyPromptStreak = typeof dailyPromptStreaks.$inferSelect;
+export type InsertDailyPromptStreak = z.infer<typeof insertDailyPromptStreakSchema>;
+export type DailyPromptSubmission = typeof dailyPromptSubmissions.$inferSelect;
+export type InsertDailyPromptSubmission = z.infer<typeof insertDailyPromptSubmissionSchema>;
 
 export const checkBanSchema = z.object({
   deviceFingerprint: z.string(),

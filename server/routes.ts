@@ -157,14 +157,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const post = await storage.createPost(postData, alias, sessionId);
       
-      // Return post with moderation response for frontend handling
+      // Handle streak tracking for daily prompt submissions
+      let streakResult = null;
+      if (validatedData.category === 'daily' && postContext === 'daily') {
+        try {
+          // Get current daily prompt from auto-rotation service
+          const currentRotation = await memAutoRotationService.getCurrentRotationData();
+          const dailyPrompt = currentRotation.dailyPrompt;
+          
+          if (dailyPrompt) {
+            // Record streak and submission
+            const streakUpdate = await storage.createOrUpdateStreak(sessionId, dailyPrompt.id, dailyPrompt.content);
+            
+            // Update the submission with the actual post ID
+            if (streakUpdate.newSubmission) {
+              streakUpdate.newSubmission.postId = post.id;
+            }
+            
+            streakResult = {
+              streak: streakUpdate.streak,
+              streakBroken: streakUpdate.streakBroken,
+              message: streakUpdate.streakBroken 
+                ? "😢 You missed a day. Your streak has reset."
+                : streakUpdate.streak.currentStreak === 1 
+                  ? "🎉 Great start! Your daily streak begins!"
+                  : `🔥 Amazing! ${streakUpdate.streak.currentStreak} day streak!`
+            };
+          }
+        } catch (streakError) {
+          console.error("Failed to update streak:", streakError);
+          // Don't fail the post creation if streak update fails
+        }
+      }
+      
+      // Return post with moderation response and streak data for frontend handling
       const response = {
         ...post,
         moderationResponse: moderationResult.flagged ? {
           severityLevel: moderationResult.severityLevel,
           supportMessage: moderationResult.supportMessage,
           resources: moderationResult.resources
-        } : undefined
+        } : undefined,
+        streakResult
       };
       
       res.json(response);
@@ -966,6 +1000,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to get recommendation stats:", error);
       res.status(500).json({ message: "Failed to get recommendation stats" });
+    }
+  });
+
+  // Daily Prompt Streak Tracking Routes
+  
+  // Get user's current streak
+  app.get("/api/streaks/daily-prompt", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      const streak = await storage.getUserStreak(sessionId);
+      if (!streak) {
+        // Return default streak for new users
+        res.json({
+          currentStreak: 0,
+          longestStreak: 0,
+          lastSubmissionDate: null,
+          submissionDates: []
+        });
+      } else {
+        res.json(streak);
+      }
+    } catch (error) {
+      console.error("Failed to get user streak:", error);
+      res.status(500).json({ message: "Failed to get user streak" });
+    }
+  });
+
+  // Record daily prompt submission and update streak
+  app.post("/api/streaks/daily-prompt/submit", checkDeviceBanMiddleware, async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      const { promptId, promptContent, postId } = req.body;
+      if (!promptId || !promptContent) {
+        return res.status(400).json({ message: "Prompt ID and content required" });
+      }
+
+      // Validate submission
+      const today = new Date().toISOString().split('T')[0];
+      const validation = await storage.validateDailyPromptSubmission(sessionId, promptId, today);
+      
+      if (!validation.isValid) {
+        return res.status(400).json({ message: validation.reason });
+      }
+
+      // Update streak and record submission
+      const result = await storage.createOrUpdateStreak(sessionId, promptId, promptContent);
+      
+      // Update the submission with the actual post ID if provided
+      if (postId && result.newSubmission) {
+        result.newSubmission.postId = postId;
+      }
+
+      res.json({
+        streak: result.streak,
+        streakBroken: result.streakBroken,
+        message: result.streakBroken 
+          ? "😢 You missed a day. Your streak has reset."
+          : result.streak.currentStreak === 1 
+            ? "🎉 Great start! Your daily streak begins!"
+            : `🔥 Amazing! ${result.streak.currentStreak} day streak!`
+      });
+    } catch (error) {
+      console.error("Failed to update streak:", error);
+      res.status(500).json({ message: "Failed to update streak" });
+    }
+  });
+
+  // Get user's daily prompt submission history
+  app.get("/api/streaks/daily-prompt/submissions", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      const { limit = 30 } = req.query;
+      const submissions = await storage.getDailyPromptSubmissions(sessionId, Number(limit));
+      res.json(submissions);
+    } catch (error) {
+      console.error("Failed to get submissions:", error);
+      res.status(500).json({ message: "Failed to get submissions" });
     }
   });
 

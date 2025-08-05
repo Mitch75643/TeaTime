@@ -1,4 +1,4 @@
-import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard, type PushSubscription, type InsertPushSubscription, type PushNotificationLog } from "@shared/schema";
+import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard, type PushSubscription, type InsertPushSubscription, type PushNotificationLog, type DailyPromptStreak, type InsertDailyPromptStreak, type DailyPromptSubmission, type InsertDailyPromptSubmission } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { createHash } from "crypto";
 
@@ -91,6 +91,13 @@ export interface IStorage {
   getPushNotificationStats(sessionId?: string): Promise<{ totalSubscriptions: number; activeSubscriptions: number; sentNotifications: number; failedNotifications: number }>;
   cleanupOldPushSubscriptions(cutoffDate: Date): Promise<void>;
   cleanupOldPushNotificationLogs(cutoffDate: Date): Promise<void>;
+
+  // Daily Prompt Streak Tracking
+  getUserStreak(sessionId: string): Promise<DailyPromptStreak | undefined>;
+  createOrUpdateStreak(sessionId: string, promptId: string, promptContent: string): Promise<{ streak: DailyPromptStreak; streakBroken: boolean; newSubmission: DailyPromptSubmission }>;
+  recordDailyPromptSubmission(submission: InsertDailyPromptSubmission): Promise<DailyPromptSubmission>;
+  validateDailyPromptSubmission(sessionId: string, promptId: string, submissionDate: string): Promise<{ isValid: boolean; reason?: string }>;
+  getDailyPromptSubmissions(sessionId: string, limit?: number): Promise<DailyPromptSubmission[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -110,6 +117,8 @@ export class MemStorage implements IStorage {
   private leaderboards: Map<string, Leaderboard>;
   private pushSubscriptions: Map<string, any>;
   private pushNotificationLogs: Map<string, any>;
+  private dailyPromptStreaks: Map<string, DailyPromptStreak>;
+  private dailyPromptSubmissions: Map<string, DailyPromptSubmission>;
 
   constructor() {
     this.posts = new Map();
@@ -128,6 +137,8 @@ export class MemStorage implements IStorage {
     this.leaderboards = new Map();
     this.pushSubscriptions = new Map();
     this.pushNotificationLogs = new Map();
+    this.dailyPromptStreaks = new Map();
+    this.dailyPromptSubmissions = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -1171,6 +1182,126 @@ export class MemStorage implements IStorage {
     for (const id of toRemove) {
       this.pushNotificationLogs.delete(id);
     }
+  }
+
+  // Daily Prompt Streak Tracking Methods
+  async getUserStreak(sessionId: string): Promise<DailyPromptStreak | undefined> {
+    return Array.from(this.dailyPromptStreaks.values())
+      .find(streak => streak.sessionId === sessionId);
+  }
+
+  async createOrUpdateStreak(sessionId: string, promptId: string, promptContent: string): Promise<{ streak: DailyPromptStreak; streakBroken: boolean; newSubmission: DailyPromptSubmission }> {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Check if user already submitted for this prompt today
+    const existingSubmission = Array.from(this.dailyPromptSubmissions.values())
+      .find(sub => sub.sessionId === sessionId && sub.promptId === promptId && sub.submissionDate === today);
+    
+    if (existingSubmission) {
+      const streak = await this.getUserStreak(sessionId);
+      if (!streak) {
+        throw new Error('Streak not found');
+      }
+      return { streak, streakBroken: false, newSubmission: existingSubmission };
+    }
+
+    // Create submission record
+    const submissionId = randomUUID();
+    const newSubmission: DailyPromptSubmission = {
+      id: submissionId,
+      sessionId,
+      postId: '',
+      promptId,
+      promptContent,
+      submissionDate: today,
+      submittedAt: new Date(),
+      isValid: true,
+    };
+    this.dailyPromptSubmissions.set(submissionId, newSubmission);
+
+    // Get or create streak
+    let existingStreak = await this.getUserStreak(sessionId);
+    let streakBroken = false;
+
+    if (!existingStreak) {
+      // Create new streak
+      const streakId = randomUUID();
+      existingStreak = {
+        id: streakId,
+        sessionId,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastSubmissionDate: today,
+        lastPromptId: promptId,
+        submissionDates: [today],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.dailyPromptStreaks.set(streakId, existingStreak);
+    } else {
+      // Update existing streak
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      if (existingStreak.lastSubmissionDate === yesterdayStr) {
+        // Consecutive day - increment streak
+        existingStreak.currentStreak += 1;
+        existingStreak.longestStreak = Math.max(existingStreak.longestStreak, existingStreak.currentStreak);
+      } else if (existingStreak.lastSubmissionDate !== today) {
+        // Streak broken - reset to 1
+        existingStreak.currentStreak = 1;
+        streakBroken = true;
+      }
+
+      existingStreak.lastSubmissionDate = today;
+      existingStreak.lastPromptId = promptId;
+      existingStreak.submissionDates = [...(existingStreak.submissionDates || []), today]
+        .filter((date, index, arr) => arr.indexOf(date) === index) // Remove duplicates
+        .sort();
+      existingStreak.updatedAt = new Date();
+
+      this.dailyPromptStreaks.set(existingStreak.id, existingStreak);
+    }
+
+    return { streak: existingStreak, streakBroken, newSubmission };
+  }
+
+  async recordDailyPromptSubmission(submission: InsertDailyPromptSubmission): Promise<DailyPromptSubmission> {
+    const id = randomUUID();
+    const newSubmission: DailyPromptSubmission = {
+      ...submission,
+      id,
+      submittedAt: new Date(),
+    };
+    this.dailyPromptSubmissions.set(id, newSubmission);
+    return newSubmission;
+  }
+
+  async validateDailyPromptSubmission(sessionId: string, promptId: string, submissionDate: string): Promise<{ isValid: boolean; reason?: string }> {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Check if submission is for today
+    if (submissionDate !== today) {
+      return { isValid: false, reason: 'Submission must be for today' };
+    }
+
+    // Check if user already submitted for this prompt today
+    const existingSubmission = Array.from(this.dailyPromptSubmissions.values())
+      .find(sub => sub.sessionId === sessionId && sub.promptId === promptId && sub.submissionDate === submissionDate);
+    
+    if (existingSubmission) {
+      return { isValid: false, reason: 'Already submitted for this prompt today' };
+    }
+
+    return { isValid: true };
+  }
+
+  async getDailyPromptSubmissions(sessionId: string, limit = 30): Promise<DailyPromptSubmission[]> {
+    return Array.from(this.dailyPromptSubmissions.values())
+      .filter(sub => sub.sessionId === sessionId)
+      .sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime())
+      .slice(0, limit);
   }
 }
 
