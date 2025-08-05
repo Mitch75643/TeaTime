@@ -105,9 +105,14 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Ensure page content is always scrollable */
-.min-h-screen {
+/* Ensure page content is always scrollable but prevent modal overlay issues */
+.min-h-screen:not(.modal-overlay) {
   min-height: 120vh !important; /* Force content to be taller than viewport */
+}
+
+/* Prevent the black line issue in modals */
+.modal-overlay {
+  min-height: 100vh !important;
 }
 
 /* Make sure main content areas can scroll */
