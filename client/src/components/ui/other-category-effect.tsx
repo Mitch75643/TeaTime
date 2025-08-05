@@ -27,45 +27,44 @@ export function OtherCategoryEffect({ isVisible, onComplete }: OtherCategoryEffe
 
   const playOtherCategorySound = () => {
     try {
-      // Create audio context for pencil scribble sound
+      // Create audio context for peaceful sounds
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       
-      // Soft pencil scribble sound (0.3s)
-      const scribbleOscillator = audioContext.createOscillator();
-      const scribbleGain = audioContext.createGain();
+      // Soft wind chime sound (1.2s) - very gentle
+      const chime1 = audioContext.createOscillator();
+      const chime1Gain = audioContext.createGain();
       
-      scribbleOscillator.connect(scribbleGain);
-      scribbleGain.connect(audioContext.destination);
+      chime1.connect(chime1Gain);
+      chime1Gain.connect(audioContext.destination);
       
-      scribbleOscillator.type = 'sawtooth';
-      scribbleOscillator.frequency.setValueAtTime(80, audioContext.currentTime);
-      scribbleOscillator.frequency.exponentialRampToValueAtTime(120, audioContext.currentTime + 0.3);
+      chime1.type = 'sine';
+      chime1.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
       
-      scribbleGain.gain.setValueAtTime(0, audioContext.currentTime);
-      scribbleGain.gain.linearRampToValueAtTime(0.03, audioContext.currentTime + 0.05);
-      scribbleGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+      chime1Gain.gain.setValueAtTime(0, audioContext.currentTime);
+      chime1Gain.gain.linearRampToValueAtTime(0.015, audioContext.currentTime + 0.1);
+      chime1Gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.2);
       
-      scribbleOscillator.start(audioContext.currentTime);
-      scribbleOscillator.stop(audioContext.currentTime + 0.3);
+      chime1.start(audioContext.currentTime);
+      chime1.stop(audioContext.currentTime + 1.2);
       
-      // Gentle chime sound (0.8s) - starts after scribble
+      // Second gentle chime (slightly higher) after 0.3s
       setTimeout(() => {
-        const chimeOscillator = audioContext.createOscillator();
-        const chimeGain = audioContext.createGain();
+        const chime2 = audioContext.createOscillator();
+        const chime2Gain = audioContext.createGain();
         
-        chimeOscillator.connect(chimeGain);
-        chimeGain.connect(audioContext.destination);
+        chime2.connect(chime2Gain);
+        chime2Gain.connect(audioContext.destination);
         
-        chimeOscillator.type = 'sine';
-        chimeOscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+        chime2.type = 'sine';
+        chime2.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5
         
-        chimeGain.gain.setValueAtTime(0, audioContext.currentTime);
-        chimeGain.gain.linearRampToValueAtTime(0.04, audioContext.currentTime + 0.1);
-        chimeGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.8);
+        chime2Gain.gain.setValueAtTime(0, audioContext.currentTime);
+        chime2Gain.gain.linearRampToValueAtTime(0.012, audioContext.currentTime + 0.08);
+        chime2Gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.9);
         
-        chimeOscillator.start(audioContext.currentTime);
-        chimeOscillator.stop(audioContext.currentTime + 0.8);
-      }, 400);
+        chime2.start(audioContext.currentTime);
+        chime2.stop(audioContext.currentTime + 0.9);
+      }, 300);
       
     } catch (error) {
       console.log("Audio not supported in this browser");
