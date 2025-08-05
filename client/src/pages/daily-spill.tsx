@@ -17,56 +17,109 @@ import { useSmartFeed } from "@/hooks/use-smart-feed";
 import { cn } from "@/lib/utils";
 import type { Post } from "@shared/schema";
 
-const WEEKLY_THEMES = [
-  { 
-    name: "Love Week", 
+// Enhanced weekly theme configuration with proper color mappings
+const WEEKLY_THEMES_CONFIG = {
+  "Love Week": { 
     emoji: "💖", 
-    color: "from-red-500 to-pink-500",
-    description: "Share your romantic wins, fails, and everything in between" 
+    color: "from-pink-500 to-rose-500",
+    textColor: "text-pink-100",
+    borderColor: "border-pink-300",
+    bgColor: "bg-pink-50",
+    darkBgColor: "dark:bg-pink-900/20",
+    description: "Share your romantic wins, fails, and everything in between",
+    animation: "hearts"
   },
-  { 
-    name: "Rant Week", 
+  "Drama Week": { 
+    emoji: "🎭", 
+    color: "from-red-600 to-red-800",
+    textColor: "text-red-100",
+    borderColor: "border-red-300",
+    bgColor: "bg-red-50",
+    darkBgColor: "dark:bg-red-900/20",
+    description: "Share the juiciest drama and messy situations",
+    animation: "spotlight"
+  },
+  "Mystery Week": { 
+    emoji: "🔍", 
+    color: "from-gray-700 to-slate-800",
+    textColor: "text-gray-100",
+    borderColor: "border-gray-400",
+    bgColor: "bg-gray-50",
+    darkBgColor: "dark:bg-gray-900/20",
+    description: "Uncover secrets and mysterious happenings",
+    animation: "smoke"
+  },
+  "Fun Week": { 
+    emoji: "🎉", 
+    color: "from-yellow-400 to-yellow-600",
+    textColor: "text-yellow-900",
+    borderColor: "border-yellow-300",
+    bgColor: "bg-yellow-50",
+    darkBgColor: "dark:bg-yellow-900/20",
+    description: "Share your most entertaining and funny moments",
+    animation: "confetti"
+  },
+  "Rant Week": { 
     emoji: "😡", 
     color: "from-red-600 to-red-700",
-    description: "Let it all out - what's been bothering you lately?" 
+    textColor: "text-red-100",
+    borderColor: "border-red-300",
+    bgColor: "bg-red-50",
+    darkBgColor: "dark:bg-red-900/20",
+    description: "Let it all out - what's been bothering you lately?",
+    animation: "lightning"
   },
-  { 
-    name: "Roast Week", 
+  "Roast Week": { 
     emoji: "😂", 
-    color: "from-yellow-500 to-orange-500",
-    description: "Time to spill the tea and serve some friendly roasts" 
+    color: "from-orange-500 to-yellow-500",
+    textColor: "text-orange-100",
+    borderColor: "border-orange-300",
+    bgColor: "bg-orange-50",
+    darkBgColor: "dark:bg-orange-900/20",
+    description: "Time to spill the tea and serve some friendly roasts",
+    animation: "tea_splash"
   },
-  { 
-    name: "Unpopular Opinions", 
+  "Unpopular Opinions": { 
     emoji: "🤯", 
     color: "from-purple-600 to-violet-600",
-    description: "Share those thoughts everyone disagrees with" 
+    textColor: "text-purple-100",
+    borderColor: "border-purple-300",
+    bgColor: "bg-purple-50",
+    darkBgColor: "dark:bg-purple-900/20",
+    description: "Share those thoughts everyone disagrees with",
+    animation: "bubble_pop"
   },
-  { 
-    name: "Chaos Week", 
+  "Chaos Week": { 
     emoji: "🌪️", 
     color: "from-green-500 to-teal-500",
-    description: "When life gets messy - share your chaotic moments" 
+    textColor: "text-green-100",
+    borderColor: "border-green-300",
+    bgColor: "bg-green-50",
+    darkBgColor: "dark:bg-green-900/20",
+    description: "When life gets messy - share your chaotic moments",
+    animation: "chaos_swirl"
   },
-  { 
-    name: "Money Week", 
+  "Money Week": { 
     emoji: "💰", 
     color: "from-green-600 to-emerald-600",
-    description: "Spill the tea about money, work, and financial drama" 
+    textColor: "text-green-100",
+    borderColor: "border-green-300",
+    bgColor: "bg-green-50",
+    darkBgColor: "dark:bg-green-900/20",
+    description: "Spill the tea about money, work, and financial drama",
+    animation: "money_rain"
   },
-  { 
-    name: "Drama Week", 
-    emoji: "🎭", 
-    color: "from-purple-500 to-fuchsia-500",
-    description: "Share the juiciest drama and messy situations" 
-  },
-  { 
-    name: "Self-Care Week", 
+  "Self-Care Week": { 
     emoji: "🧘‍♀️", 
     color: "from-blue-400 to-cyan-400",
-    description: "Focus on wellness, mental health, and taking care of yourself" 
+    textColor: "text-blue-100",
+    borderColor: "border-blue-300",
+    bgColor: "bg-blue-50",
+    darkBgColor: "dark:bg-blue-900/20",
+    description: "Focus on wellness, mental health, and taking care of yourself",
+    animation: "zen_ripples"
   }
-];
+};
 
 const THEMED_PROMPTS: Record<string, string[]> = {
   "Love Week": [
@@ -129,19 +182,63 @@ const DAILY_PROMPTS = [
   "What's something you did that you're secretly proud of?",
 ];
 
-function getCurrentWeekTheme() {
-  const today = new Date();
-  const weekOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24 * 7));
-  return WEEKLY_THEMES[weekOfYear % WEEKLY_THEMES.length];
+// Hook to get current weekly theme from server
+function useCurrentWeeklyTheme() {
+  const { data: themeData } = useQuery({
+    queryKey: ["/api/rotation/current"],
+    queryFn: async () => {
+      const response = await fetch("/api/rotation/current");
+      if (!response.ok) throw new Error("Failed to fetch current theme");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+  });
+
+  // Find the active weekly theme from rotation data
+  const activeTheme = themeData?.weeklyThemes?.find((theme: any) => theme.isActive);
+  
+  // Get theme configuration or fallback to Drama Week
+  const themeName = activeTheme?.name || "Drama Week";
+  const themeConfig = WEEKLY_THEMES_CONFIG[themeName as keyof typeof WEEKLY_THEMES_CONFIG] || WEEKLY_THEMES_CONFIG["Drama Week"];
+  
+  return {
+    name: themeName,
+    emoji: themeConfig.emoji,
+    color: themeConfig.color,
+    textColor: themeConfig.textColor,
+    borderColor: themeConfig.borderColor,
+    bgColor: themeConfig.bgColor,
+    darkBgColor: themeConfig.darkBgColor,
+    description: themeConfig.description,
+    animation: themeConfig.animation
+  };
 }
 
-function getDailyPrompt() {
+// Hook to get current daily prompt from server
+function useCurrentDailyPrompt(themeName: string) {
+  const { data: rotationData } = useQuery({
+    queryKey: ["/api/rotation/current"],
+    queryFn: async () => {
+      const response = await fetch("/api/rotation/current");
+      if (!response.ok) throw new Error("Failed to fetch current content");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Get current daily prompt from rotation service or fallback to themed prompts
+  const serverPrompt = rotationData?.dailyPrompts?.find((prompt: any) => prompt.isActive)?.content;
+  
+  if (serverPrompt) {
+    return serverPrompt;
+  }
+
+  // Fallback to themed prompts
   const today = new Date();
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-  const currentTheme = getCurrentWeekTheme();
+  const themedPrompts = THEMED_PROMPTS[themeName];
   
-  // Use themed prompts if available, otherwise fall back to general prompts
-  const themedPrompts = THEMED_PROMPTS[currentTheme.name];
   if (themedPrompts) {
     return themedPrompts[dayOfYear % themedPrompts.length];
   }
@@ -254,9 +351,9 @@ export default function DailySpill() {
   const [hasSpilledToday, setHasSpilledToday] = useState(false); // Would track user's daily participation
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const queryClient = useQueryClient();
-  const todayPrompt = getDailyPrompt();
   const dateString = getDateString();
-  const currentTheme = getCurrentWeekTheme();
+  const currentTheme = useCurrentWeeklyTheme();
+  const todayPrompt = useCurrentDailyPrompt(currentTheme.name);
   
   // Weekly theme animation hook
   const { animation, triggerAnimation, completeAnimation } = useWeeklyThemeAnimation();
@@ -289,7 +386,7 @@ export default function DailySpill() {
     setShowSuccessMessage(true);
     
     // Trigger weekly theme animation
-    triggerAnimation(currentTheme.name);
+    triggerAnimation(currentTheme.animation);
     
     // Refresh the posts feed to show new post immediately
     queryClient.invalidateQueries({ queryKey: ["/api/posts", "daily", "new"] });
@@ -350,7 +447,7 @@ export default function DailySpill() {
 
       {/* Daily Prompt Card */}
       <div className="px-4 pt-4 pb-4">
-        <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 relative overflow-hidden">
+        <Card className={cn("text-white border-0 relative overflow-hidden bg-gradient-to-br", currentTheme.color)}>
           {spillOfTheDay && (
             <div className="absolute top-2 right-2">
               <Badge className="bg-yellow-400 text-yellow-900 border-0 text-xs font-bold">
@@ -380,7 +477,7 @@ export default function DailySpill() {
             </p>
             <Button
               onClick={() => setIsPostModalOpen(true)}
-              className="w-full bg-white text-red-600 hover:bg-gray-100 font-semibold shadow-sm mb-3"
+              className={cn("w-full font-semibold shadow-sm mb-3 text-gray-900 bg-white/90 hover:bg-white")}
             >
               <Plus className="h-4 w-4 mr-2" />
               Spill Your Tea

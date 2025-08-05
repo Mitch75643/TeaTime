@@ -8,52 +8,47 @@ interface WeeklyThemeAnimationProps {
   theme: string;
 }
 
-// Weekly theme configuration for easy updates
+// Enhanced theme configuration matching Daily Spill themes
 const THEME_CONFIG = {
-  "Love Week": {
-    colors: ["#FF7A00", "#FFD8B2", "#CC6200"],
+  "hearts": {
+    colors: ["#ec4899", "#f43f5e", "#be185d"],
     sound: "romantic-chime"
   },
-  "Pet Peeves Week": {
-    colors: ["#ff4500", "#ff6347", "#ffa500"],
-    sound: "grumble"
-  },
-  "Cringe/Funny Week": {
-    colors: ["#ffd700", "#ffff00", "#FF7A00"],
-    sound: "giggle"
-  },
-  "Secrets Week": {
-    colors: ["#FF7A00", "#CC6200", "#3C2E20"],
-    sound: "whisper"
-  },
-  "Embarrassing Moments Week": {
-    colors: ["#FF7A00", "#FFD8B2", "#FFE5D1"],
-    sound: "gasp"
-  },
-  "Drama Week": {
-    colors: ["#FF7A00", "#CC6200", "#FFD8B2"],
+  "spotlight": {
+    colors: ["#dc2626", "#b91c1c", "#991b1b"],
     sound: "dramatic-sting"
   },
-  "Self-Care Week": {
-    colors: ["#FF7A00", "#FFD8B2", "#FFE5D1"],
-    sound: "spa-chime"
+  "smoke": {
+    colors: ["#374151", "#1f2937", "#111827"],
+    sound: "whisper"
   },
-  // Existing themes
-  "Rant Week": {
-    colors: ["#FF7A00", "#CC6200", "#FFD8B2"],
-    sound: "grumble"
-  },
-  "Roast Week": {
-    colors: ["#FF7A00", "#FFD8B2", "#FFE5D1"],
+  "confetti": {
+    colors: ["#eab308", "#ca8a04", "#a16207"],
     sound: "giggle"
   },
-  "Unpopular Opinions": {
-    colors: ["#FF7A00", "#CC6200", "#3C2E20"],
+  "lightning": {
+    colors: ["#dc2626", "#b91c1c", "#991b1b"],
+    sound: "grumble"
+  },
+  "tea_splash": {
+    colors: ["#f97316", "#ea580c", "#c2410c"],
+    sound: "giggle"
+  },
+  "bubble_pop": {
+    colors: ["#9333ea", "#7c3aed", "#6d28d9"],
     sound: "bubble-pop"
   },
-  "Chaos Week": {
-    colors: ["#32cd32", "#20b2aa", "#00ced1"],
+  "chaos_swirl": {
+    colors: ["#059669", "#047857", "#065f46"],
     sound: "chaos-swirl"
+  },
+  "money_rain": {
+    colors: ["#059669", "#047857", "#065f46"],
+    sound: "cha-ching"
+  },
+  "zen_ripples": {
+    colors: ["#0ea5e9", "#0284c7", "#0369a1"],
+    sound: "spa-chime"
   }
 };
 
@@ -217,6 +212,26 @@ const playThemeSound = (theme: string) => {
         zapOsc.stop(audioContext.currentTime + 0.1);
         break;
         
+      case "cha-ching":
+        // Money sound for Money Week
+        const moneyOsc1 = audioContext.createOscillator();
+        const moneyOsc2 = audioContext.createOscillator();
+        const moneyGain = audioContext.createGain();
+        moneyOsc1.connect(moneyGain);
+        moneyOsc2.connect(moneyGain);
+        moneyGain.connect(audioContext.destination);
+        moneyOsc1.type = "sine";
+        moneyOsc2.type = "sine";
+        moneyOsc1.frequency.setValueAtTime(659, audioContext.currentTime); // E5
+        moneyOsc2.frequency.setValueAtTime(784, audioContext.currentTime); // G5
+        moneyGain.gain.setValueAtTime(0.08, audioContext.currentTime);
+        moneyGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        moneyOsc1.start(audioContext.currentTime);
+        moneyOsc2.start(audioContext.currentTime);
+        moneyOsc1.stop(audioContext.currentTime + 0.4);
+        moneyOsc2.stop(audioContext.currentTime + 0.4);
+        break;
+        
       default:
         // Default gentle water droplet (from celebration animations)
         const defaultOsc = audioContext.createOscillator();
@@ -254,13 +269,13 @@ export function WeeklyThemeAnimation({ isVisible, onComplete, theme }: WeeklyThe
     }
   }, [isVisible, theme, onComplete]);
 
-  const renderLoveWeekAnimation = () => (
+  const renderHeartsAnimation = () => (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
       {/* Floating Hearts */}
-      {[...Array(8)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute text-orange-500"
+          className="absolute text-pink-500"
           initial={{ 
             scale: 0,
             x: 0,
@@ -270,18 +285,18 @@ export function WeeklyThemeAnimation({ isVisible, onComplete, theme }: WeeklyThe
           }}
           animate={{
             scale: [0, 1.2, 0.8],
-            x: (Math.random() - 0.5) * 200,
-            y: -150 - Math.random() * 100,
+            x: (Math.random() - 0.5) * 300,
+            y: -200 - Math.random() * 150,
             opacity: [1, 1, 0],
             rotate: [0, 360]
           }}
           transition={{
-            duration: 1.5,
-            delay: i * 0.1,
+            duration: 2,
+            delay: i * 0.08,
             ease: "easeOut"
           }}
         >
-          <Heart className="h-6 w-6 fill-current" />
+          <Heart className="h-8 w-8 fill-current" />
         </motion.div>
       ))}
       
@@ -297,41 +312,53 @@ export function WeeklyThemeAnimation({ isVisible, onComplete, theme }: WeeklyThe
     </div>
   );
 
-  const renderRantWeekAnimation = () => (
+  const renderSpotlightAnimation = () => (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
-      {/* Lightning Bolts */}
-      {[...Array(6)].map((_, i) => (
+      {/* Dramatic Spotlight Burst */}
+      <motion.div
+        className="absolute w-96 h-96 rounded-full bg-gradient-radial from-red-400/30 via-red-500/20 to-transparent"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ 
+          scale: [0, 3, 2.5], 
+          opacity: [0, 0.8, 0],
+          rotate: [0, 180]
+        }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+      />
+      
+      {/* Red Confetti Burst */}
+      {[...Array(16)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute text-red-500"
+          className="absolute w-3 h-3 bg-red-500 rounded-sm"
           initial={{ 
             scale: 0,
-            x: Math.cos(i * 60 * Math.PI / 180) * 80,
-            y: Math.sin(i * 60 * Math.PI / 180) * 80,
-            opacity: 0
+            x: 0,
+            y: 0,
+            rotate: 0
           }}
           animate={{
-            scale: [0, 1.5, 0],
-            opacity: [0, 1, 0]
+            scale: [0, 1, 0],
+            x: Math.cos(i * 22.5 * Math.PI / 180) * 150,
+            y: Math.sin(i * 22.5 * Math.PI / 180) * 150,
+            rotate: [0, 360]
           }}
           transition={{
-            duration: 0.6,
-            delay: i * 0.05,
+            duration: 1.2,
+            delay: i * 0.02,
             ease: "easeOut"
           }}
-        >
-          <Zap className="h-8 w-8 fill-current" />
-        </motion.div>
+        />
       ))}
       
-      {/* Central Rant Message */}
+      {/* Central Drama Message */}
       <motion.div
-        className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-3 rounded-full shadow-lg"
+        className="bg-gradient-to-r from-red-600 to-red-800 text-white px-6 py-3 rounded-full shadow-lg z-10"
         initial={{ scale: 0 }}
         animate={{ scale: [0, 1.2, 1] }}
-        transition={{ duration: 0.8, ease: "backOut" }}
+        transition={{ duration: 0.8, delay: 0.3, ease: "backOut" }}
       >
-        <span className="text-sm font-medium">😡 Let it all out!</span>
+        <span className="text-sm font-medium">🎭 Drama time!</span>
       </motion.div>
     </div>
   );
@@ -481,12 +508,235 @@ export function WeeklyThemeAnimation({ isVisible, onComplete, theme }: WeeklyThe
     </div>
   );
 
+  const renderSmokeAnimation = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Mysterious Smoke Effect */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-12 h-12 bg-gray-600 rounded-full opacity-30"
+          initial={{ 
+            scale: 0.5,
+            x: 0,
+            y: 0,
+            opacity: 0.6
+          }}
+          animate={{
+            scale: [0.5, 2, 1.5],
+            x: (Math.random() - 0.5) * 200,
+            y: -100 - Math.random() * 80,
+            opacity: [0.6, 0.3, 0]
+          }}
+          transition={{
+            duration: 2.5,
+            delay: i * 0.15,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+      
+      {/* Central Mystery Message */}
+      <motion.div
+        className="bg-gradient-to-r from-gray-700 to-slate-800 text-white px-6 py-3 rounded-full shadow-lg"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.1, 1], opacity: [0, 1, 1] }}
+        transition={{ duration: 0.8, ease: "backOut" }}
+      >
+        <span className="text-sm font-medium">🔍 The mystery unfolds...</span>
+      </motion.div>
+    </div>
+  );
+
+  const renderConfettiAnimation = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Colorful Confetti */}
+      {[...Array(20)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-3 h-3 bg-yellow-400 rounded-sm"
+          style={{
+            backgroundColor: ['#eab308', '#f59e0b', '#d97706', '#dc2626', '#ec4899'][i % 5]
+          }}
+          initial={{ 
+            scale: 0,
+            x: 0,
+            y: -50,
+            rotate: 0
+          }}
+          animate={{
+            scale: [0, 1, 0.8],
+            x: (Math.random() - 0.5) * 400,
+            y: 200 + Math.random() * 100,
+            rotate: [0, 360 * 3]
+          }}
+          transition={{
+            duration: 2,
+            delay: i * 0.05,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+      
+      {/* Central Fun Message */}
+      <motion.div
+        className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-900 px-6 py-3 rounded-full shadow-lg font-bold"
+        initial={{ scale: 0 }}
+        animate={{ scale: [0, 1.2, 1] }}
+        transition={{ duration: 0.8, ease: "backOut" }}
+      >
+        <span className="text-sm font-medium">🎉 Let's have some fun!</span>
+      </motion.div>
+    </div>
+  );
+
+  const renderLightningAnimation = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Lightning Bolts */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-red-500"
+          initial={{ 
+            scale: 0,
+            x: Math.cos(i * 45 * Math.PI / 180) * 100,
+            y: Math.sin(i * 45 * Math.PI / 180) * 100,
+            opacity: 0
+          }}
+          animate={{
+            scale: [0, 1.8, 0],
+            opacity: [0, 1, 0]
+          }}
+          transition={{
+            duration: 0.8,
+            delay: i * 0.05,
+            ease: "easeOut"
+          }}
+        >
+          <Zap className="h-8 w-8 fill-current" />
+        </motion.div>
+      ))}
+      
+      {/* Central Rant Message */}
+      <motion.div
+        className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-full shadow-lg"
+        initial={{ scale: 0 }}
+        animate={{ scale: [0, 1.2, 1] }}
+        transition={{ duration: 0.8, ease: "backOut" }}
+      >
+        <span className="text-sm font-medium">😡 Let it all out!</span>
+      </motion.div>
+    </div>
+  );
+
+  const renderMoneyRainAnimation = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Money Rain */}
+      {[...Array(15)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-2xl"
+          initial={{ 
+            x: (Math.random() - 0.5) * 300,
+            y: -100,
+            rotate: 0
+          }}
+          animate={{
+            y: window.innerHeight + 100,
+            rotate: [0, 360],
+            x: (Math.random() - 0.5) * 350
+          }}
+          transition={{
+            duration: 2 + Math.random(),
+            delay: i * 0.1,
+            ease: "linear"
+          }}
+        >
+          💰
+        </motion.div>
+      ))}
+      
+      {/* Central Money Message */}
+      <motion.div
+        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-full shadow-lg"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.1, 1], opacity: [0, 1, 1] }}
+        transition={{ duration: 0.8, ease: "backOut" }}
+      >
+        <span className="text-sm font-medium">💰 Money talks!</span>
+      </motion.div>
+    </div>
+  );
+
+  const renderZenRipplesAnimation = () => (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Zen Ripples */}
+      {[...Array(5)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute border-2 border-blue-400/30 rounded-full"
+          initial={{ 
+            width: 20,
+            height: 20,
+            opacity: 0.8
+          }}
+          animate={{
+            width: 300 + i * 50,
+            height: 300 + i * 50,
+            opacity: 0
+          }}
+          transition={{
+            duration: 2.5,
+            delay: i * 0.3,
+            ease: "easeOut"
+          }}
+        />
+      ))}
+      
+      {/* Central Zen Message */}
+      <motion.div
+        className="bg-gradient-to-r from-blue-400 to-cyan-400 text-white px-6 py-3 rounded-full shadow-lg"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.1, 1], opacity: [0, 1, 1] }}
+        transition={{ duration: 0.8, ease: "backOut" }}
+      >
+        <span className="text-sm font-medium">🧘‍♀️ Find your peace</span>
+      </motion.div>
+    </div>
+  );
+
   const getThemeAnimation = () => {
     switch (theme.toLowerCase()) {
+      case "hearts":
+        return renderHeartsAnimation();
+      case "spotlight":
+        return renderSpotlightAnimation();
+      case "smoke":
+        return renderSmokeAnimation();
+      case "confetti":
+        return renderConfettiAnimation();
+      case "lightning":
+        return renderLightningAnimation();
+      case "tea_splash":
+        return renderRoastWeekAnimation();
+      case "bubble_pop":
+        return renderUnpopularOpinionsAnimation();
+      case "chaos_swirl":
+        return renderChaosWeekAnimation();
+      case "money_rain":
+        return renderMoneyRainAnimation();
+      case "zen_ripples":
+        return renderZenRipplesAnimation();
+      // Legacy theme names for backward compatibility
       case "love week":
-        return renderLoveWeekAnimation();
+        return renderHeartsAnimation();
+      case "drama week":
+        return renderSpotlightAnimation();
+      case "mystery week":
+        return renderSmokeAnimation();
+      case "fun week":
+        return renderConfettiAnimation();
       case "rant week":
-        return renderRantWeekAnimation();
+        return renderLightningAnimation();
       case "roast week":
         return renderRoastWeekAnimation();
       case "unpopular opinions":
@@ -494,7 +744,7 @@ export function WeeklyThemeAnimation({ isVisible, onComplete, theme }: WeeklyThe
       case "chaos week":
         return renderChaosWeekAnimation();
       default:
-        return renderLoveWeekAnimation(); // Fallback
+        return renderConfettiAnimation(); // Default fun fallback
     }
   };
 
