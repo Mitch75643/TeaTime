@@ -139,38 +139,51 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     setState(prev => ({ ...prev, isRefreshing: true }));
 
     try {
-      // Clear displayed post IDs to get completely fresh content
+      console.log('Smart Feed: Starting refresh...');
+      
+      // Clear displayed post IDs completely to force fresh fetch
       setDisplayedPostIds([]);
       
-      // Clear all related queries and force fresh fetch
+      // Clear all cached queries 
       await queryClient.removeQueries({ 
-        queryKey: [...queryKey, "smartfeed"],
+        queryKey: [...queryKey],
         exact: false 
       });
       
-      // Force immediate refetch with fresh data
-      console.log('Smart Feed: Starting refresh...');
-      const freshData = await refetch();
-      console.log('Smart Feed: Fresh data received:', freshData.data);
+      // Force a completely fresh API call with no exclusions
+      const params = buildApiParams([]);
+      const response = await fetch(`${apiEndpoint}?${params}`);
+      if (!response.ok) throw new Error("Failed to refresh posts");
       
+      const freshData = await response.json();
+      console.log('Smart Feed: Fresh data received from API:', freshData);
+      
+      const newPosts = enableSmartLogic && freshData.posts ? freshData.posts : freshData;
+      const newPostIds = (newPosts || []).map((post: any) => post.id);
+      
+      // Update state with fresh data
       setState(prev => {
         const newState = {
           ...prev,
+          posts: newPosts || [],
+          hasMorePosts: enableSmartLogic ? (freshData.hasMorePosts || false) : false,
           newPostsCount: 0,
           isRefreshing: false,
-          posts: freshData.data?.posts || [],
-          hasMorePosts: freshData.data?.hasMorePosts || false,
           nextRefreshAvailable: false,
+          lastRefreshTime: new Date(),
         };
         console.log('Smart Feed: Updated state after refresh:', newState);
         return newState;
       });
       
+      // Update displayed post IDs
+      setDisplayedPostIds(newPostIds);
+      
     } catch (error) {
       console.error("Failed to refresh feed:", error);
       setState(prev => ({ ...prev, isRefreshing: false }));
     }
-  }, [state.isRefreshing, queryClient, queryKey, refetch]);
+  }, [state.isRefreshing, queryClient, queryKey, apiEndpoint, enableSmartLogic, buildApiParams]);
 
   // Load more posts function
   const handleLoadMore = useCallback(async () => {

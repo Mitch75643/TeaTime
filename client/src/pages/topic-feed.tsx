@@ -154,10 +154,10 @@ export default function TopicFeed() {
         // Check if the post belongs to current topic
         const messageData = message.data;
         if (messageData?.communitySection === topicId || messageData?.postContext === 'community') {
-          // Invalidate community and user post queries to refresh with new post
-          queryClient.invalidateQueries({ queryKey: ['/api/posts/community', topicId] });
-          queryClient.invalidateQueries({ queryKey: ['/api/posts/user', topicId] });
-          queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+          console.log('Topic Feed: New post relevant to topic:', topicId, messageData);
+          // Force refresh for both community and user posts
+          queryClient.refetchQueries({ queryKey: ['/api/posts/user', topicId] });
+          queryClient.refetchQueries({ queryKey: ['/api/posts'] });
         }
       }
     });
@@ -204,9 +204,29 @@ export default function TopicFeed() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
-    await queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
+    console.log('Topic Feed: Starting manual refresh for topic:', topicId);
+    
+    try {
+      // Clear all cached queries and force fresh fetch
+      await queryClient.removeQueries({ 
+        queryKey: ['/api/posts'],
+        exact: false 
+      });
+      
+      // Use smart feed refresh for community posts
+      await smartFeed.handleRefresh();
+      
+      // Force fresh fetch for user posts
+      await queryClient.refetchQueries({ 
+        queryKey: ['/api/posts/user', topicId, sortBy, storyCategory, hotTopicFilter],
+        exact: true 
+      });
+      
+      console.log('Topic Feed: Manual refresh completed');
+    } catch (error) {
+      console.error('Topic Feed: Failed to refresh:', error);
+    }
+    
     setIsRefreshing(false);
   };
 
