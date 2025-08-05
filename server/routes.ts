@@ -1478,6 +1478,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Temporary route to add specific fingerprint to admin system
+  app.post("/api/admin/add-user-fingerprint", async (req, res) => {
+    try {
+      const userFingerprint = "5ae3b0a995c35312b63f31520ebab6db";
+      const userEmail = "fertez@gmail.com";
+      
+      console.log('[Admin System] Adding user fingerprint to admin system...');
+      
+      // Add user fingerprint if it doesn't exist
+      const existingFingerprint = await storage.getAdminFingerprint(userFingerprint);
+      if (!existingFingerprint) {
+        await storage.createAdminFingerprint({
+          fingerprint: userFingerprint,
+          fingerprintLabel: 'User Main Device',
+          addedBy: 'system',
+          isActive: true
+        });
+        console.log('[Admin System] User fingerprint added');
+      }
+
+      // Add user email if it doesn't exist
+      const existingEmail = await storage.getAdminEmail(userEmail, userFingerprint);
+      if (!existingEmail) {
+        await storage.createAdminEmail({
+          email: userEmail,
+          fingerprint: userFingerprint,
+          role: 'root_host',
+          addedBy: 'system',
+          isActive: true
+        });
+        console.log('[Admin System] User email added');
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "User fingerprint added to admin system successfully." 
+      });
+    } catch (error) {
+      console.error("Add user fingerprint error:", error);
+      res.status(500).json({ message: "Failed to add user fingerprint" });
+    }
+  });
+
   // Add test routes for development
   if (process.env.NODE_ENV === 'development') {
     addTestRoute(app);
