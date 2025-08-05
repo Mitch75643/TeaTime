@@ -104,10 +104,13 @@ export function AdminPanel() {
 
   const executeAddAdmin = async () => {
     try {
+      console.log('Adding admin with data:', { ...newAdminData, password: '[HIDDEN]' });
       const result = await addAdmin({
         ...newAdminData,
         password: managementPassword
       });
+      
+      console.log('Add admin result:', result);
       
       if (result.success) {
         toast({
@@ -128,6 +131,7 @@ export function AdminPanel() {
         setPasswordError(result.message || 'Failed to add admin');
       }
     } catch (err: any) {
+      console.error('Add admin error:', err);
       setPasswordError(err.message || 'Failed to add admin');
     }
   };
@@ -214,13 +218,22 @@ export function AdminPanel() {
               <Shield className="w-5 h-5" />
               Current Admins ({adminList.length})
             </span>
-            <Button
-              onClick={() => setShowAddForm(!showAddForm)}
-              disabled={isAddingAdmin}
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add Admin
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.reload()}
+              >
+                Refresh List
+              </Button>
+              <Button
+                onClick={() => setShowAddForm(!showAddForm)}
+                disabled={isAddingAdmin}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add Admin
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         

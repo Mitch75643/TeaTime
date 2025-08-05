@@ -86,18 +86,24 @@ export function useAdminManagement() {
     }) => {
       return apiRequest('POST', '/api/admin/manage/add', adminData);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Admin add success, invalidating cache:', data);
+      // Force invalidate and refetch the admin list
       queryClient.invalidateQueries({ queryKey: ['/api/admin/manage/list'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/manage/list'] });
     },
   });
 
   // Remove admin
   const removeAdminMutation = useMutation({
-    mutationFn: async (targetEmail: string, password: string) => {
+    mutationFn: async ({ targetEmail, password }: { targetEmail: string; password: string }) => {
       return apiRequest('POST', '/api/admin/manage/remove', { targetEmail, password });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Admin remove success, invalidating cache:', data);
+      // Force invalidate and refetch the admin list
       queryClient.invalidateQueries({ queryKey: ['/api/admin/manage/list'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/manage/list'] });
     },
   });
 
@@ -105,7 +111,8 @@ export function useAdminManagement() {
     adminList: adminList || [],
     isLoadingAdmins,
     addAdmin: addAdminMutation.mutateAsync,
-    removeAdmin: removeAdminMutation.mutateAsync,
+    removeAdmin: (targetEmail: string, password: string) => 
+      removeAdminMutation.mutateAsync({ targetEmail, password }),
     isAddingAdmin: addAdminMutation.isPending,
     isRemovingAdmin: removeAdminMutation.isPending,
   };
