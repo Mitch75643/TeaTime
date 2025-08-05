@@ -100,7 +100,7 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
       setComment("");
       setReplyText("");
       setReplyingTo(null);
-      setIsComposing(false); // Reset composing state
+      setIsComposing(false);
       toast({
         title: replyingTo ? "Reply posted!" : "Comment posted!",
         description: replyingTo ? "Your reply has been added." : "Your anonymous comment has been added.",
@@ -195,7 +195,15 @@ export function CommentsDrawer({ postId, commentCount, isDrama = false }: Commen
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        setIsComposing(false);
+        setComment("");
+        setReplyText("");
+        setReplyingTo(null);
+      }
+    }}>
       <SheetTrigger asChild>
         <Button
           variant="ghost"
