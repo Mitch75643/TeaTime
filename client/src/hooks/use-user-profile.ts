@@ -3,6 +3,7 @@ import { useUserAvatar } from './use-user-avatar';
 import { useUserAlias } from './use-user-alias';
 import { useAvatarColor } from './use-avatar-color';
 import { useAnonymousAuth } from '@/lib/anonymousAuth';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface UserProfile {
   avatarId: string;
@@ -200,8 +201,27 @@ export function useUserProfile() {
       window.dispatchEvent(new CustomEvent('avatarColorChanged', { 
         detail: { avatarColor: updates.avatarColor } 
       }));
+      
+      // Sync avatar color with server for global visibility
+      try {
+        // Create a simple fetch request since we don't need ensureUserExists here
+        const response = await fetch('/api/user/avatar-color', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ avatarColor: updates.avatarColor }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to sync avatar color');
+        }
+      } catch (error) {
+        console.error('Failed to sync avatar color with server:', error);
+        // Don't revert local change since user experience should be preserved
+      }
     }
-  }, []);
+  }, [user]);
 
   return {
     profile,
