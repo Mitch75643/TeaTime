@@ -4,10 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { getDeviceFingerprint } from "@/lib/fingerprint";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ShieldCheck, ShieldX, Loader2 } from "lucide-react";
+import { Shield, ShieldCheck, ShieldX, Loader2, Fingerprint, Mail, CheckCircle, ArrowRight } from "lucide-react";
 
 interface AdminAuthProps {
   onSuccess?: () => void;
@@ -16,10 +18,12 @@ interface AdminAuthProps {
 export function AdminAuth({ onSuccess }: AdminAuthProps) {
   const [step, setStep] = useState<'fingerprint' | 'email'>('fingerprint');
   const [email, setEmail] = useState('');
-  const [fingerprint, setFingerprint] = useState('');
+  const [enteredFingerprint, setEnteredFingerprint] = useState('');
+  const [currentFingerprint, setCurrentFingerprint] = useState('');
   const [error, setError] = useState('');
   const [isGettingFingerprint, setIsGettingFingerprint] = useState(false);
   const [isSettingUpRoot, setIsSettingUpRoot] = useState(false);
+  const [fingerprintVerified, setFingerprintVerified] = useState(false);
   
   const { toast } = useToast();
   const {
@@ -33,13 +37,13 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
     isLoggingOut,
   } = useAdminAuth();
 
-  // Get device fingerprint on component mount
+  // Get current device fingerprint for reference
   useEffect(() => {
     const initFingerprint = async () => {
       setIsGettingFingerprint(true);
       try {
         const fp = await getDeviceFingerprint();
-        setFingerprint(fp);
+        setCurrentFingerprint(fp);
       } catch (error) {
         setError('Failed to generate device fingerprint');
       } finally {
@@ -52,24 +56,32 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
 
   // Handle step 1: fingerprint verification
   const handleFingerprintVerification = async () => {
-    if (!fingerprint) {
-      setError('Device fingerprint not available');
+    if (!enteredFingerprint.trim()) {
+      setError('Please enter your fingerprint ID');
       return;
     }
 
     try {
       setError('');
-      const result = await verifyFingerprint(fingerprint);
+      const result = await verifyFingerprint(enteredFingerprint.trim());
       
       if (result.verified) {
+        setFingerprintVerified(true);
         setStep('email');
         toast({
-          title: "Device Verified",
-          description: "Please enter your admin email to continue.",
+          title: "Fingerprint Verified",
+          description: "Device approved. Please enter your admin email to continue.",
         });
       }
     } catch (err: any) {
-      setError(err.message || 'Device verification failed');
+      setError(err.message || 'Fingerprint verification failed');
+    }
+  };
+
+  // Auto-fill current device fingerprint
+  const useCurrentDevice = () => {
+    if (currentFingerprint) {
+      setEnteredFingerprint(currentFingerprint);
     }
   };
 
@@ -77,14 +89,19 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !fingerprint) {
-      setError('Email and device fingerprint required');
+    if (!email.trim()) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    if (!enteredFingerprint.trim()) {
+      setError('Fingerprint verification required');
       return;
     }
 
     try {
       setError('');
-      const result = await login({ fingerprint, email });
+      const result = await login({ fingerprint: enteredFingerprint.trim(), email: email.trim() });
       
       toast({
         title: "Admin Access Granted",
@@ -96,13 +113,13 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
         onSuccess?.();
       }, 200);
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Email verification failed');
     }
   };
 
   // Handle root admin setup
   const handleSetupRootAdmin = async () => {
-    if (!fingerprint) {
+    if (!currentFingerprint) {
       setError('Device fingerprint not available');
       return;
     }
@@ -123,7 +140,7 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fingerprint,
+          fingerprint: currentFingerprint,
           email: adminEmail
         }),
       });
@@ -214,14 +231,31 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
           Admin Authentication
         </CardTitle>
         <CardDescription>
-          {step === 'fingerprint' 
-            ? 'Step 1: Device Verification' 
-            : 'Step 2: Email Verification'
-          }
+          Two-step verification process for secure admin access
         </CardDescription>
+        
+        {/* Progress indicator */}
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs ${
+            step === 'fingerprint' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 
+            fingerprintVerified ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 
+            'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+          }`}>
+            <Fingerprint className="w-3 h-3" />
+            {fingerprintVerified ? 'Device Verified' : 'Device ID'}
+          </div>
+          <ArrowRight className="w-3 h-3 text-gray-400" />
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs ${
+            step === 'email' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 
+            'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+          }`}>
+            <Mail className="w-3 h-3" />
+            Email Verification
+          </div>
+        </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {error && (
           <Alert variant="destructive">
             <ShieldX className="w-4 h-4" />
@@ -229,100 +263,154 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
           </Alert>
         )}
 
-        {step === 'fingerprint' && (
+        {step === 'fingerprint' ? (
+          // Step 1: Manual fingerprint entry
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Device Fingerprint</Label>
-              <div className="p-3 bg-muted rounded border text-sm font-mono text-foreground break-all">
-                {isGettingFingerprint ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating fingerprint...
-                  </div>
-                ) : fingerprint ? (
-                  <div className="space-y-2">
-                    <div className="text-foreground">
-                      {fingerprint}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      ✓ Your unique device fingerprint
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-destructive">Failed to generate</span>
-                )}
-              </div>
+              <Label htmlFor="fingerprintInput" className="text-sm font-medium">
+                Enter Fingerprint ID
+              </Label>
+              <Input
+                id="fingerprintInput"
+                type="text"
+                value={enteredFingerprint}
+                onChange={(e) => setEnteredFingerprint(e.target.value)}
+                placeholder="Paste your authorized fingerprint ID here"
+                className="font-mono text-sm"
+                disabled={isVerifyingFingerprint}
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter the fingerprint ID that was approved by the root host
+              </p>
             </div>
-            
+
+            {/* Current device helper */}
+            {currentFingerprint && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground">Current Device ID</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={useCurrentDevice}
+                    className="text-xs h-6"
+                  >
+                    Use This Device
+                  </Button>
+                </div>
+                <div className="p-2 bg-muted rounded text-xs font-mono text-muted-foreground border">
+                  {isGettingFingerprint ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Generating...
+                    </div>
+                  ) : (
+                    currentFingerprint
+                  )}
+                </div>
+              </div>
+            )}
+
             <Button 
               onClick={handleFingerprintVerification}
-              disabled={!fingerprint || isVerifyingFingerprint || isGettingFingerprint}
+              disabled={isVerifyingFingerprint || !enteredFingerprint.trim()}
               className="w-full"
             >
-              {isVerifyingFingerprint && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Verify Device
-            </Button>
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  First time setup
-                </span>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={handleSetupRootAdmin}
-              disabled={!fingerprint || isGettingFingerprint || isSettingUpRoot}
-              variant="outline"
-              className="w-full"
-            >
-              {isSettingUpRoot && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Setup Root Admin
+              {isVerifyingFingerprint ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Verifying Device...
+                </>
+              ) : (
+                <>
+                  <Fingerprint className="w-4 h-4 mr-2" />
+                  Verify Fingerprint ID
+                </>
+              )}
             </Button>
           </div>
-        )}
-
-        {step === 'email' && (
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Admin Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
-                required
-              />
+        ) : (
+          // Step 2: Email verification
+          <div className="space-y-4">
+            {/* Show verified fingerprint */}
+            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-800">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <span className="text-sm text-green-700 dark:text-green-300">Device fingerprint verified</span>
             </div>
             
-            <Button 
-              type="submit"
-              disabled={!email || isLoggingIn}
-              className="w-full"
-            >
-              {isLoggingIn && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Login as Admin
-            </Button>
-            
-            <Button 
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setStep('fingerprint');
-                setEmail('');
-                setError('');
-              }}
-              className="w-full"
-            >
-              Back to Device Verification
-            </Button>
-          </form>
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">Admin Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your admin email address"
+                  disabled={isLoggingIn}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter the email that was authorized for this fingerprint ID
+                </p>
+              </div>
+
+              <Button 
+                type="submit"
+                disabled={isLoggingIn || !email.trim()}
+                className="w-full"
+              >
+                {isLoggingIn ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Verifying Email...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4 mr-2" />
+                    Grant Admin Access
+                  </>
+                )}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setStep('fingerprint');
+                  setFingerprintVerified(false);
+                  setError('');
+                }}
+                className="w-full"
+              >
+                ← Back to Fingerprint Verification
+              </Button>
+            </form>
+          </div>
         )}
+        
+        <Separator />
+        
+        <div className="text-center space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Need to setup the first admin account?
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleSetupRootAdmin}
+            disabled={isSettingUpRoot || isGettingFingerprint}
+          >
+            {isSettingUpRoot ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Setting up...
+              </>
+            ) : (
+              'Setup Root Admin'
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
