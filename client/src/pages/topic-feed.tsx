@@ -140,7 +140,7 @@ export default function TopicFeed() {
     };
   }, [topicId]);
 
-  // Subscribe to real-time comment updates for topic feeds
+  // Subscribe to real-time updates for topic feeds
   useEffect(() => {
     const unsubscribe = subscribeToMessages((message: any) => {
       if (message.type === 'comment_added') {
@@ -149,6 +149,16 @@ export default function TopicFeed() {
         queryClient.invalidateQueries({ queryKey: ['/api/posts/community', topicId] });
         queryClient.invalidateQueries({ queryKey: ['/api/posts/user', topicId] });
         queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      } else if (message.type === 'post_created') {
+        console.log('Topic Feed: Real-time post created:', message);
+        // Check if the post belongs to current topic
+        const messageData = message.data;
+        if (messageData?.communitySection === topicId || messageData?.postContext === 'community') {
+          // Invalidate community and user post queries to refresh with new post
+          queryClient.invalidateQueries({ queryKey: ['/api/posts/community', topicId] });
+          queryClient.invalidateQueries({ queryKey: ['/api/posts/user', topicId] });
+          queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+        }
       }
     });
 

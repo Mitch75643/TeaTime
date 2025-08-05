@@ -200,8 +200,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let moderationResult;
       try {
         moderationResult = await comprehensiveModeration(validatedData.content);
-      } catch (moderationError) {
-        console.warn("Moderation service unavailable, using fallback:", moderationError.message);
+      } catch (moderationError: any) {
+        console.warn("Moderation service unavailable, using fallback:", moderationError?.message || 'Unknown error');
         // Fallback to allow post creation without moderation
         moderationResult = {
           action: 'allow',
@@ -238,6 +238,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const post = await storage.createPost(postData, alias, sessionId);
+      
+      // Broadcast new post to all connected clients
+      wsManager.broadcast({
+        type: 'post_created',
+        postId: post.id,
+        data: {
+          post: post,
+          category: validatedData.category,
+          sessionId: sessionId,
+          communitySection: communitySection,
+          postContext: postContext
+        }
+      });
+      
       // Handle streak tracking for daily prompt submissions
       let streakResult = null;
       if (validatedData.category === 'daily' && postContext === 'daily') {

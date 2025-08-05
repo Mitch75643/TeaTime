@@ -106,12 +106,22 @@ export function useSmartFeedV2(options: SmartFeedOptions) {
     if (!enableSmartLogic || sortBy !== 'new') return;
 
     const unsubscribe = subscribeToMessages((message: any) => {
-      if (message.type === 'post_created' && message.postContext === postContext) {
-        setState(prev => ({
-          ...prev,
-          newPostsCount: prev.newPostsCount + 1,
-          nextRefreshAvailable: true,
-        }));
+      if (message.type === 'post_created') {
+        // Check if this post is relevant to current feed context
+        const messageData = message.data;
+        const isRelevantPost = 
+          postContext === 'home' || // Home page shows all posts
+          (postContext === 'community' && messageData?.communitySection) || // Community posts
+          messageData?.postContext === postContext; // Exact context match
+          
+        if (isRelevantPost) {
+          console.log('Smart Feed: New post detected for context:', postContext, message);
+          setState(prev => ({
+            ...prev,
+            newPostsCount: prev.newPostsCount + 1,
+            nextRefreshAvailable: true,
+          }));
+        }
       }
     });
 
