@@ -276,7 +276,7 @@ export default function TopicFeed() {
       </div>
 
       {/* Topic-Specific Features */}
-      <div className="px-4 pt-8 pb-6 space-y-6">
+      <div className="px-4 pt-8 pb-6 space-y-6 max-w-2xl mx-auto">
         {topicId === "celebrity-tea" && (
           <CelebrityTeaFeatures 
             onSpillAbout={(celebName) => {
@@ -358,8 +358,8 @@ export default function TopicFeed() {
       </div>
 
       {/* Posts Section with Tabs */}
-      <div className="px-4 py-6 pb-20">
-        <div className="grid grid-cols-1 gap-6">
+      <div className="container mx-auto px-4 py-6 pb-20">
+        <div className="grid grid-cols-1 gap-6 max-w-4xl mx-auto">
           {/* Main Posts Section */}
           <div>
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -517,8 +517,8 @@ export default function TopicFeed() {
             </button>
           </div>
 
-          {/* Tab Content - Expanded with more padding */}
-          <div className="p-8">
+          {/* Tab Content */}
+          <div className="p-6">
             {activeTab === 'community' && (
               <div className="space-y-4">
                 {isLoadingCommunity ? (
@@ -562,7 +562,7 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
                     {/* Show Story Recommendations first for Story Time */}
                     {topicId === "story-time" && (
                       <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
@@ -634,7 +634,7 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
                     {userPosts.map((post: Post) => (
                       <PostCard 
                         key={post.id} 
