@@ -154,11 +154,11 @@ export default function Home() {
             ))}
           </div>
         ) : posts.length === 0 ? (
-          <div className="relative text-center min-h-[60vh] flex flex-col items-center justify-center">
+          <div className="relative text-center min-h-[40vh] sm:min-h-[50vh] flex flex-col items-center justify-center py-8">
             {/* Animated Tea Cup Icon */}
-            <div className="relative mb-6">
-              <div className="text-6xl mb-2 animate-pulse leading-none flex items-center justify-center w-16 h-16 mx-auto">
-                <span className="block" style={{ fontSize: '3.5rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
+            <div className="relative mb-4 sm:mb-6">
+              <div className="text-5xl sm:text-6xl mb-2 animate-pulse leading-none flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mx-auto">
+                <span className="block" style={{ fontSize: '2.5rem', lineHeight: '1', fontFamily: 'system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji"' }}>☕</span>
               </div>
               {/* Steam Animation */}
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2">
@@ -171,10 +171,10 @@ export default function Home() {
             </div>
             
             {/* Fun Headlines */}
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 px-4">
               {activeCategory === "all" ? "It's quiet in here..." : `Still brewing in ${categories.find(c => c.id === activeCategory)?.label}...`}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-base">
+            <p className="text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base px-4">
               {activeCategory === "all" ? "No one's spilled yet... will you be the first?" : "Be bold—spill the first sip in this category!"}
             </p>
 
