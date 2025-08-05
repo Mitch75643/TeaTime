@@ -26,8 +26,8 @@ const spamMetrics = new Map<string, SpamMetrics>();
 
 // Configuration
 const SPAM_CONFIG = {
-  POST_LIMIT: 10, // posts per time window
-  TIME_WINDOW_MINUTES: 15,
+  POST_LIMIT: 4, // posts per time window
+  TIME_WINDOW_MINUTES: 5, // 5-minute cooldown window after 4 posts
   SIMILARITY_THRESHOLD: 0.8, // 80% similarity triggers warning
   MIN_ENGAGEMENT_FOR_WHITELIST: 10, // likes + comments to be whitelisted
   VIOLATION_COOLDOWN_MINUTES: 5,
@@ -162,7 +162,7 @@ export async function detectSpam(
     return { isSpam: false, action: 'allow', severity: 'low' };
   }
   
-  // Check frequency limit
+  // Check frequency limit - allow 4 posts before cooldown
   const recentPostCount = metrics.recentPosts.length;
   if (recentPostCount >= SPAM_CONFIG.POST_LIMIT) {
     metrics.violations.push({
@@ -174,7 +174,7 @@ export async function detectSpam(
     return {
       isSpam: true,
       action: 'throttle',
-      message: "💬 Looks like you're on a roll! Try spacing out your posts so others can join the convo too.",
+      message: "You've shared 4 posts recently! Take a 5-minute break to let others join the conversation.",
       severity: 'medium',
       cooldownMinutes: SPAM_CONFIG.VIOLATION_COOLDOWN_MINUTES
     };
