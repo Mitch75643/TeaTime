@@ -472,13 +472,6 @@ export default function DailySpill() {
       {/* Daily Prompt Card */}
       <div className="px-4 pt-4 pb-4">
         <Card className={cn("text-white border-0 relative overflow-hidden bg-gradient-to-br", currentTheme.color)}>
-          {spillOfTheDay && (
-            <div className="absolute top-2 right-2">
-              <Badge className="bg-yellow-400 text-yellow-900 border-0 text-xs font-bold">
-                ⭐ Spill of the Day
-              </Badge>
-            </div>
-          )}
           <CardHeader className="pb-3">
             <div className="flex items-center space-x-2 mb-2">
               <CountdownTimer />
