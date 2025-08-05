@@ -234,7 +234,6 @@ export default function TopicFeed() {
           Back
         </Button>
       </div>
-
       {/* Header with topic branding */}
       <div className={cn("relative", topic.gradient)}>
         <div className="px-4 py-6">
@@ -274,7 +273,6 @@ export default function TopicFeed() {
 
 
       </div>
-
       {/* Topic-Specific Features */}
       <div className="px-4 pt-8 pb-6 space-y-6 max-w-2xl mx-auto">
         {topicId === "celebrity-tea" && (
@@ -356,7 +354,6 @@ export default function TopicFeed() {
           />
         )}
       </div>
-
       {/* Posts Section with Tabs */}
       <div className="container mx-auto px-4 py-8 pb-20">
         <div className="grid grid-cols-1 gap-8 max-w-4xl mx-auto">
@@ -512,7 +509,7 @@ export default function TopicFeed() {
                 >
                   <User className="h-5 w-5" />
                   <span>Your Posts</span>
-                  <span className="ml-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
+                  <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium ml-[5px] mr-[5px]">
                     {userPosts.length}
                   </span>
                 </button>
@@ -677,7 +674,6 @@ export default function TopicFeed() {
           </div>
         </div>
       </div>
-
       {/* Floating Add Button */}
       <Button
         onClick={() => setIsPostModalOpen(true)}
@@ -690,7 +686,6 @@ export default function TopicFeed() {
       >
         <Plus className="h-6 w-6 text-white" />
       </Button>
-
       {/* Section-specific Post Modal */}
       <SectionPostModal
         isOpen={isPostModalOpen}
@@ -708,7 +703,6 @@ export default function TopicFeed() {
           triggerCelebration(section as any);
         }}
       />
-      
       {/* Celebration Animation */}
       <CelebrationAnimation
         isVisible={celebration.isVisible}
