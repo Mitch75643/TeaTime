@@ -7,6 +7,9 @@ import { Input } from "./input";
 import { FlaskConical, BarChart3, Zap, TestTube, Beaker, Plus, RefreshCw, Clock, Flame, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChemistryAnimation, useChemistryAnimation } from "./chemistry-animation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface PollOption {
   id: string;
@@ -107,50 +110,33 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
   const { isVisible: isChemistryVisible, triggerAnimation, completeAnimation } = useChemistryAnimation();
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   
-  const refreshCommunityResults = () => {
-    // Simulate loading random community polls from "+ Create Your Experiment"
-    const mockPolls: UserPoll[] = [
-      {
-        id: "poll-1",
-        question: "Should I quit my job to travel the world for a year?",
-        options: [
-          { id: "yes", text: "Yes, YOLO!", votes: 234, percentage: 68 },
-          { id: "no", text: "No, too risky", votes: 110, percentage: 32 }
-        ],
-        totalVotes: 344,
-        userAvatar: "🌟",
-        username: "AdventureDreamer23",
-        createdAt: new Date()
-      },
-      {
-        id: "poll-2", 
-        question: "Is it weird to bring my own snacks to the movie theater?",
-        options: [
-          { id: "weird", text: "Yes, totally weird", votes: 89, percentage: 22 },
-          { id: "smart", text: "No, you're saving money!", votes: 201, percentage: 50 },
-          { id: "depends", text: "Depends on the snack", votes: 112, percentage: 28 }
-        ],
-        totalVotes: 402,
-        userAvatar: "🍿",
-        username: "MovieBudgetHack",
-        createdAt: new Date()
-      },
-      {
-        id: "poll-3",
-        question: "Should I tell my roommate they're a terrible cook?",
-        options: [
-          { id: "yes", text: "Yes, honesty is best", votes: 156, percentage: 41 },
-          { id: "no", text: "No, too harsh", votes: 98, percentage: 26 },
-          { id: "gentle", text: "Suggest cooking together", votes: 124, percentage: 33 }
-        ],
-        totalVotes: 378,
-        userAvatar: "👨‍🍳",
-        username: "DiplomaticFoodie",
-        createdAt: new Date()
-      }
-    ];
-    setCommunityPolls(mockPolls.sort(() => 0.5 - Math.random()).slice(0, 2));
-  };
+  // React Query hooks
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  // Mutation for creating poll posts
+  const createPostMutation = useMutation({
+    mutationFn: async (postData: { content: string; category: string; pollOptions: string[]; postType: string }) => {
+      return apiRequest('POST', '/api/posts', postData);
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh the community feed
+      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      toast({
+        title: "Experiment launched!",
+        description: "Your tea experiment is now live in the community feed",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to launch experiment",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
+  
+
 
   const handlePollVote = (pollId: string, optionId: string) => {
     if (userVotes[pollId]) return; // Already voted
@@ -212,23 +198,14 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
       // Trigger chemistry animation first
       triggerAnimation();
       
-      // Create new poll and add to community results
-      const newPoll: UserPoll = {
-        id: `poll-${Date.now()}`,
-        question: newQuestion.trim(),
-        options: newOptions.filter(opt => opt.trim()).map((text, index) => ({
-          id: `option-${index}`,
-          text: text.trim(),
-          votes: 0,
-          percentage: 0
-        })),
-        totalVotes: 0,
-        userAvatar: "🧪", // Could get from user context
-        username: "You",
-        createdAt: new Date()
-      };
-      
-      setCommunityPolls(prev => [newPoll, ...prev]);
+      // Create real poll post in database
+      const filteredOptions = newOptions.filter(opt => opt.trim());
+      createPostMutation.mutate({
+        content: newQuestion.trim(),
+        category: "tea-experiments",
+        pollOptions: filteredOptions,
+        postType: "poll"
+      });
       
       // Reset form and collapse create section after animation starts
       setTimeout(() => {
@@ -238,19 +215,7 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
         setIsCreateExperimentExpanded(false);
       }, 500);
       
-      // Scroll to Community Results section after animation
-      setTimeout(() => {
-        const communityResultsElement = document.querySelector('[data-section="community-results"]');
-        if (communityResultsElement) {
-          communityResultsElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
-          });
-        }
-      }, 2100); // After animation completes
-      
-      // Don't call onCreatePoll to avoid opening modal
-      // onCreatePoll(newQuestion, newOptions.filter(opt => opt.trim()));
+      onCreatePoll(newQuestion.trim(), filteredOptions);
     }
   };
 
