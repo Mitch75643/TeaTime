@@ -86,6 +86,8 @@ export function PostModal({
   const { animation, triggerAnimation, completeAnimation } = useHomeCategoryAnimation();
   const { canPerformAction, getFingerprint, banInfo } = useDeviceFingerprint();
 
+  console.log("PostModal render - isOpen:", isOpen, "category:", category);
+
   // Load draft and set defaults when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -293,11 +295,14 @@ export function PostModal({
           {/* Category Selection */}
           <div className="space-y-2">
             <Label htmlFor="category">Choose a category</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
+            <Select value={category} onValueChange={(value) => {
+              console.log("Category selected:", value);
+              setCategory(value);
+            }}>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select category..." />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[100]">
                 {categories.map((cat) => (
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
