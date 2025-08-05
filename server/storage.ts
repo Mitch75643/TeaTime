@@ -1407,6 +1407,7 @@ export class MemStorage implements IStorage {
     const session: AdminSession = {
       ...sessionData,
       id,
+      isActive: true, // Ensure new sessions are active
       expiresAt: typeof sessionData.expiresAt === 'string' ? new Date(sessionData.expiresAt) : sessionData.expiresAt,
       createdAt: new Date(),
       lastActivity: new Date(),

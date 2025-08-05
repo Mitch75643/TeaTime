@@ -91,7 +91,10 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
         description: `Welcome back! Role: ${result.role}`,
       });
       
-      onSuccess?.();
+      // Small delay to ensure session is properly set before calling onSuccess
+      setTimeout(() => {
+        onSuccess?.();
+      }, 200);
     } catch (err: any) {
       setError(err.message || 'Login failed');
     }
