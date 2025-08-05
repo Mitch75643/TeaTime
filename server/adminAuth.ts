@@ -108,14 +108,19 @@ class AdminAuthService {
     };
   }> {
     try {
+      console.log('[Admin Auth] Verifying admin session:', sessionId);
+      
       const session = await storage.getAdminSession(sessionId);
+      console.log('[Admin Auth] Session found:', session);
       
       if (!session) {
+        console.log('[Admin Auth] No session found');
         return { valid: false };
       }
       
       // Check if session is active
       if (session.isActive === false) {
+        console.log('[Admin Auth] Session is not active');
         return { valid: false };
       }
 
@@ -124,6 +129,7 @@ class AdminAuthService {
       const expiresAt = new Date(session.expiresAt);
       
       if (now > expiresAt) {
+        console.log('[Admin Auth] Session has expired');
         await storage.deactivateAdminSession(sessionId);
         return { valid: false };
       }
@@ -131,7 +137,7 @@ class AdminAuthService {
       // Update last activity
       await storage.updateAdminSessionActivity(sessionId);
 
-      return {
+      const result = {
         valid: true,
         admin: {
           email: session.email,
@@ -140,6 +146,9 @@ class AdminAuthService {
           sessionId: session.sessionId
         }
       };
+      
+      console.log('[Admin Auth] Session verification result:', result);
+      return result;
     } catch (error) {
       console.error('Error verifying admin session:', error);
       return { valid: false };
@@ -149,10 +158,23 @@ class AdminAuthService {
   // Check if user is root host
   async isRootHost(email: string, fingerprint: string): Promise<boolean> {
     try {
+      console.log('[Admin Auth] Checking root host status for:', { email, fingerprint });
+      
       const fingerprintRecord = await storage.getAdminFingerprint(fingerprint);
       const emailRecord = await storage.getAdminEmail(email, fingerprint);
       
-      return (fingerprintRecord?.isRootHost && emailRecord?.role === 'root_host') || false;
+      console.log('[Admin Auth] Fingerprint record:', fingerprintRecord);
+      console.log('[Admin Auth] Email record:', emailRecord);
+      
+      // A user is root host if they have both fingerprint and email records active AND the email role is 'root_host'
+      const isRootHost = (
+        fingerprintRecord?.isActive && 
+        emailRecord?.isActive && 
+        emailRecord?.role === 'root_host'
+      ) || false;
+      
+      console.log('[Admin Auth] Root host check result:', isRootHost);
+      return isRootHost;
     } catch (error) {
       console.error('Error checking root host status:', error);
       return false;
