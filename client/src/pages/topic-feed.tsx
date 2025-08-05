@@ -371,7 +371,7 @@ export default function TopicFeed() {
       <div className="pb-20">
         {/* Sticky Filter and Sort Controls */}
         <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <div className="max-w-screen-sm lg:max-w-2xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="px-4 md:px-6 lg:px-8">
             {/* Story Category Filter Bar - Only for Story Time */}
             {topicId === "story-time" && (
               <div className="py-4 border-b border-gray-200 dark:border-gray-700">
@@ -529,29 +529,29 @@ export default function TopicFeed() {
         </div>
 
         {/* Main Feed Content - Full Width, Modern Layout */}
-        <div className="px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">
+        <div className="px-4 md:px-6 lg:px-8 pt-6">
             {activeTab === 'community' && (
               <div className="space-y-4">
                 {isLoadingCommunity ? (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {[...Array(3)].map((_, i) => (
-                      <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-6 animate-pulse border border-gray-200 dark:border-gray-700">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-3"></div>
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-3"></div>
-                        <div className="h-16 bg-gray-200 dark:bg-gray-600 rounded"></div>
+                      <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-8 animate-pulse border border-gray-200 dark:border-gray-700">
+                        <div className="h-5 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+                        <div className="h-5 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-4"></div>
+                        <div className="h-20 bg-gray-200 dark:bg-gray-600 rounded"></div>
                       </div>
                     ))}
                   </div>
                 ) : communityPosts.length === 0 ? (
-                  <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <div className="text-5xl mb-6">{topic.emoji}</div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div className="text-6xl mb-8">{topic.emoji}</div>
+                    <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                       {topicId === "hot-topics" && hotTopicFilter !== "all" 
                         ? "No takes on this yet"
                         : `No posts yet in ${topic.name}`
                       }
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                    <p className="text-gray-600 dark:text-gray-400 mb-10 max-w-lg mx-auto text-lg">
                       {topicId === "hot-topics" && hotTopicFilter !== "all" 
                         ? "Be the first to weigh in on this hot topic!"
                         : "Be the first to share something in this topic!"
@@ -564,7 +564,7 @@ export default function TopicFeed() {
                         }
                         setIsPostModalOpen(true);
                       }}
-                      className={cn("shadow-lg text-lg px-8 py-3", topic.gradient, topic.textColor)}
+                      className={cn("shadow-lg text-xl px-10 py-4", topic.gradient, topic.textColor)}
                     >
                       <Plus className="h-5 w-5 mr-2" />
                       {topicId === "hot-topics" && hotTopicFilter !== "all" 
@@ -574,17 +574,17 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {/* Smart Feed Refresh for new feeds */}
                     {sortBy === 'new' && (
-                      <div className="mb-6">
+                      <div className="mb-8">
                         <button
                           onClick={() => {
                             queryClient.invalidateQueries({ 
                               queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter] 
                             });
                           }}
-                          className="w-full px-4 py-3 text-sm bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors flex items-center justify-center gap-2 border border-orange-200 dark:border-orange-800"
+                          className="w-full px-6 py-4 text-sm bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors flex items-center justify-center gap-2 border border-orange-200 dark:border-orange-800"
                         >
                           <RefreshCw className="h-4 w-4" />
                           Refresh Feed
@@ -594,16 +594,16 @@ export default function TopicFeed() {
                   
                     {/* Show Story Recommendations first for Story Time */}
                     {topicId === "story-time" && (
-                      <div className="mb-8">
-                        <div className="flex items-center gap-2 mb-4">
-                          <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                      <div className="mb-10">
+                        <div className="flex items-center gap-2 mb-6">
+                          <span className="text-base font-semibold text-purple-600 dark:text-purple-400">
                             ✨ Recommended for You
                           </span>
                         </div>
                         <StoryRecommendations 
                           limit={3}
                           showPreferences={true}
-                          className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-6 border border-purple-200 dark:border-purple-800"
+                          className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-8 border border-purple-200 dark:border-purple-800"
                         />
                       </div>
                     )}
@@ -637,26 +637,27 @@ export default function TopicFeed() {
             )}
 
             {activeTab === 'user' && (
-              <div className="space-y-4">
+              <div className="space-y-8">
                 {isLoadingUser ? (
-                  <div className="space-y-4">
+                  <div className="space-y-8">
                     {[...Array(2)].map((_, i) => (
-                      <div key={i} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-pulse">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
-                        <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                      <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-8 animate-pulse border border-gray-200 dark:border-gray-700">
+                        <div className="h-5 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+                        <div className="h-5 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-4"></div>
+                        <div className="h-20 bg-gray-200 dark:bg-gray-600 rounded"></div>
                       </div>
                     ))}
                   </div>
                 ) : userPosts.length === 0 ? (
-                  <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <div className="text-5xl mb-6">✍️</div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div className="text-6xl mb-8">✍️</div>
+                    <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                       {topicId === "hot-topics" && hotTopicFilter !== "all" 
                         ? "You haven't shared your take yet"
                         : "You haven't posted here yet"
                       }
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                    <p className="text-gray-600 dark:text-gray-400 mb-10 max-w-lg mx-auto text-lg">
                       {topicId === "hot-topics" && hotTopicFilter !== "all" 
                         ? "Share your perspective on this hot topic!"
                         : `Share your thoughts about ${topic.name.toLowerCase()} with the community!`
@@ -669,7 +670,7 @@ export default function TopicFeed() {
                         }
                         setIsPostModalOpen(true);
                       }}
-                      className={cn("shadow-lg text-lg px-8 py-3", topic.gradient, topic.textColor)}
+                      className={cn("shadow-lg text-xl px-10 py-4", topic.gradient, topic.textColor)}
                     >
                       <Plus className="h-5 w-5 mr-2" />
                       {topicId === "hot-topics" && hotTopicFilter !== "all" 
@@ -679,7 +680,7 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {userPosts.map((post: Post) => (
                       topicId === "daily-debate" ? (
                         <DailyDebatePostCard 

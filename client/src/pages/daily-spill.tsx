@@ -525,10 +525,10 @@ export default function DailySpill() {
       )}
 
       {/* New Posts Banner */}
-      {smartFeed.showNewPostsBanner && (
+      {shouldShowRefreshBanner && (
         <SmartFeedBanner
           newPostsCount={smartFeed.newPostsCount}
-          onLoadNewPosts={smartFeed.handleLoadNewPosts}
+          onLoadNewPosts={() => smartFeed.handleRefresh()}
           className={cn(
             "transition-opacity duration-200",
             isPostModalOpen && "opacity-0 pointer-events-none"
@@ -544,7 +544,7 @@ export default function DailySpill() {
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Today's Spills ({allPosts.length})
+              Today's Spills ({posts.length})
             </h2>
             <Button
               variant="ghost"
