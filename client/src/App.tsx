@@ -8,6 +8,8 @@ import { AnonymousAuthProvider } from "@/lib/anonymousAuth";
 import { DeviceBanGuard } from "@/components/ui/device-ban-guard";
 import { WebSocketProvider } from "@/components/providers/WebSocketProvider";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
+import { setupNotificationClickHandler } from "@/lib/deepLinkNavigation";
+import { useEffect } from "react";
 import Home from "@/pages/home";
 import Trending from "@/pages/trending";
 import Community from "@/pages/community";
@@ -22,6 +24,11 @@ import { SecureAdminRoute } from "@/components/admin/secure-admin-route";
 function Router() {
   // Initialize real-time updates for the entire app
   useRealtimeUpdates();
+  
+  // Initialize deep link navigation system
+  useEffect(() => {
+    setupNotificationClickHandler();
+  }, []);
   
   return (
     <Switch>

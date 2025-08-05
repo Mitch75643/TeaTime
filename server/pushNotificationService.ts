@@ -233,6 +233,20 @@ export class PushNotificationService {
     }
   }
 
+  // Queue a single notification for sending
+  queueEngagementNotification(subscription: PushSubscription, payload: string): void {
+    this.notificationQueue.push({
+      subscription,
+      payload,
+      retryCount: 0
+    });
+
+    // Start processing queue if not already running
+    if (!this.isProcessing) {
+      this.processQueue();
+    }
+  }
+
   // Get VAPID public key for client-side subscription
   getVapidPublicKey(): string {
     return VAPID_PUBLIC_KEY;

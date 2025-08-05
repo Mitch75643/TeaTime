@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -36,13 +36,15 @@ import {
   BarChart3,
   Eye,
   Edit,
-  Pencil
+  Pencil,
+  RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { AvatarDisplay } from "@/components/ui/avatar-display";
 import { AvatarSelector } from "@/components/ui/avatar-selector";
+import { parseDeepLinkParams, clearDeepLinkParams, useDeepLinkNavigation } from "@/lib/deepLinkNavigation";
 import { AvatarColorPicker } from "@/components/ui/avatar-color-picker";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { AliasSelector } from "@/components/ui/alias-selector";
@@ -78,6 +80,11 @@ export default function Profile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const { handleNotificationClick } = useDeepLinkNavigation();
+  
+  // Deep link navigation state
+  const [highlightedPostId, setHighlightedPostId] = useState<string | null>(null);
+  const postRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   
   // Authentication states
   const { user, isUpgraded, clearUserData } = useAnonymousAuth();
@@ -93,6 +100,88 @@ export default function Profile() {
       setBiometricEnabled(isBiometricEnabled(user.anonId));
     }
   }, [user?.anonId]);
+
+  // Handle deep link navigation on page load
+  useEffect(() => {
+    const deepLinkData = parseDeepLinkParams();
+    
+    if (deepLinkData) {
+      // Set the appropriate tab
+      if (deepLinkData.tab) {
+        setActiveTab(deepLinkData.tab);
+      }
+      
+      // Highlight the specific post if provided
+      if (deepLinkData.postId && deepLinkData.highlightPost) {
+        setHighlightedPostId(deepLinkData.postId);
+        
+        // Scroll to the post after a brief delay to ensure it's rendered
+        setTimeout(() => {
+          scrollToPost(deepLinkData.postId!);
+          
+          // Show notification context
+          toast({
+            title: "📍 Post Found",
+            description: "Here's the post from your notification",
+          });
+          
+          // Remove highlight after 3 seconds
+          setTimeout(() => {
+            setHighlightedPostId(null);
+          }, 3000);
+        }, 500);
+      }
+      
+      // Clear the deep link params from URL after handling
+      setTimeout(() => {
+        clearDeepLinkParams();
+      }, 1000);
+    }
+  }, []);
+
+  // Listen for deep link navigation events
+  useEffect(() => {
+    const handleDeepLinkNavigation = (event: CustomEvent) => {
+      const { postId, tab, highlightPost } = event.detail;
+      
+      if (tab) {
+        setActiveTab(tab);
+      }
+      
+      if (postId && highlightPost) {
+        setHighlightedPostId(postId);
+        setTimeout(() => {
+          scrollToPost(postId);
+          
+          toast({
+            title: "📍 Post Found",
+            description: "Here's the post from your notification",
+          });
+          
+          setTimeout(() => {
+            setHighlightedPostId(null);
+          }, 3000);
+        }, 500);
+      }
+    };
+
+    window.addEventListener('deepLinkNavigation', handleDeepLinkNavigation as EventListener);
+    
+    return () => {
+      window.removeEventListener('deepLinkNavigation', handleDeepLinkNavigation as EventListener);
+    };
+  }, []);
+
+  // Function to scroll to a specific post
+  const scrollToPost = (postId: string) => {
+    const postElement = postRefs.current[postId];
+    if (postElement) {
+      postElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  };
 
   // Get user's posts (using session ID for identification)
   const { data: userPosts = [], isLoading, refetch } = useQuery<Post[]>({
@@ -437,14 +526,37 @@ export default function Profile() {
 
             {userPosts.map((post: Post) => {
               const sourceInfo = getPostSourceInfo(post);
+              const isHighlighted = highlightedPostId === post.id;
+              
               return (
-                <div key={post.id} className="space-y-2">
+                <div 
+                  key={post.id} 
+                  className="space-y-2"
+                  ref={(el) => {
+                    if (el) {
+                      postRefs.current[post.id] = el;
+                    }
+                  }}
+                >
                   <div 
-                    className="cursor-pointer transition-transform hover:scale-[1.02]"
+                    className={cn(
+                      "cursor-pointer transition-all duration-300 hover:scale-[1.02]",
+                      isHighlighted && "ring-2 ring-orange-400 ring-opacity-70 shadow-lg transform scale-[1.01]"
+                    )}
                     onClick={() => handleViewInContext(post)}
                   >
                     <PostCard post={post} />
                   </div>
+                  {isHighlighted && (
+                    <div className="text-center">
+                      <Badge 
+                        variant="secondary" 
+                        className="bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 animate-pulse"
+                      >
+                        📍 From your notification
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -464,7 +576,11 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <AliasSelector
-                  currentAlias={{ alias: userAlias }}
+                  currentAlias={{ 
+                    alias: userAlias,
+                    hasEmoji: false,
+                    generated: false
+                  }}
                   onSelect={(newUsername) => {
                     updateProfile({ alias: newUsername.alias });
                     toast({

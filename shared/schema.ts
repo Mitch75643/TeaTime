@@ -107,11 +107,14 @@ export const dramaVotes = pgTable("drama_votes", {
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   recipientSessionId: varchar("recipient_session_id").notNull(),
-  type: varchar("type").notNull(), // 'post_reply' | 'comment_reply'
+  type: varchar("type").notNull(), // 'post_reply' | 'comment_reply' | 'post_reaction' | 'comment_reaction' | 'poll_vote' | 'debate_vote'
   message: text("message").notNull(),
-  postId: varchar("post_id"),
-  commentId: varchar("comment_id"),
+  postId: varchar("post_id"), // Always includes the root post ID for deep linking
+  commentId: varchar("comment_id"), // Optional comment ID if notification is comment-specific
   triggerAlias: varchar("trigger_alias").notNull(), // Who triggered the notification
+  triggerAvatarId: varchar("trigger_avatar_id").default("happy-face"), // Avatar of who triggered
+  reactionType: varchar("reaction_type"), // For reaction notifications: thumbsUp, thumbsDown, laugh, sad
+  deepLinkTab: varchar("deep_link_tab").default("posts"), // Which tab to open: posts, settings
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -422,12 +425,18 @@ export type Leaderboard = typeof leaderboards.$inferSelect;
 
 export const notificationSchema = z.object({
   recipientSessionId: z.string(),
-  type: z.enum(['post_reply', 'comment_reply']),
+  type: z.enum(['post_reply', 'comment_reply', 'post_reaction', 'comment_reaction', 'poll_vote', 'debate_vote']),
   message: z.string(),
-  postId: z.string().optional(),
+  postId: z.string(), // Always required for deep linking
   commentId: z.string().optional(),
   triggerAlias: z.string(),
+  triggerAvatarId: z.string().optional(),
+  reactionType: z.string().optional(),
+  deepLinkTab: z.enum(['posts', 'settings']).default('posts'),
 });
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof notificationSchema>;
 
 // Anonymous User schemas
 export const createAnonymousUserSchema = z.object({
