@@ -646,12 +646,14 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
     };
     this.notifications.set(id, newNotification);
+    console.log('[Storage] Created notification:', id, 'for session:', notification.recipientSessionId, 'total notifications:', this.notifications.size);
   }
 
   async getNotifications(sessionId: string): Promise<Notification[]> {
-    return Array.from(this.notifications.values())
-      .filter(n => n.recipientSessionId === sessionId)
-      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+    const allNotifications = Array.from(this.notifications.values());
+    const userNotifications = allNotifications.filter(n => n.recipientSessionId === sessionId);
+    console.log('[Storage] Getting notifications for session:', sessionId, 'found:', userNotifications.length, 'total in storage:', allNotifications.length);
+    return userNotifications.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
   }
 
   async markNotificationAsRead(notificationId: string, sessionId: string): Promise<void> {
@@ -672,9 +674,10 @@ export class MemStorage implements IStorage {
   }
 
   async getUnreadNotificationCount(sessionId: string): Promise<number> {
-    return Array.from(this.notifications.values())
-      .filter(n => n.recipientSessionId === sessionId && !n.isRead)
-      .length;
+    const allNotifications = Array.from(this.notifications.values());
+    const unreadForUser = allNotifications.filter(n => n.recipientSessionId === sessionId && !n.isRead);
+    console.log('[Storage] Getting unread count for session:', sessionId, 'unread:', unreadForUser.length, 'total notifications:', allNotifications.length);
+    return unreadForUser.length;
   }
 
   // Anonymous User System methods

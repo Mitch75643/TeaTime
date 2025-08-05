@@ -390,6 +390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const comments = await storage.getComments(validatedData.postId);
           const parent = comments.find(c => c.id === validatedData.parentCommentId);
           if (parent && parent.sessionId && parent.sessionId !== sessionId) {
+            console.log('[Notifications] Creating comment reply notification for session:', parent.sessionId);
             await storage.createNotification({
               recipientSessionId: parent.sessionId,
               type: 'comment_reply',
@@ -398,11 +399,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               commentId: comment.id,
               triggerAlias: alias,
             });
+            console.log('[Notifications] Comment reply notification created successfully');
+          } else {
+            console.log('[Notifications] Skipping comment reply notification - same user or no session ID');
           }
         } else {
           // Reply to post - notify the post owner
           const post = await storage.getPost(validatedData.postId);
           if (post && post.sessionId && post.sessionId !== sessionId) {
+            console.log('[Notifications] Creating post reply notification for session:', post.sessionId);
             await storage.createNotification({
               recipientSessionId: post.sessionId,
               type: 'post_reply',
@@ -411,6 +416,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               commentId: comment.id,
               triggerAlias: alias,
             });
+            console.log('[Notifications] Post reply notification created successfully');
+          } else {
+            console.log('[Notifications] Skipping post reply notification - same user or no session ID');
           }
         }
       } catch (notifError) {
@@ -689,9 +697,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/notifications", async (req, res) => {
     try {
       const sessionId = req.session.id!;
+      console.log('[Notifications] Fetching notifications for session:', sessionId);
       const notifications = await storage.getNotifications(sessionId);
+      console.log('[Notifications] Found', notifications.length, 'notifications for session:', sessionId);
       res.json(notifications);
     } catch (error) {
+      console.error('[Notifications] Failed to fetch notifications:', error);
       res.status(500).json({ message: "Failed to fetch notifications" });
     }
   });
@@ -699,9 +710,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/notifications/unread-count", async (req, res) => {
     try {
       const sessionId = req.session.id!;
+      console.log('[Notifications] Fetching unread count for session:', sessionId);
       const count = await storage.getUnreadNotificationCount(sessionId);
+      console.log('[Notifications] Unread count for session', sessionId, ':', count);
       res.json({ count });
     } catch (error) {
+      console.error('[Notifications] Failed to fetch unread count:', error);
       res.status(500).json({ message: "Failed to fetch unread count" });
     }
   });
