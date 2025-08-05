@@ -1,0 +1,70 @@
+🛠️ Replit Prompt — Expand Post Card Layout in Community Topic Feeds Without Removing Features (Tfess)
+📌 What I Need Replit to Do:
+In the Community page, each topic section (like Hot Topics, Celebrity Tea, Story Time, etc.) currently displays posts inside a small, boxed feed area that limits readability and makes posts feel cramped.
+
+I want to improve the layout of these topic feeds so they feel full-width and immersive, while preserving all the current UI features like tabs, filters, and headers.
+
+✅ What to Change:
+Only update the post container/card layout and feed border, not other elements.
+
+Remove or reduce the small centered boxed area where posts currently sit.
+
+Do not remove tabs, filters, or any special UI (e.g. "Your Posts", Story Filters, etc.)
+
+The feed should expand to full width (or near full width) of the content container.
+
+Each post card should:
+
+Be visually larger
+
+Have more padding
+
+Be easier to scroll and read on all screen sizes
+
+Make sure scrolling is natural and vertical, without nested or double scrolls.
+
+Do not use embedded scroll boxes or modals — this should feel like a standard scrollable feed page.
+
+✅ Must Keep:
+✅ "Your Posts" tab in every section.
+
+✅ Story Filters (like Horror, Funny, etc.) in Story Time.
+
+✅ Celebrity Search in Celebrity Tea.
+
+✅ Any post format logic that changes per topic (like Tea Experiments or Am I in the Wrong verdicts).
+
+✅ Post cards should still display all relevant features (username, emojis, reactions, etc.).
+
+✅ Apply This Post Card Layout Fix To:
+Hot Topics
+
+Celebrity Tea
+
+Story Time
+
+Daily Debate
+
+Tea Experiments
+
+Any other community topic feed using the cramped boxed layout
+
+🚫 Do NOT Apply Layout Changes To:
+The "Create First Post" button design — just center or align it better if needed.
+
+Trending feed on the Home Page
+
+Spill of the Day section on the Daily Spill page
+
+Any modal or popup view — this is for full-page feed views only
+
+✅ Final Result I Want:
+A clean, modern, full-width post card layout on all community topic feeds
+
+Scrollable like the Home Page feed or Daily Spill
+
+Feels immersive and not confined
+
+All current features and logic should remain fully visible and functional
+
+Works across all screen sizes (desktop, tablet, mobile)
