@@ -1,18 +1,100 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AdminAuth } from "@/components/AdminAuth";
 import { AdminPanel, BannedUsersPanel, RestrictedUsersPanel } from "@/components/AdminPanel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { Shield, Settings, Users, UserX, UserMinus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Shield, Settings, Users, UserX, UserMinus, ArrowLeft, Lock } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("auth");
+  const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
+  const [exitPassword, setExitPassword] = useState("");
+  const [exitError, setExitError] = useState("");
   const { isAuthenticated, isRootHost } = useAdminAuth();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  const handleExitAdmin = () => {
+    if (exitPassword === "NewYork/Boston/Wichita/area2025!") {
+      toast({
+        title: "Admin Access Closed",
+        description: "Returning to main application.",
+      });
+      setLocation("/");
+    } else {
+      setExitError("Incorrect password. Access denied.");
+    }
+  };
+
+  const closeExitDialog = () => {
+    setIsExitDialogOpen(false);
+    setExitPassword("");
+    setExitError("");
+  };
 
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+          {/* Password-protected back button */}
+          <Dialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="absolute left-0 top-0 flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Exit Admin
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Lock className="w-5 h-5" />
+                  Exit Admin Access
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="exit-password">Enter admin password to exit:</Label>
+                  <Input
+                    id="exit-password"
+                    type="password"
+                    value={exitPassword}
+                    onChange={(e) => {
+                      setExitPassword(e.target.value);
+                      setExitError("");
+                    }}
+                    placeholder="Enter password..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleExitAdmin();
+                      }
+                    }}
+                  />
+                  {exitError && (
+                    <p className="text-sm text-destructive">{exitError}</p>
+                  )}
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={closeExitDialog}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleExitAdmin}>
+                    Exit Admin
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Admin Access
           </h1>
