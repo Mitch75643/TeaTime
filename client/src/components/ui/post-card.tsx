@@ -174,9 +174,7 @@ export function PostCard({ post }: PostCardProps) {
       id={`post-${post.id}`}
       className={cn(
         "w-full max-w-full rounded-2xl shadow-sm border p-4 space-y-3 relative overflow-hidden break-words",
-        post.isDrama 
-          ? "bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200"
-          : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
+        "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
       )}>
       {/* Trending Badge */}
       {isTrending && !post.isDrama && (
@@ -232,12 +230,7 @@ export function PostCard({ post }: PostCardProps) {
             {post.tags.map((tag, index) => (
               <span
                 key={index}
-                className={cn(
-                  "text-xs px-2 py-1 rounded",
-                  post.isDrama 
-                    ? "bg-orange-100 text-orange-700"
-                    : "bg-gray-100 text-gray-600"
-                )}
+                className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
               >
                 {tag.startsWith('#') ? tag : `#${tag}`}
               </span>
@@ -251,8 +244,7 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Reactions */}
       <div className={cn(
-        "flex items-center justify-between pt-2 border-t",
-        post.isDrama ? "border-orange-200" : "border-gray-100"
+        "flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700"
       )}>
         <div className="flex items-center space-x-4">
           {Object.entries(reactionEmojis).map(([type, emoji]) => {

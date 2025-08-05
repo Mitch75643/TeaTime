@@ -95,13 +95,13 @@ export function DramaVoting({ postId }: DramaVotingProps) {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 rounded-2xl p-5 space-y-4 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+      <div className="bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 rounded-xl p-3 space-y-3 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
         <div className="text-center">
-          <h4 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Community Verdict</h4>
+          <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Community Verdict</h4>
           <p className="text-xs text-gray-600 dark:text-gray-400">Cast your vote below</p>
         </div>
         
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {voteOptions.map((option) => {
             const voteCount = votes[option.type] || 0;
             const isSelected = userVote === option.type;
@@ -112,11 +112,11 @@ export function DramaVoting({ postId }: DramaVotingProps) {
                 key={option.type}
                 variant="ghost"
                 className={cn(
-                  "h-auto p-4 rounded-xl text-center transition-all duration-200 border-2",
-                  "flex flex-col items-center justify-center space-y-2",
-                  "hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]",
+                  "h-auto p-2 rounded-lg text-center transition-all duration-200 border-2",
+                  "flex flex-col items-center justify-center space-y-1",
+                  "hover:scale-[1.02] hover:shadow-md active:scale-[0.98]",
                   option.colorClass,
-                  isSelected && "ring-2 ring-current ring-offset-2 ring-offset-white dark:ring-offset-gray-800 shadow-lg scale-[1.02]",
+                  isSelected && "ring-2 ring-current ring-offset-1 ring-offset-white dark:ring-offset-gray-800 shadow-md scale-[1.02]",
                   isDisabled && "opacity-50 cursor-not-allowed hover:scale-100",
                   option.type === "iconic" && voteCount >= 3 && "animate-pulse shadow-purple-200 dark:shadow-purple-900"
                 )}
@@ -124,15 +124,15 @@ export function DramaVoting({ postId }: DramaVotingProps) {
                 disabled={voteMutation.isPending || isDisabled}
               >
                 <div className={cn(
-                  "text-3xl transition-transform duration-200",
+                  "text-xl transition-transform duration-200",
                   option.type === "iconic" && voteCount >= 3 && "animate-bounce",
                   isSelected && "scale-110"
                 )}>{option.emoji}</div>
                 
-                <div className="space-y-1">
-                  <div className="text-sm font-semibold leading-tight">{option.label}</div>
+                <div className="space-y-0.5">
+                  <div className="text-xs font-semibold leading-tight">{option.label}</div>
                   <div className={cn(
-                    "text-xs font-medium px-2 py-1 rounded-full bg-white/50 dark:bg-gray-800/50",
+                    "text-xs font-medium px-1.5 py-0.5 rounded-full bg-white/50 dark:bg-gray-800/50",
                     option.type === "iconic" && voteCount >= 3 && "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold"
                   )}>
                     {voteCount} vote{voteCount !== 1 ? 's' : ''}
@@ -144,7 +144,7 @@ export function DramaVoting({ postId }: DramaVotingProps) {
         </div>
         
         {hasVoted && (
-          <div className="text-center pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+          <div className="text-center pt-1 border-t border-gray-200/50 dark:border-gray-700/50">
             <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
               <span className="text-green-500">✓</span>
               Thanks for voting! You can only vote once per post.
