@@ -15,6 +15,7 @@ import Profile from "@/pages/profile";
 import UserPosts from "@/pages/user-posts";
 import NotFound from "@/pages/not-found";
 import { AuthPage } from "@/pages/AuthPage";
+import AdminPage from "@/pages/AdminPage";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/user-posts" component={UserPosts} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );

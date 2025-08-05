@@ -1,4 +1,5 @@
 import { storage } from './storage';
+import { adminAuthService } from './adminAuth';
 
 interface SpamMetrics {
   sessionId: string;
@@ -34,18 +35,15 @@ const SPAM_CONFIG = {
   MAX_WARNINGS: 3
 };
 
-// Admin session identifiers that bypass spam detection
-const ADMIN_SESSIONS = new Set([
-  process.env.ADMIN_SESSION_1,
-  process.env.ADMIN_SESSION_2, 
-  process.env.ADMIN_SESSION_3
-].filter(Boolean)); // Remove any undefined values
-
-// Check if a session belongs to an admin
-function isAdminSession(sessionId: string): boolean {
-  return ADMIN_SESSIONS.has(sessionId) || 
-         sessionId.startsWith('admin_') || 
-         (process.env.NODE_ENV === 'development' && sessionId === 'dev_admin');
+// Check if a session belongs to an admin using the new admin auth system
+async function isAdminSession(sessionId: string): Promise<boolean> {
+  try {
+    const verification = await adminAuthService.verifyAdminSession(sessionId);
+    return verification.valid;
+  } catch (error) {
+    console.error('Error checking admin session:', error);
+    return false;
+  }
 }
 
 // Calculate text similarity using Levenshtein distance
@@ -164,7 +162,8 @@ export async function detectSpam(
   cooldownMinutes?: number;
 }> {
   // Admin bypass - admins can post unlimited times without restrictions
-  if (isAdminSession(sessionId)) {
+  const isAdmin = await isAdminSession(sessionId);
+  if (isAdmin) {
     return { isSpam: false, action: 'allow', severity: 'low' };
   }
   
@@ -350,3 +349,60 @@ export function cleanupOldMetrics() {
 
 // Initialize cleanup timer
 setInterval(cleanupOldMetrics, 60 * 60 * 1000); // Run every hour
+
+// Admin/development helper functions
+export function getSpamDetectionStats() {
+  const allMetrics = Array.from(spamMetrics.values());
+  
+  return {
+    totalSessions: allMetrics.length,
+    activeSessions: allMetrics.filter(m => m.recentPosts.length > 0).length,
+    totalViolations: allMetrics.reduce((sum, m) => sum + m.violations.length, 0),
+    whitelistedUsers: allMetrics.filter(m => m.isWhitelisted).length,
+    avgEngagementScore: allMetrics.reduce((sum, m) => sum + m.engagementScore, 0) / allMetrics.length || 0
+  };
+}
+
+export function getRecentViolations(limit: number = 50) {
+  const allViolations: Array<{
+    sessionId: string;
+    violation: any;
+    userMetrics: {
+      postCount: number;
+      warnings: number;
+      engagementScore: number;
+      isWhitelisted: boolean;
+    };
+  }> = [];
+
+  for (const [sessionId, metrics] of spamMetrics.entries()) {
+    for (const violation of metrics.violations) {
+      allViolations.push({
+        sessionId: sessionId.slice(0, 8) + '...',
+        violation,
+        userMetrics: {
+          postCount: metrics.recentPosts.length,
+          warnings: metrics.warnings,
+          engagementScore: metrics.engagementScore,
+          isWhitelisted: metrics.isWhitelisted
+        }
+      });
+    }
+  }
+
+  return allViolations
+    .sort((a, b) => b.violation.timestamp.getTime() - a.violation.timestamp.getTime())
+    .slice(0, limit);
+}
+
+export function clearSessionSpamHistory(sessionId: string) {
+  const metrics = spamMetrics.get(sessionId);
+  if (metrics) {
+    metrics.recentPosts = [];
+    metrics.violations = [];
+    metrics.warnings = 0;
+    spamMetrics.set(sessionId, metrics);
+    return true;
+  }
+  return false;
+}

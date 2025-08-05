@@ -9,7 +9,9 @@ import { memAutoRotationService } from "./memAutoRotationService";
 import { pushNotificationService } from "./pushNotificationService";
 import { addTestRoute } from "./testRoute";
 import { memoryStoryRecommendationEngine } from "./storyRecommendationEngine";
-import { detectSpam, isInCooldown, updateEngagementScore } from "./spamDetection";
+import { detectSpam, isInCooldown, updateEngagementScore, getSpamDetectionStats, getRecentViolations, clearSessionSpamHistory } from "./spamDetection";
+import { adminAuthService } from "./adminAuth";
+import { adminLoginSchema, addAdminSchema } from "../shared/admin-schema";
 
 declare module 'express-session' {
   interface SessionData {
@@ -1231,6 +1233,202 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   }
+
+  // Admin Authentication Routes
+  
+  // Step 1: Verify fingerprint and get admin verification prompt
+  app.post("/api/admin/verify-fingerprint", async (req, res) => {
+    try {
+      const { fingerprint } = req.body;
+      
+      if (!fingerprint) {
+        return res.status(400).json({ message: "Device fingerprint required" });
+      }
+
+      const isAuthorized = await adminAuthService.isAuthorizedFingerprint(fingerprint);
+      
+      if (isAuthorized) {
+        res.json({ 
+          verified: true, 
+          message: "Device authorized. Please enter your admin email." 
+        });
+      } else {
+        res.status(401).json({ 
+          verified: false, 
+          message: "Unauthorized device" 
+        });
+      }
+    } catch (error) {
+      console.error("Admin fingerprint verification error:", error);
+      res.status(500).json({ message: "Verification error" });
+    }
+  });
+
+  // Step 2: Complete admin login with email verification
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const loginData = adminLoginSchema.parse(req.body);
+      const sessionId = req.session.id;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session required" });
+      }
+
+      const verification = await adminAuthService.verifyAdminCredentials(
+        loginData.fingerprint, 
+        loginData.email
+      );
+      
+      if (!verification.valid) {
+        return res.status(401).json({ 
+          message: verification.errors?.join(', ') || "Invalid credentials" 
+        });
+      }
+
+      // Create admin session
+      const sessionCreated = await adminAuthService.createAdminSession(
+        loginData.fingerprint, 
+        loginData.email, 
+        sessionId
+      );
+      
+      if (sessionCreated) {
+        res.json({ 
+          success: true, 
+          message: "Admin access granted",
+          role: verification.role 
+        });
+      } else {
+        res.status(500).json({ message: "Failed to create admin session" });
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ message: "Login error" });
+    }
+  });
+
+  // Verify current admin session status
+  app.get("/api/admin/session", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      
+      if (!sessionId) {
+        return res.status(401).json({ authenticated: false });
+      }
+
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (verification.valid) {
+        res.json({ 
+          authenticated: true, 
+          admin: verification.admin 
+        });
+      } else {
+        res.status(401).json({ authenticated: false });
+      }
+    } catch (error) {
+      console.error("Admin session check error:", error);
+      res.status(500).json({ message: "Session check error" });
+    }
+  });
+
+  // Admin logout
+  app.post("/api/admin/logout", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      
+      if (sessionId) {
+        await storage.deactivateAdminSession(sessionId);
+      }
+      
+      res.json({ success: true, message: "Logged out successfully" });
+    } catch (error) {
+      console.error("Admin logout error:", error);
+      res.status(500).json({ message: "Logout error" });
+    }
+  });
+
+  // Root Host Only Routes (Admin Management)
+  
+  // Get all admins (root host only)
+  app.get("/api/admin/manage/list", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const result = await adminAuthService.getAdminList(
+        verification.admin.email, 
+        verification.admin.fingerprint
+      );
+      
+      if (result.success) {
+        res.json(result.admins);
+      } else {
+        res.status(403).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Get admin list error:", error);
+      res.status(500).json({ message: "Failed to get admin list" });
+    }
+  });
+
+  // Add new admin (root host only)
+  app.post("/api/admin/manage/add", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const adminData = addAdminSchema.parse(req.body);
+      
+      const result = await adminAuthService.addAdmin(
+        verification.admin.email,
+        verification.admin.fingerprint,
+        adminData
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Add admin error:", error);
+      res.status(500).json({ message: "Failed to add admin" });
+    }
+  });
+
+  // Remove admin (root host only)
+  app.post("/api/admin/manage/remove", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const { targetEmail } = req.body;
+      
+      if (!targetEmail) {
+        return res.status(400).json({ message: "Target email required" });
+      }
+
+      const result = await adminAuthService.removeAdmin(
+        verification.admin.email,
+        verification.admin.fingerprint,
+        targetEmail
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Remove admin error:", error);
+      res.status(500).json({ message: "Failed to remove admin" });
+    }
+  });
 
   // Add test routes for development
   if (process.env.NODE_ENV === 'development') {

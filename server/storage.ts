@@ -1,4 +1,5 @@
 import { type Post, type InsertPost, type Comment, type InsertComment, type Reaction, type DramaVote, type ReactionInput, type DramaVoteInput, type Report, type UserFlag, type Notification, type NotificationInput, type AnonymousUser, type DeviceSession, type BannedDevice, type CreateAnonymousUserInput, type UpgradeAccountInput, type LoginInput, type ContentPrompt, type InsertContentPrompt, type WeeklyTheme, type InsertWeeklyTheme, type RotationCycle, type InsertRotationCycle, type Leaderboard, type PushSubscription, type InsertPushSubscription, type PushNotificationLog, type DailyPromptStreak, type InsertDailyPromptStreak, type DailyPromptSubmission, type InsertDailyPromptSubmission } from "@shared/schema";
+import { type AdminFingerprint, type InsertAdminFingerprint, type AdminEmail, type InsertAdminEmail, type AdminSession, type InsertAdminSession, type AdminActivityLog, type InsertAdminActivityLog } from "@shared/admin-schema";
 import { randomUUID } from "crypto";
 import { createHash } from "crypto";
 
@@ -98,6 +99,31 @@ export interface IStorage {
   recordDailyPromptSubmission(submission: InsertDailyPromptSubmission): Promise<DailyPromptSubmission>;
   validateDailyPromptSubmission(sessionId: string, promptId: string, submissionDate: string): Promise<{ isValid: boolean; reason?: string }>;
   getDailyPromptSubmissions(sessionId: string, limit?: number): Promise<DailyPromptSubmission[]>;
+
+  // Admin Authentication System
+  createAdminFingerprint(fingerprintData: InsertAdminFingerprint): Promise<AdminFingerprint>;
+  getAdminFingerprint(fingerprint: string): Promise<AdminFingerprint | undefined>;
+  deactivateAdminFingerprint(fingerprint: string): Promise<void>;
+  createAdminEmail(emailData: InsertAdminEmail): Promise<AdminEmail>;
+  getAdminEmail(email: string, fingerprint: string): Promise<AdminEmail | undefined>;
+  getAdminEmailByEmail(email: string): Promise<AdminEmail | undefined>;
+  updateAdminEmailLastLogin(email: string): Promise<void>;
+  deactivateAdminEmail(email: string): Promise<void>;
+  createAdminSession(sessionData: InsertAdminSession): Promise<AdminSession>;
+  getAdminSession(sessionId: string): Promise<AdminSession | undefined>;
+  updateAdminSessionActivity(sessionId: string): Promise<void>;
+  deactivateAdminSession(sessionId: string): Promise<void>;
+  deactivateAdminSessionsByEmail(email: string): Promise<void>;
+  createAdminActivityLog(logData: InsertAdminActivityLog): Promise<AdminActivityLog>;
+  getAllActiveAdmins(): Promise<Array<{
+    email: string;
+    fingerprint: string;
+    fingerprintLabel: string;
+    role: string;
+    isRootHost: boolean;
+    lastLogin?: Date;
+    createdAt: Date;
+  }>>;
 }
 
 export class MemStorage implements IStorage {
@@ -119,6 +145,10 @@ export class MemStorage implements IStorage {
   private pushNotificationLogs: Map<string, any>;
   private dailyPromptStreaks: Map<string, DailyPromptStreak>;
   private dailyPromptSubmissions: Map<string, DailyPromptSubmission>;
+  private adminFingerprints: Map<string, AdminFingerprint>;
+  private adminEmails: Map<string, AdminEmail>;
+  private adminSessions: Map<string, AdminSession>;
+  private adminActivityLogs: Map<string, AdminActivityLog>;
 
   constructor() {
     this.posts = new Map();
@@ -139,6 +169,10 @@ export class MemStorage implements IStorage {
     this.pushNotificationLogs = new Map();
     this.dailyPromptStreaks = new Map();
     this.dailyPromptSubmissions = new Map();
+    this.adminFingerprints = new Map();
+    this.adminEmails = new Map();
+    this.adminSessions = new Map();
+    this.adminActivityLogs = new Map();
   }
 
   async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
@@ -1303,6 +1337,204 @@ export class MemStorage implements IStorage {
       .sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime())
       .slice(0, limit);
   }
+
+  // Admin Authentication System Implementation
+  async createAdminFingerprint(fingerprintData: InsertAdminFingerprint): Promise<AdminFingerprint> {
+    const id = randomUUID();
+    const fingerprint: AdminFingerprint = {
+      ...fingerprintData,
+      id,
+      createdAt: new Date(),
+      lastUsed: null,
+    };
+    this.adminFingerprints.set(fingerprint.fingerprint, fingerprint);
+    return fingerprint;
+  }
+
+  async getAdminFingerprint(fingerprint: string): Promise<AdminFingerprint | undefined> {
+    return this.adminFingerprints.get(fingerprint);
+  }
+
+  async deactivateAdminFingerprint(fingerprint: string): Promise<void> {
+    const adminFingerprint = this.adminFingerprints.get(fingerprint);
+    if (adminFingerprint) {
+      adminFingerprint.isActive = false;
+      this.adminFingerprints.set(fingerprint, adminFingerprint);
+    }
+  }
+
+  async createAdminEmail(emailData: InsertAdminEmail): Promise<AdminEmail> {
+    const id = randomUUID();
+    const adminEmail: AdminEmail = {
+      ...emailData,
+      id,
+      createdAt: new Date(),
+      lastLogin: null,
+    };
+    this.adminEmails.set(`${emailData.email}:${emailData.fingerprint}`, adminEmail);
+    return adminEmail;
+  }
+
+  async getAdminEmail(email: string, fingerprint: string): Promise<AdminEmail | undefined> {
+    return this.adminEmails.get(`${email}:${fingerprint}`);
+  }
+
+  async getAdminEmailByEmail(email: string): Promise<AdminEmail | undefined> {
+    return Array.from(this.adminEmails.values())
+      .find(adminEmail => adminEmail.email === email && adminEmail.isActive);
+  }
+
+  async updateAdminEmailLastLogin(email: string): Promise<void> {
+    const adminEmail = Array.from(this.adminEmails.values())
+      .find(ae => ae.email === email);
+    if (adminEmail) {
+      adminEmail.lastLogin = new Date();
+      this.adminEmails.set(`${adminEmail.email}:${adminEmail.fingerprint}`, adminEmail);
+    }
+  }
+
+  async deactivateAdminEmail(email: string): Promise<void> {
+    const adminEmail = Array.from(this.adminEmails.values())
+      .find(ae => ae.email === email);
+    if (adminEmail) {
+      adminEmail.isActive = false;
+      this.adminEmails.set(`${adminEmail.email}:${adminEmail.fingerprint}`, adminEmail);
+    }
+  }
+
+  async createAdminSession(sessionData: InsertAdminSession): Promise<AdminSession> {
+    const id = randomUUID();
+    const session: AdminSession = {
+      ...sessionData,
+      id,
+      expiresAt: typeof sessionData.expiresAt === 'string' ? new Date(sessionData.expiresAt) : sessionData.expiresAt,
+      createdAt: new Date(),
+      lastActivity: new Date(),
+    };
+    this.adminSessions.set(session.sessionId, session);
+    return session;
+  }
+
+  async getAdminSession(sessionId: string): Promise<AdminSession | undefined> {
+    return this.adminSessions.get(sessionId);
+  }
+
+  async updateAdminSessionActivity(sessionId: string): Promise<void> {
+    const session = this.adminSessions.get(sessionId);
+    if (session) {
+      session.lastActivity = new Date();
+      this.adminSessions.set(sessionId, session);
+    }
+  }
+
+  async deactivateAdminSession(sessionId: string): Promise<void> {
+    const session = this.adminSessions.get(sessionId);
+    if (session) {
+      session.isActive = false;
+      this.adminSessions.set(sessionId, session);
+    }
+  }
+
+  async deactivateAdminSessionsByEmail(email: string): Promise<void> {
+    Array.from(this.adminSessions.values())
+      .filter(session => session.email === email)
+      .forEach(session => {
+        session.isActive = false;
+        this.adminSessions.set(session.sessionId, session);
+      });
+  }
+
+  async createAdminActivityLog(logData: InsertAdminActivityLog): Promise<AdminActivityLog> {
+    const id = randomUUID();
+    const log: AdminActivityLog = {
+      ...logData,
+      id,
+      createdAt: new Date(),
+    };
+    this.adminActivityLogs.set(id, log);
+    return log;
+  }
+
+  async getAllActiveAdmins(): Promise<Array<{
+    email: string;
+    fingerprint: string;
+    fingerprintLabel: string;
+    role: string;
+    isRootHost: boolean;
+    lastLogin?: Date;
+    createdAt: Date;
+  }>> {
+    const activeEmails = Array.from(this.adminEmails.values())
+      .filter(email => email.isActive);
+    
+    return activeEmails.map(emailRecord => {
+      const fingerprintRecord = this.adminFingerprints.get(emailRecord.fingerprint);
+      return {
+        email: emailRecord.email,
+        fingerprint: emailRecord.fingerprint,
+        fingerprintLabel: fingerprintRecord?.label || 'Unknown Device',
+        role: emailRecord.role || 'admin',
+        isRootHost: fingerprintRecord?.isRootHost || false,
+        lastLogin: emailRecord.lastLogin || undefined,
+        createdAt: emailRecord.createdAt,
+      };
+    });
+  }
+  // Initialize root admin - call this on startup
+  async initializeRootAdmin(fingerprint: string, email: string, label?: string): Promise<void> {
+    console.log('[Admin System] Initializing root admin...');
+
+    // Create root fingerprint if it doesn't exist
+    const existingFingerprint = await this.getAdminFingerprint(fingerprint);
+    if (!existingFingerprint) {
+      await this.createAdminFingerprint({
+        fingerprint,
+        label: label || 'Root Host Device',
+        addedBy: 'system',
+        isActive: true
+      });
+      console.log('[Admin System] Root fingerprint created');
+    }
+
+    // Create root email if it doesn't exist
+    const existingEmail = await this.getAdminEmailByEmail(email);
+    if (!existingEmail) {
+      await this.createAdminEmail({
+        email,
+        fingerprint,
+        role: 'root_host',
+        addedBy: 'system',
+        isActive: true
+      });
+      console.log('[Admin System] Root email created');
+    } else if (existingEmail.role !== 'root_host') {
+      // Upgrade existing admin to root host
+      existingEmail.role = 'root_host';
+      console.log('[Admin System] Existing admin upgraded to root host');
+    }
+
+    console.log('[Admin System] Root admin initialization complete');
+  }
 }
 
 export const storage = new MemStorage();
+
+// Initialize root admin on startup if environment variables are provided
+const initializeAdminSystem = async () => {
+  const rootFingerprint = process.env.ROOT_ADMIN_FINGERPRINT;
+  const rootEmail = process.env.ROOT_ADMIN_EMAIL;
+  
+  if (rootFingerprint && rootEmail) {
+    try {
+      await storage.initializeRootAdmin(rootFingerprint, rootEmail, 'Root Host Device');
+      console.log('[Admin System] Root admin initialized successfully');
+    } catch (error) {
+      console.error('[Admin System] Failed to initialize root admin:', error);
+    }
+  } else {
+    console.log('[Admin System] No root admin environment variables found - manual setup required');
+  }
+};
+
+// Call initialization after a short delay to ensure storage is ready
+setTimeout(initializeAdminSystem, 1000);
