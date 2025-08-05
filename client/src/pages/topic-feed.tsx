@@ -198,7 +198,7 @@ export default function TopicFeed() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
       {/* Fixed Back Arrow - Always visible in top left with topic theme */}
       <div className="fixed top-4 left-4 z-50">
         <Button

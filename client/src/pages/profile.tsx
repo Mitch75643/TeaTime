@@ -233,7 +233,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
       <Header />
       
       <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto">

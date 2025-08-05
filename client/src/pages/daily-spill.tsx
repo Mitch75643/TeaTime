@@ -410,7 +410,7 @@ export default function DailySpill() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
       <Header />
       
       {/* Theme of the Week Banner with Streak */}

@@ -188,7 +188,7 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
       <Header />
       
       <div className="px-4 pt-6 pb-4">

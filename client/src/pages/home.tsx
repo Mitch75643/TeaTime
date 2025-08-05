@@ -86,7 +86,7 @@ export default function Home() {
   const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
       <Header />
       
       <div className="sticky top-16 z-40 bg-white dark:bg-gray-800">
