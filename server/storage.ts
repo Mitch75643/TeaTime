@@ -1737,6 +1737,13 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserDebateVote(postId: string, sessionId: string): Promise<'up' | 'down' | null> {
+    const vote = Array.from(this.debateVotes.values()).find(
+      vote => vote.postId === postId && vote.sessionId === sessionId
+    );
+    return vote ? vote.vote : null;
+  }
+
   // Get all banned users for admin panel (alias for getAllBannedDevices)
   async getAllBannedUsers(): Promise<BannedDevice[]> {
     return this.getAllBannedDevices();

@@ -140,7 +140,9 @@ export function addPollVotingRoutes(app: Express) {
       const sessionId = req.session.id!;
       
       const hasVoted = await storage.hasUserVotedInDebate(postId, sessionId);
-      res.json({ hasVoted });
+      const userVote = await storage.getUserDebateVote(postId, sessionId);
+      
+      res.json({ hasVoted, vote: userVote });
     } catch (error) {
       console.error("Failed to check debate vote status:", error);
       res.status(500).json({ message: "Failed to check vote status" });
