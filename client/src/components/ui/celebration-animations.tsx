@@ -8,15 +8,33 @@ interface CelebrationProps {
   type: "celebrity-tea" | "story-time" | "hot-topics" | "daily-debate" | "tea-experiments" | "bug-report" | "feature-request" | "general-feedback";
 }
 
-// Global sound cooldown to prevent spam
+// Global sound control to prevent spam
 let lastSoundTime = 0;
+let soundDisabledUntil = 0;
 const SOUND_COOLDOWN_MS = 3000; // 3 seconds cooldown between sounds
+const SOUND_DISABLE_DURATION = 2000; // 2 seconds disable after posting
+
+// Function to disable sounds temporarily after posting
+const disableSoundsTemporarily = () => {
+  soundDisabledUntil = Date.now() + SOUND_DISABLE_DURATION;
+  console.log("Sounds disabled for 2 seconds after posting");
+};
+
+// Make this function available globally
+(window as any).disableSoundsTemporarily = disableSoundsTemporarily;
 
 // Audio helper function
 const playSound = (soundType: string) => {
   try {
-    // Check cooldown period
     const now = Date.now();
+    
+    // Check if sounds are temporarily disabled
+    if (now < soundDisabledUntil) {
+      console.log("Sound blocked - temporarily disabled after posting");
+      return;
+    }
+    
+    // Check cooldown period
     if (now - lastSoundTime < SOUND_COOLDOWN_MS) {
       console.log("Sound blocked due to cooldown");
       return;

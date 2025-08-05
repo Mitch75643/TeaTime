@@ -218,6 +218,14 @@ export function SectionPostModal({
       queryClient.invalidateQueries({ queryKey: ['/api/posts/community'] });
       queryClient.invalidateQueries({ queryKey: ['/api/posts/user'] });
       
+      // Disable sounds temporarily after posting
+      if ((window as any).disableSoundsTemporarily) {
+        (window as any).disableSoundsTemporarily();
+      }
+      if ((window as any).disableTopicSoundsTemporarily) {
+        (window as any).disableTopicSoundsTemporarily();
+      }
+      
       // Trigger community topic animation or regular celebration
       if (["celebrity-tea", "story-time", "hot-topics", "daily-debate", "feedback-suggestions"].includes(section)) {
         triggerTopicAnimation(section);

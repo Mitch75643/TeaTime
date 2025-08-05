@@ -8,15 +8,33 @@ interface CommunityTopicAnimationProps {
   topic: string;
 }
 
-// Global sound cooldown to prevent spam
+// Global sound control to prevent spam
 let lastTopicSoundTime = 0;
+let topicSoundDisabledUntil = 0;
 const TOPIC_SOUND_COOLDOWN_MS = 3000; // 3 seconds cooldown between sounds
+const TOPIC_SOUND_DISABLE_DURATION = 2000; // 2 seconds disable after posting
+
+// Function to disable topic sounds temporarily after posting
+const disableTopicSoundsTemporarily = () => {
+  topicSoundDisabledUntil = Date.now() + TOPIC_SOUND_DISABLE_DURATION;
+  console.log("Topic sounds disabled for 2 seconds after posting");
+};
+
+// Make this function available globally
+(window as any).disableTopicSoundsTemporarily = disableTopicSoundsTemporarily;
 
 // Topic-specific sound effects
 const playTopicSound = (topic: string) => {
   try {
-    // Check cooldown period
     const now = Date.now();
+    
+    // Check if sounds are temporarily disabled
+    if (now < topicSoundDisabledUntil) {
+      console.log("Topic sound blocked - temporarily disabled after posting");
+      return;
+    }
+    
+    // Check cooldown period
     if (now - lastTopicSoundTime < TOPIC_SOUND_COOLDOWN_MS) {
       console.log("Topic sound blocked due to cooldown");
       return;
