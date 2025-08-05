@@ -24,7 +24,7 @@ export function BottomNav() {
         {/* Gradient accent bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600"></div>
         
-        <div className="flex items-center justify-around py-3 px-2 relative">
+        <div className="flex items-center justify-around py-2 px-2 relative">
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = location === item.path;
@@ -36,7 +36,7 @@ export function BottomNav() {
                   <Link 
                     href={item.path!} 
                     className={cn(
-                      "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group cursor-pointer touch-manipulation select-none",
+                      "flex flex-col items-center py-1.5 px-3 transition-all duration-300 relative group cursor-pointer touch-manipulation select-none",
                       isActive 
                         ? "text-orange-500 dark:text-orange-400" 
                         : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
@@ -71,7 +71,7 @@ export function BottomNav() {
                 <Link 
                   href={item.path!}
                   className={cn(
-                    "flex flex-col items-center py-2 px-3 transition-all duration-300 relative group cursor-pointer touch-manipulation select-none",
+                    "flex flex-col items-center py-1.5 px-3 transition-all duration-300 relative group cursor-pointer touch-manipulation select-none",
                     isActive 
                       ? "text-orange-500 dark:text-orange-400" 
                       : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
