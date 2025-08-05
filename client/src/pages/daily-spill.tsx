@@ -565,7 +565,7 @@ export default function DailySpill() {
       </div>
 
       {/* Posts Feed */}
-      <main className="px-4 pb-24 space-y-4 pt-4 mobile-scroll-content">
+      <main className="px-4 pb-24 space-y-4 pt-4">
         {isLoading && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>

@@ -92,24 +92,28 @@ body[data-modal-open="true"]::-webkit-scrollbar {
   display: none;
 }
 
-/* Mobile app scrolling optimization for Replit */
+/* Enhanced scrolling for all devices */
+body {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+main {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* Ensure content areas are properly scrollable on all devices */
+.mobile-scroll-content {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: visible;
+  position: relative;
+}
+
+/* Mobile-specific optimizations */
 @media (max-width: 768px) {
-  body {
-    -webkit-overflow-scrolling: touch;
-    overflow-scrolling: touch;
-  }
-  
   main {
-    -webkit-overflow-scrolling: touch;
-    overflow-scrolling: touch;
     min-height: calc(100vh - 160px); /* Account for header and nav */
-  }
-  
-  /* Ensure content areas are properly scrollable */
-  .mobile-scroll-content {
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
-    position: relative;
   }
 }
 

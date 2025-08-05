@@ -236,7 +236,7 @@ export default function Profile() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
-      <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto mobile-scroll-content">
+      <main className="px-4 pt-6 pb-20 space-y-6 max-w-2xl mx-auto">
         {/* Profile Header */}
         <Card>
           <CardHeader className="text-center">
