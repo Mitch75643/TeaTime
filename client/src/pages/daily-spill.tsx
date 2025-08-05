@@ -519,20 +519,20 @@ export default function DailySpill() {
 
       {/* Spill of the Day Highlight */}
       {spillOfTheDay && (
-        <div className="px-4 pb-4">
-          <Card className="border-2 border-yellow-400 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
-            <CardHeader className="pb-2">
+        <div className="px-4 pb-3">
+          <Card className="border border-yellow-400 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/10 dark:to-orange-900/10">
+            <CardHeader className="pb-1 py-2">
               <div className="flex items-center space-x-2">
-                <Trophy className="h-5 w-5 text-yellow-600" />
-                <CardTitle className="text-lg text-yellow-700 dark:text-yellow-300">
+                <Trophy className="h-4 w-4 text-yellow-600" />
+                <CardTitle className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
                   ⭐ Spill of the Day
                 </CardTitle>
-                <Badge className="bg-yellow-400 text-yellow-900 text-xs">
-                  Most Reactions
+                <Badge className="bg-yellow-400 text-yellow-900 text-xs px-1 py-0">
+                  Top
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 pb-2">
               <PostCard post={spillOfTheDay} />
             </CardContent>
           </Card>
