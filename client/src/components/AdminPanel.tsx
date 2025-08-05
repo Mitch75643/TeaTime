@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAdminAuth, useAdminManagement } from "@/hooks/useAdminAuth";
 import { getDeviceFingerprint } from "@/lib/fingerprint";
 import { useToast } from "@/hooks/use-toast";
@@ -23,13 +24,16 @@ import {
   Trash2,
   AlertTriangle,
   Loader2,
-  UserX
+  UserX,
+  Search,
+  Calendar,
+  Clock
 } from "lucide-react";
 
 export function AdminPanel() {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showBannedUsers, setShowBannedUsers] = useState(false);
   const [showRootHostConfirm, setShowRootHostConfirm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [newAdminData, setNewAdminData] = useState({
     fingerprint: '',
     fingerprintLabel: '',
@@ -52,9 +56,14 @@ export function AdminPanel() {
   // Fetch banned users
   const { data: bannedUsers, isLoading: isLoadingBanned } = useQuery({
     queryKey: ['/api/admin/banned-users'],
-    enabled: showBannedUsers,
     retry: false,
   });
+
+  // Filter banned users based on search term
+  const filteredBannedUsers = bannedUsers?.filter((ban: any) => 
+    ban.fingerprint?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ban.reason?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
 
   // Only root host can access admin panel
   if (!isAuthenticated || !isRootHost) {
@@ -183,22 +192,13 @@ export function AdminPanel() {
               <Shield className="w-5 h-5" />
               Current Admins ({adminList.length})
             </span>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setShowAddForm(!showAddForm)}
-                disabled={isAddingAdmin}
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add Admin
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowBannedUsers(!showBannedUsers)}
-              >
-                <UserX className="w-4 h-4 mr-2" />
-                View Banned Users
-              </Button>
-            </div>
+            <Button
+              onClick={() => setShowAddForm(!showAddForm)}
+              disabled={isAddingAdmin}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add Admin
+            </Button>
           </CardTitle>
         </CardHeader>
         
@@ -403,72 +403,187 @@ export function AdminPanel() {
         </Card>
       )}
 
-      {/* Banned Users Section */}
-      {showBannedUsers && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserX className="w-5 h-5 text-red-600" />
-              Banned Users
-            </CardTitle>
-            <CardDescription>
-              View all users that have been banned from the platform with their device fingerprints.
-            </CardDescription>
-          </CardHeader>
+    </div>
+  );
+}
+
+// Separate Banned Users Component
+export function BannedUsersPanel() {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Fetch banned users
+  const { data: bannedUsers, isLoading: isLoadingBanned } = useQuery({
+    queryKey: ['/api/admin/banned-users'],
+    retry: false,
+  });
+
+  // Filter banned users based on search term
+  const filteredBannedUsers = bannedUsers?.filter((ban: any) => 
+    ban.fingerprint?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ban.reason?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const activeBans = filteredBannedUsers.filter((ban: any) => ban.isActive);
+  const expiredBans = filteredBannedUsers.filter((ban: any) => !ban.isActive);
+
+  return (
+    <div className="space-y-6 w-full max-w-6xl mx-auto">
+      {/* Header with Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserX className="w-5 h-5 text-red-600" />
+            Banned Users Management
+          </CardTitle>
+          <CardDescription>
+            Monitor and manage banned devices with advanced search and filtering capabilities.
+          </CardDescription>
           
-          <CardContent>
-            {isLoadingBanned ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin" />
-                <span className="ml-2">Loading banned users...</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+            <div className="bg-red-50 dark:bg-red-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-red-600">{activeBans.length}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Active Bans</div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-gray-600">{expiredBans.length}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Expired Bans</div>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{bannedUsers?.length || 0}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Total Records</div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Search and Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Search & Filter</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Label htmlFor="search">Search by Fingerprint ID or Reason</Label>
+              <div className="relative mt-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Enter fingerprint ID or ban reason..."
+                  className="pl-10"
+                />
               </div>
-            ) : bannedUsers && bannedUsers.length > 0 ? (
-              <div className="space-y-3">
-                {bannedUsers.map((ban: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg bg-red-50 dark:bg-red-950/20">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="destructive">BANNED</Badge>
-                        <span className="font-medium">Device #{index + 1}</span>
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <strong>Fingerprint:</strong> {ban.fingerprint}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <strong>Reason:</strong> {ban.reason || 'Violation of platform rules'}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Banned: {new Date(ban.bannedAt).toLocaleString()}
-                      </div>
-                      {ban.expiresAt && (
-                        <div className="text-xs text-gray-500">
-                          Expires: {new Date(ban.expiresAt).toLocaleString()}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Banned Users Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Banned Devices ({filteredBannedUsers.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingBanned ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <span className="ml-3 text-lg">Loading banned users...</span>
+            </div>
+          ) : filteredBannedUsers.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Device Fingerprint</TableHead>
+                  <TableHead>Ban Reason</TableHead>
+                  <TableHead>Banned Date</TableHead>
+                  <TableHead>Expires</TableHead>
+                  <TableHead>Banned By</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredBannedUsers.map((ban: any, index: number) => (
+                  <TableRow key={index} className={ban.isActive ? "bg-red-50/50 dark:bg-red-950/10" : "bg-gray-50/50 dark:bg-gray-950/10"}>
+                    <TableCell>
                       <Badge variant={ban.isActive ? "destructive" : "secondary"}>
-                        {ban.isActive ? "Active" : "Expired"}
+                        {ban.isActive ? "ACTIVE" : "EXPIRED"}
                       </Badge>
-                    </div>
-                  </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-mono text-sm">
+                        {ban.fingerprint}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Device #{index + 1}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-xs">
+                        {ban.reason || 'Violation of platform rules'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(ban.bannedAt).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                        <Clock className="w-3 h-3" />
+                        {new Date(ban.bannedAt).toLocaleTimeString()}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {ban.expiresAt ? (
+                        <div>
+                          <div className="flex items-center gap-1 text-sm">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(ban.expiresAt).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(ban.expiresAt).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      ) : (
+                        <Badge variant="outline">Permanent</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {ban.bannedBy || 'System'}
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <UserX className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  No Banned Users
-                </h3>
-                <p className="text-muted-foreground">
-                  There are currently no banned users on the platform.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-12">
+              <UserX className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-medium text-foreground mb-2">
+                {searchTerm ? 'No Results Found' : 'No Banned Users'}
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                {searchTerm 
+                  ? `No banned users match your search for "${searchTerm}". Try a different search term.`
+                  : 'There are currently no banned users on the platform. All users are in good standing.'
+                }
+              </p>
+              {searchTerm && (
+                <Button
+                  variant="outline"
+                  onClick={() => setSearchTerm('')}
+                  className="mt-4"
+                >
+                  Clear Search
+                </Button>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

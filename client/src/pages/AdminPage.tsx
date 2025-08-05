@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminAuth } from "@/components/AdminAuth";
-import { AdminPanel } from "@/components/AdminPanel";
+import { AdminPanel, BannedUsersPanel } from "@/components/AdminPanel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { Shield, Settings, Users } from "lucide-react";
+import { Shield, Settings, Users, UserX } from "lucide-react";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("auth");
@@ -25,7 +25,7 @@ export default function AdminPage() {
           <AdminAuth onSuccess={() => setActiveTab("management")} />
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+            <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-8">
               <TabsTrigger value="auth" className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
                 Authentication
@@ -37,6 +37,14 @@ export default function AdminPage() {
               >
                 <Users className="w-4 h-4" />
                 Admin Management
+              </TabsTrigger>
+              <TabsTrigger 
+                value="banned" 
+                className="flex items-center gap-2"
+                disabled={!isRootHost}
+              >
+                <UserX className="w-4 h-4" />
+                Banned Users
               </TabsTrigger>
             </TabsList>
 
@@ -55,6 +63,22 @@ export default function AdminPage() {
                   </h2>
                   <p className="text-muted-foreground">
                     Only the root host can access admin management features.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="banned">
+              {isRootHost ? (
+                <BannedUsersPanel />
+              ) : (
+                <div className="text-center py-8">
+                  <UserX className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold text-foreground mb-2">
+                    Banned Users
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Only the root host can view banned users information.
                   </p>
                 </div>
               )}
