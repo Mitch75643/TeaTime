@@ -19,6 +19,7 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
   const [fingerprint, setFingerprint] = useState('');
   const [error, setError] = useState('');
   const [isGettingFingerprint, setIsGettingFingerprint] = useState(false);
+  const [isSettingUpRoot, setIsSettingUpRoot] = useState(false);
   
   const { toast } = useToast();
   const {
@@ -96,6 +97,53 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
     }
   };
 
+  // Handle root admin setup
+  const handleSetupRootAdmin = async () => {
+    if (!fingerprint) {
+      setError('Device fingerprint not available');
+      return;
+    }
+
+    const adminEmail = prompt('Enter your admin email address:');
+    if (!adminEmail) {
+      setError('Email required for root admin setup');
+      return;
+    }
+
+    setIsSettingUpRoot(true);
+    try {
+      setError('');
+      
+      const response = await fetch('/api/admin/setup-root', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fingerprint,
+          email: adminEmail
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Root Admin Created!",
+          description: `Admin account created successfully. You can now login with your email.`,
+        });
+        setStep('email');
+        setEmail(adminEmail);
+      } else {
+        setError(result.message || 'Failed to setup root admin');
+      }
+    } catch (err: any) {
+      setError('Network error: Failed to setup root admin');
+    } finally {
+      setIsSettingUpRoot(false);
+    }
+  };
+
   // Handle logout
   const handleLogout = async () => {
     try {
@@ -129,14 +177,14 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label className="text-sm font-medium">Email</Label>
-            <div className="p-2 bg-gray-50 rounded border text-sm">
+            <div className="p-3 bg-muted rounded border text-sm text-foreground">
               {admin.email}
             </div>
           </div>
           
           <div className="space-y-2">
             <Label className="text-sm font-medium">Role</Label>
-            <div className="p-2 bg-gray-50 rounded border text-sm">
+            <div className="p-3 bg-muted rounded border text-sm text-foreground">
               {admin.role === 'root_host' ? 'Root Host' : 'Admin'}
             </div>
           </div>
@@ -181,15 +229,24 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
         {step === 'fingerprint' && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Device Fingerprint</Label>
-              <div className="p-2 bg-gray-50 rounded border text-sm font-mono">
+              <Label className="text-sm font-medium">Device Fingerprint</Label>
+              <div className="p-3 bg-muted rounded border text-sm font-mono text-foreground break-all">
                 {isGettingFingerprint ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Generating fingerprint...
                   </div>
+                ) : fingerprint ? (
+                  <div className="space-y-2">
+                    <div className="text-foreground">
+                      {fingerprint}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      ✓ Your unique device fingerprint
+                    </div>
+                  </div>
                 ) : (
-                  fingerprint || 'Failed to generate'
+                  <span className="text-destructive">Failed to generate</span>
                 )}
               </div>
             </div>
@@ -201,6 +258,27 @@ export function AdminAuth({ onSuccess }: AdminAuthProps) {
             >
               {isVerifyingFingerprint && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Verify Device
+            </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  First time setup
+                </span>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleSetupRootAdmin}
+              disabled={!fingerprint || isGettingFingerprint || isSettingUpRoot}
+              variant="outline"
+              className="w-full"
+            >
+              {isSettingUpRoot && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Setup Root Admin
             </Button>
           </div>
         )}

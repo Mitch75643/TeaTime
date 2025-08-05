@@ -1236,6 +1236,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin Authentication Routes
   
+  // Root admin setup route (only for initial setup)
+  app.post('/api/admin/setup-root', async (req, res) => {
+    try {
+      const { fingerprint, email } = req.body;
+      
+      if (!fingerprint || !email) {
+        return res.status(400).json({ message: "Fingerprint and email required" });
+      }
+
+      // Check if any admins already exist
+      const existingAdmins = await storage.getAllActiveAdmins();
+      if (existingAdmins.length > 0) {
+        return res.status(403).json({ message: "Root admin already exists. Use normal admin creation process." });
+      }
+
+      // Create root admin
+      await storage.initializeRootAdmin(fingerprint, email, 'Root Host Device');
+      
+      res.json({ 
+        success: true, 
+        message: "Root admin created successfully",
+        fingerprint: fingerprint.slice(0, 8) + '...',
+        email 
+      });
+    } catch (error) {
+      console.error("Error setting up root admin:", error);
+      res.status(500).json({ message: "Failed to setup root admin" });
+    }
+  });
+  
   // Step 1: Verify fingerprint and get admin verification prompt
   app.post("/api/admin/verify-fingerprint", async (req, res) => {
     try {

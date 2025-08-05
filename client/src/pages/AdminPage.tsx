@@ -10,13 +10,13 @@ export default function AdminPage() {
   const { isAuthenticated, isRootHost } = useAdminAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Admin Access
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Secure admin management system with two-step verification
           </p>
         </div>
@@ -49,11 +49,11 @@ export default function AdminPage() {
                 <AdminPanel />
               ) : (
                 <div className="text-center py-8">
-                  <Shield className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                  <Shield className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold text-foreground mb-2">
                     Admin Management
                   </h2>
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     Only the root host can access admin management features.
                   </p>
                 </div>
