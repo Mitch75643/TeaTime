@@ -16,7 +16,6 @@ import { adminAuthService } from "./adminAuth";
 import { adminLoginSchema, addAdminSchema } from "../shared/admin-schema";
 import { initializeWebSocket, wsManager } from "./websocket";
 import { addPollVotingRoutes } from "./pollVotingRoutes";
-import { smartFeedService } from "./smartFeedService";
 
 declare module 'express-session' {
   interface SessionData {
@@ -57,26 +56,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ sessionId: req.session.id });
   });
 
-  // Get posts (with smart feed support)
+  // Get posts
   app.get("/api/posts", async (req, res) => {
     try {
-      const { category, sortBy = 'new', tags, userOnly, postContext, section, smartFeed, excludePostIds, offset } = req.query;
+      const { category, sortBy = 'new', tags, userOnly, postContext, section } = req.query;
       const sessionId = req.session.id!;
-      
-      // Check if smart feed is requested
-      if (smartFeed === 'true') {
-        const excludeIds = excludePostIds ? (excludePostIds as string).split(',') : [];
-        
-        const smartFeedResponse = await smartFeedService.getSmartFeed({
-          sessionId,
-          category: category as string,
-          sortBy: sortBy as 'new' | 'trending',
-          postContext: postContext as string,
-          excludePostIds: excludeIds,
-        }, storage);
-        
-        return res.json(smartFeedResponse);
-      }
       
       const posts = await storage.getPosts(
         category as string,
@@ -1958,18 +1942,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Add user fingerprint error:", error);
       res.status(500).json({ message: "Failed to add user fingerprint" });
-    }
-  });
-
-  // Smart feed reset endpoint
-  app.post("/api/smart-feed/reset", (req, res) => {
-    try {
-      const sessionId = req.session.id!;
-      smartFeedService.resetSessionQueue(sessionId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Failed to reset smart feed:", error);
-      res.status(500).json({ message: "Failed to reset smart feed" });
     }
   });
 

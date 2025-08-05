@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
 import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
-import { useSmartFeedV2 } from "@/hooks/use-smart-feed-v2";
-import { SmartRefreshButton } from "@/components/ui/smart-refresh-button";
+import { useSmartFeed } from "@/hooks/use-smart-feed";
 import type { Post } from "@shared/schema";
 
 const categories = [
@@ -58,22 +57,34 @@ export default function Home() {
     }
   }, []);
 
-  // Initialize smart feed v2 (only for "new" feeds)
-  const smartFeed = useSmartFeedV2({
+  // Initialize smart feed
+  const smartFeed = useSmartFeed({
     queryKey: ["/api/posts", activeCategory, feedType],
     apiEndpoint: "/api/posts",
     category: activeCategory,
     sortBy: feedType,
     postContext: "home",
-    enableSmartLogic: feedType === 'new', // Only enable smart logic for "new" feeds
   });
 
-  // Use smart feed data
-  const posts = smartFeed.posts;
-  const isLoading = smartFeed.isLoading;
-  const hasMorePosts = smartFeed.hasMorePosts;
-  const shouldShowRefreshBanner = smartFeed.shouldShowRefreshBanner;
-  const shouldShowRefreshButton = smartFeed.shouldShowRefreshButton;
+  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
+    queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (activeCategory !== "all") {
+        params.append("category", activeCategory);
+      }
+      params.append("sortBy", feedType);
+      
+      params.append("postContext", "home");
+      
+      const response = await fetch(`/api/posts?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      return response.json();
+    },
+  });
+
+  // Apply smart feed batching
+  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
@@ -116,14 +127,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Smart Feed Refresh Banner */}
-      {shouldShowRefreshBanner && feedType === 'new' && (
-        <SmartRefreshButton
-          onRefresh={smartFeed.handleRefresh}
-          isRefreshing={smartFeed.isRefreshing}
+      {/* New Posts Banner */}
+      {smartFeed.showNewPostsBanner && (
+        <SmartFeedBanner
           newPostsCount={smartFeed.newPostsCount}
-          queuedPostsCount={smartFeed.queuedPostsCount}
-          variant="banner"
+          onLoadNewPosts={smartFeed.handleLoadNewPosts}
         />
       )}
 
@@ -186,24 +194,11 @@ export default function Home() {
               <PostCard key={post.id} post={post} />
             ))}
             
-            {/* Smart Feed Controls */}
-            {feedType === 'new' && shouldShowRefreshButton && (
-              <div className="text-center pt-4">
-                <SmartRefreshButton
-                  onRefresh={smartFeed.handleRefresh}
-                  isRefreshing={smartFeed.isRefreshing}
-                  newPostsCount={smartFeed.newPostsCount}
-                  queuedPostsCount={smartFeed.queuedPostsCount}
-                  variant="button"
-                />
-              </div>
-            )}
-            
-            {/* Load More Button for additional content */}
-            {hasMorePosts && !shouldShowRefreshButton && (
+            {/* Load More Button */}
+            {hasMorePosts && (
               <LoadMoreButton
                 onLoadMore={smartFeed.handleLoadMore}
-                remainingCount={0}
+                remainingCount={allPosts.length - posts.length}
               />
             )}
           </div>
