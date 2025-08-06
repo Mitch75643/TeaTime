@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SmartFeedRefresh } from "@/components/ui/smart-feed-refresh";
+import { useSmartFeed } from "@/hooks/useSmartFeed";
 import { cn } from "@/lib/utils";
 import { 
   Star, 
@@ -220,9 +222,21 @@ export default function Community() {
       <Header />
       
       <div className="px-4 pt-6 pb-4">
-        <div className="flex items-center space-x-2 mb-6">
-          <Users className="h-6 w-6 text-purple-500" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Community</h1>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <Users className="h-6 w-6 text-purple-500" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Community</h1>
+          </div>
+          <Button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            variant="outline"
+            size="sm"
+            className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/20"
+          >
+            <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
+            {isRefreshing ? "Refreshing..." : "Refresh"}
+          </Button>
         </div>
 
         {/* Community Sections Grid */}
