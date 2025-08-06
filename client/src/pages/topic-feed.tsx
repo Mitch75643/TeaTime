@@ -111,7 +111,7 @@ export default function TopicFeed() {
   
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
-  const topic = topicConfig[topicId] || topicConfig['celebrity-tea']; // Fallback to prevent undefined
+  const topic = topicConfig[topicId];
 
   // Initialize smart feed for community posts
   const smartFeed = useSmartFeed({
@@ -171,7 +171,9 @@ export default function TopicFeed() {
       }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
       if (!response.ok) throw new Error("Failed to fetch community posts");
-      return response.json();
+      const data = await response.json();
+      console.log(`[${topicId}] Community posts fetched:`, data.length);
+      return data;
     }
   });
 
@@ -193,14 +195,23 @@ export default function TopicFeed() {
       }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/user?${params}`);
       if (!response.ok) throw new Error("Failed to fetch user posts");
-      return response.json();
+      const data = await response.json();
+      console.log(`[${topicId}] User posts fetched:`, data.length);
+      return data;
     }
   });
 
   const isLoading = isLoadingCommunity || isLoadingUser;
 
+  // Handle invalid topic redirect in useEffect to avoid hooks order issues
+  useEffect(() => {
+    if (!topic) {
+      setLocation('/community');
+    }
+  }, [topic, setLocation]);
+
+  // Don't render anything if topic is invalid
   if (!topic) {
-    setLocation('/community');
     return null;
   }
 
