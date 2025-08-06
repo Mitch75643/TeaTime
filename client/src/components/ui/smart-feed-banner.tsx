@@ -12,7 +12,7 @@ export function SmartFeedBanner({ newPostsCount, onLoadNewPosts, className = "" 
   const showPlus = newPostsCount > 20;
   
   return (
-    <div className={`sticky top-36 z-0 mx-4 md:mx-6 lg:mx-8 max-w-screen-sm lg:max-w-2xl mx-auto ${className}`}>
+    <div className={`sticky top-36 z-0 mx-6 md:mx-12 lg:mx-16 max-w-sm lg:max-w-lg mx-auto ${className}`}>
       <div className="bg-orange-500/90 dark:bg-orange-600/90 backdrop-blur-sm text-white px-4 py-3 rounded-lg shadow-lg">
         <button 
           onClick={onLoadNewPosts}
