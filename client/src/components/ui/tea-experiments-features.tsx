@@ -200,10 +200,15 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
       
       // Create real poll post in database
       const filteredOptions = newOptions.filter(opt => opt.trim());
+      // Backend expects pollOptions as an object with optionA and optionB
+      const pollOptionsObject = {
+        optionA: filteredOptions[0] || "",
+        optionB: filteredOptions[1] || ""
+      };
       createPostMutation.mutate({
         content: newQuestion.trim(),
         category: "tea-experiments",
-        pollOptions: filteredOptions,
+        pollOptions: pollOptionsObject,
         postType: "poll"
       });
       
