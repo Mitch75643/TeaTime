@@ -203,8 +203,15 @@ export default function TopicFeed() {
 
   const isLoading = isLoadingCommunity || isLoadingUser;
 
+  // Handle invalid topic redirect in useEffect to avoid hooks order issues
+  useEffect(() => {
+    if (!topic) {
+      setLocation('/community');
+    }
+  }, [topic, setLocation]);
+
+  // Don't render anything if topic is invalid
   if (!topic) {
-    setLocation('/community');
     return null;
   }
 
