@@ -2,11 +2,9 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 
 export interface WebSocketMessage {
-  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote' | 'new_post' | 'post_updated' | 'reactions_updated' | 'comments_updated';
+  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote';
   postId: string;
   data: any;
-  page?: string;
-  sessionId?: string;
 }
 
 export class WebSocketManager {
@@ -72,44 +70,6 @@ export class WebSocketManager {
     });
 
     console.log(`[WebSocket] Broadcasted ${message.type} for post ${message.postId} to ${sent} clients (${failed} failed)`);
-  }
-
-  // Broadcast new post notification
-  broadcastNewPost(post: any, page: string, sessionId: string) {
-    this.broadcast({
-      type: 'new_post',
-      postId: post.id,
-      data: { post, page },
-      page,
-      sessionId
-    });
-  }
-
-  // Broadcast post update (reactions, comments, etc.)
-  broadcastPostUpdate(postId: string, updatedPost: any, updateType: string) {
-    this.broadcast({
-      type: 'post_updated',
-      postId,
-      data: { post: updatedPost, type: updateType }
-    });
-  }
-
-  // Broadcast specific reaction updates
-  broadcastReactionUpdate(postId: string, reactions: any[]) {
-    this.broadcast({
-      type: 'reactions_updated',
-      postId,
-      data: { postId, reactions }
-    });
-  }
-
-  // Broadcast specific comment updates
-  broadcastCommentUpdate(postId: string, comments: any[]) {
-    this.broadcast({
-      type: 'comments_updated',
-      postId,
-      data: { postId, comments }
-    });
   }
 
   // Get current client count

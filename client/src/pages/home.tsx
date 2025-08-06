@@ -9,8 +9,9 @@ import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
-import { SmartFeedRefresh } from "@/components/ui/smart-feed-refresh";
-import { useSmartFeed } from "@/hooks/useSmartFeed";
+import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { useSmartFeed } from "@/hooks/use-smart-feed";
 import type { Post } from "@shared/schema";
 
 const categories = [
@@ -56,22 +57,16 @@ export default function Home() {
     }
   }, []);
 
-  // Use smart feed for "New" posts, regular for others
-  const smartFeedEnabled = feedType === "new" && activeCategory === "all";
-  
-  const {
-    posts: smartPosts,
-    isLoading: smartLoading,
-    hasMore,
-    nextBatch,
-    pendingCount,
-    showRefreshPrompt,
-    forceRefresh,
-    loadMorePosts,
-    isLoadingMore
-  } = useSmartFeed("home", smartFeedEnabled);
+  // Initialize smart feed
+  const smartFeed = useSmartFeed({
+    queryKey: ["/api/posts", activeCategory, feedType],
+    apiEndpoint: "/api/posts",
+    category: activeCategory,
+    sortBy: feedType,
+    postContext: "home",
+  });
 
-  const { data: regularPosts = [], isLoading: regularLoading } = useQuery<Post[]>({
+  const { data: allPosts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", { category: activeCategory, sortBy: feedType }],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -79,18 +74,17 @@ export default function Home() {
         params.append("category", activeCategory);
       }
       params.append("sortBy", feedType);
+      
       params.append("postContext", "home");
       
       const response = await fetch(`/api/posts?${params}`);
       if (!response.ok) throw new Error("Failed to fetch posts");
       return response.json();
     },
-    enabled: !smartFeedEnabled, // Only run when smart feed is disabled
   });
 
-  // Choose which posts to display
-  const posts = smartFeedEnabled ? smartPosts : regularPosts;
-  const isLoading = smartFeedEnabled ? smartLoading : regularLoading;
+  // Apply smart feed batching
+  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
@@ -122,30 +116,23 @@ export default function Home() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/posts"] })}
+              onClick={smartFeed.handleRefresh}
+              disabled={smartFeed.isRefreshing}
               className="flex items-center space-x-1 text-orange-600 hover:text-orange-800 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
             >
-              <RefreshCw className="h-3 w-3" />
+              <RefreshCw className={`h-3 w-3 ${smartFeed.isRefreshing ? 'animate-spin' : ''}`} />
               <span className="text-xs">Refresh</span>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Smart Feed Refresh Controls */}
-      {smartFeedEnabled && (
-        <div className="px-4 md:px-6 lg:px-8 max-w-screen-sm lg:max-w-2xl mx-auto">
-          <SmartFeedRefresh
-            pendingCount={pendingCount}
-            showRefreshPrompt={showRefreshPrompt}
-            hasMore={hasMore}
-            nextBatch={nextBatch}
-            onRefresh={forceRefresh}
-            onLoadMore={loadMorePosts}
-            isRefreshing={smartLoading}
-            isLoadingMore={isLoadingMore}
-          />
-        </div>
+      {/* New Posts Banner */}
+      {smartFeed.showNewPostsBanner && (
+        <SmartFeedBanner
+          newPostsCount={smartFeed.newPostsCount}
+          onLoadNewPosts={smartFeed.handleLoadNewPosts}
+        />
       )}
 
       <main className="pb-24 px-4 md:px-6 lg:px-8 pt-6 max-w-screen-sm lg:max-w-2xl mx-auto">

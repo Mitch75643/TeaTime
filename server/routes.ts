@@ -16,7 +16,6 @@ import { adminAuthService } from "./adminAuth";
 import { adminLoginSchema, addAdminSchema } from "../shared/admin-schema";
 import { initializeWebSocket, wsManager } from "./websocket";
 import { addPollVotingRoutes } from "./pollVotingRoutes";
-import { smartFeedService } from "./smartFeedService";
 
 declare module 'express-session' {
   interface SessionData {
@@ -57,24 +56,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ sessionId: req.session.id });
   });
 
-  // Get posts with smart feed support
+  // Get posts
   app.get("/api/posts", async (req, res) => {
     try {
-      const { category, sortBy = 'new', tags, userOnly, postContext, section, smartFeed, offset } = req.query;
+      const { category, sortBy = 'new', tags, userOnly, postContext, section } = req.query;
       const sessionId = req.session.id!;
       
-      // Use smart feed for Home page "New" section only
-      if (smartFeed === 'true' && sortBy === 'new' && !category) {
-        const result = await smartFeedService.getSmartHomeFeed(sessionId);
-        res.json({
-          posts: result.posts,
-          hasMore: result.hasMore,
-          nextBatch: result.nextBatch
-        });
-        return;
-      }
-      
-      // Regular posts endpoint
       const posts = await storage.getPosts(
         category as string,
         sortBy as 'trending' | 'new',
@@ -83,29 +70,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         postContext as string,
         section as string
       );
-      
       res.json(posts);
     } catch (error) {
       console.error("Failed to fetch posts:", error);
       res.status(500).json({ message: "Failed to fetch posts" });
-    }
-  });
-
-  // Get next batch for smart feed
-  app.get("/api/posts/next-batch", async (req, res) => {
-    try {
-      const { offset } = req.query;
-      const sessionId = req.session.id!;
-      
-      const posts = await smartFeedService.getNextBatch(
-        sessionId, 
-        parseInt(offset as string) || 0
-      );
-      
-      res.json(posts);
-    } catch (error) {
-      console.error("Failed to fetch next batch:", error);
-      res.status(500).json({ message: "Failed to fetch next batch" });
     }
   });
 
@@ -310,10 +278,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         streakResult,
         spamWarning: res.locals.spamWarning
       };
-      
-      // Broadcast new post to all connected clients for real-time updates
-      const page = validatedData.postContext || 'home';
-      wsManager.broadcastNewPost(post, page, sessionId);
       
       res.json(response);
     } catch (error) {
