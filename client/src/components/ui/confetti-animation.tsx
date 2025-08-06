@@ -24,11 +24,11 @@ export function ConfettiAnimation({ trigger, onComplete }: ConfettiAnimationProp
       
       setConfetti(pieces);
       
-      // Auto-hide after animation
+      // Auto-hide after animation - 1.5 seconds max
       const timer = setTimeout(() => {
         setIsVisible(false);
         onComplete?.();
-      }, 3000);
+      }, 1500);
       
       return () => clearTimeout(timer);
     }

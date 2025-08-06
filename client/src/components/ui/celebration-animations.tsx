@@ -174,11 +174,11 @@ export function CelebrationAnimation({ isVisible, onComplete, type }: Celebratio
       // Play sound effect - using soft water droplet sound for all topics
       playSound("twinkle");
       
-      // Auto-hide after animation
+      // Auto-hide after animation - 1.5 seconds max
       const timer = setTimeout(() => {
         setShowAnimation(false);
         onComplete();
-      }, 2500);
+      }, 1500);
       
       return () => clearTimeout(timer);
     }

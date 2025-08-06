@@ -91,11 +91,11 @@ export function ChemistryAnimation({ isVisible, onComplete }: ChemistryAnimation
       setShowAnimation(true);
       playChemistrySounds();
       
-      // Auto-hide after animation
+      // Auto-hide after animation - 1.5 seconds max
       const timer = setTimeout(() => {
         setShowAnimation(false);
         onComplete();
-      }, 2000);
+      }, 1500);
       
       return () => clearTimeout(timer);
     }

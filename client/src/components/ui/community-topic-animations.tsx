@@ -204,11 +204,11 @@ export function CommunityTopicAnimation({ isVisible, onComplete, topic }: Commun
       setShowAnimation(true);
       playTopicSound(topic);
       
-      // Auto-hide after animation
+      // Auto-hide after animation - 1.5 seconds max
       const timer = setTimeout(() => {
         setShowAnimation(false);
         onComplete();
-      }, 1800);
+      }, 1500);
       
       return () => clearTimeout(timer);
     }

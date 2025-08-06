@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useAnonymousAuth } from '@/lib/anonymousAuth';
@@ -227,12 +227,12 @@ export function useSmartFeed(options: SmartFeedOptions) {
     setLoadedPostsCount(prev => prev + 20);
   };
 
-  // Function to update visible posts tracking
-  const updateVisiblePosts = (posts: any[]) => {
+  // Function to update visible posts tracking - use useCallback to prevent re-renders
+  const updateVisiblePosts = useCallback((posts: any[]) => {
     const postIds = posts.map(post => post.id);
     setVisiblePostIds(new Set(postIds));
     console.log(`[Smart Feed] Updated visible posts tracking: ${postIds.length} posts`);
-  };
+  }, []);
 
   return {
     isRefreshing,
