@@ -83,8 +83,12 @@ export default function Home() {
     },
   });
 
-  // Apply smart feed batching
-  const { posts, hasMorePosts } = smartFeed.applyBatching(allPosts);
+  // Apply smart capped feed logic (only for "new" feed type, not trending)
+  const feedResult = feedType === "new" 
+    ? smartFeed.applyCappedFeedLogic(allPosts)
+    : smartFeed.applyBatching(allPosts);
+  
+  const { posts, hasMorePosts, needsRefresh } = feedResult;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
@@ -194,8 +198,33 @@ export default function Home() {
               <PostCard key={post.id} post={post} />
             ))}
             
-            {/* Load More Button */}
-            {hasMorePosts && (
+            {/* Refresh to Load More Button for Capped Feed */}
+            {needsRefresh && hasMorePosts && feedType === "new" && (
+              <div className="text-center py-6">
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Showing {posts.length} posts optimized for visibility
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                    {Math.floor(posts.length * 0.2)} zero-engagement • {Math.floor(posts.length * 0.1)} low-engagement • {posts.length - Math.floor(posts.length * 0.2) - Math.floor(posts.length * 0.1)} regular posts
+                  </p>
+                </div>
+                <Button
+                  onClick={smartFeed.handleRefresh}
+                  disabled={smartFeed.isRefreshing}
+                  variant="outline"
+                  className="px-6 py-2 text-sm border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/20"
+                >
+                  🔁 Refresh to load more posts
+                </Button>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                  {allPosts.length - posts.length} more posts available
+                </p>
+              </div>
+            )}
+            
+            {/* Traditional Load More Button for Trending */}
+            {!needsRefresh && hasMorePosts && (
               <LoadMoreButton
                 onLoadMore={smartFeed.handleLoadMore}
                 remainingCount={allPosts.length - posts.length}

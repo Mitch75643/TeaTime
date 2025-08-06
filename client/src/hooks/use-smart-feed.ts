@@ -64,19 +64,94 @@ export function useSmartFeed(options: SmartFeedOptions) {
     return () => clearInterval(interval);
   }, [category, sortBy, postContext, lastFetchTime, apiEndpoint, pollingInterval]);
 
-  // Apply batching logic: show all if < 10 posts, otherwise limit to loadedPostsCount
-  const applyBatching = (allPosts: any[]) => {
-    if (allPosts.length < 10) {
+  // Smart capped feed logic with engagement prioritization
+  const applyCappedFeedLogic = (allPosts: any[]) => {
+    // If fewer than 20 posts, show them all normally
+    if (allPosts.length < 20) {
       return {
         posts: allPosts,
         hasMorePosts: false,
+        needsRefresh: false,
       };
     }
+
+    // Only apply engagement prioritization if user manually refreshed or initial load
+    const shouldPrioritizeEngagement = true;
     
+    if (shouldPrioritizeEngagement && allPosts.length >= 20) {
+      // Smart sampling logic to prioritize under-engaged posts
+      const cappedPosts = applySamplingLogic(allPosts);
+      
+      return {
+        posts: cappedPosts,
+        hasMorePosts: allPosts.length > 20,
+        needsRefresh: true,
+      };
+    }
+
+    // Fallback to showing first 20 posts
     return {
-      posts: allPosts.slice(0, loadedPostsCount),
-      hasMorePosts: allPosts.length > loadedPostsCount,
+      posts: allPosts.slice(0, 20),
+      hasMorePosts: allPosts.length > 20,
+      needsRefresh: true,
     };
+  };
+
+  // Sampling logic for engagement prioritization
+  const applySamplingLogic = (posts: any[]) => {
+    const maxPosts = 20;
+    
+    // Categorize posts by engagement level
+    const zeroEngagement = posts.filter(post => 
+      (post.reactionCount || 0) === 0 && (post.commentCount || 0) === 0
+    );
+    const lowEngagement = posts.filter(post => {
+      const reactions = post.reactionCount || 0;
+      const comments = post.commentCount || 0;
+      return (reactions + comments) > 0 && (reactions + comments) < 2;
+    });
+    const normalEngagement = posts.filter(post => {
+      const reactions = post.reactionCount || 0;
+      const comments = post.commentCount || 0;
+      return (reactions + comments) >= 2;
+    });
+
+    // Calculate target counts based on percentages
+    const zeroTarget = Math.floor(maxPosts * 0.2); // 20%
+    const lowTarget = Math.floor(maxPosts * 0.1);  // 10%
+    const normalTarget = maxPosts - zeroTarget - lowTarget; // 70%
+
+    // Sample posts from each category
+    const selectedPosts = [];
+    
+    // Add zero engagement posts (up to target)
+    const shuffledZero = [...zeroEngagement].sort(() => Math.random() - 0.5);
+    selectedPosts.push(...shuffledZero.slice(0, Math.min(zeroTarget, shuffledZero.length)));
+    
+    // Add low engagement posts (up to target)
+    const shuffledLow = [...lowEngagement].sort(() => Math.random() - 0.5);
+    selectedPosts.push(...shuffledLow.slice(0, Math.min(lowTarget, shuffledLow.length)));
+    
+    // Fill remaining slots with normal engagement posts
+    const remainingSlots = maxPosts - selectedPosts.length;
+    const shuffledNormal = [...normalEngagement].sort(() => Math.random() - 0.5);
+    selectedPosts.push(...shuffledNormal.slice(0, Math.min(remainingSlots, shuffledNormal.length)));
+    
+    // If we still don't have enough posts, fill with any remaining posts
+    if (selectedPosts.length < maxPosts) {
+      const usedIds = new Set(selectedPosts.map(p => p.id));
+      const remainingPosts = posts.filter(p => !usedIds.has(p.id));
+      const shuffledRemaining = [...remainingPosts].sort(() => Math.random() - 0.5);
+      selectedPosts.push(...shuffledRemaining.slice(0, maxPosts - selectedPosts.length));
+    }
+
+    // Shuffle final result to avoid predictable ordering
+    return selectedPosts.sort(() => Math.random() - 0.5).slice(0, maxPosts);
+  };
+
+  // Legacy batching function for backward compatibility
+  const applyBatching = (allPosts: any[]) => {
+    return applyCappedFeedLogic(allPosts);
   };
 
   const handleRefresh = async () => {
@@ -134,6 +209,7 @@ export function useSmartFeed(options: SmartFeedOptions) {
     newPostsCount,
     showNewPostsBanner,
     applyBatching,
+    applyCappedFeedLogic,
     handleRefresh,
     handleLoadNewPosts,
     handleLoadMore,
