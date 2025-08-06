@@ -3,6 +3,7 @@ import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Badge } from "./badge";
 import { FlaskConical, BarChart3, Zap, TestTube, Beaker, Plus, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 interface PollOption {
