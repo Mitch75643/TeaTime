@@ -111,7 +111,7 @@ export default function TopicFeed() {
   
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
-  const topic = topicConfig[topicId];
+  const topic = topicConfig[topicId] || topicConfig['celebrity-tea']; // Fallback to prevent undefined
 
   // Initialize smart feed for community posts
   const smartFeed = useSmartFeed({
