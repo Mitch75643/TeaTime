@@ -321,6 +321,9 @@ export class MemStorage implements IStorage {
       posts.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
     }
     
+    // Apply maximum limit of 20 posts to prevent feed flooding
+    posts = posts.slice(0, 20);
+    
     return posts;
   }
 
@@ -1165,7 +1168,16 @@ export class MemStorage implements IStorage {
       prompts = prompts.filter(p => !p.isUsed);
     }
     
-    return prompts.sort((a, b) => b.priority - a.priority || a.createdAt.getTime() - b.createdAt.getTime());
+    return prompts.sort((a, b) => {
+      const aPriority = a.priority || 0;
+      const bPriority = b.priority || 0;
+      if (aPriority !== bPriority) {
+        return bPriority - aPriority;
+      }
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return aTime - bTime;
+    });
   }
 
   async markPromptAsUsed(promptId: string): Promise<void> {

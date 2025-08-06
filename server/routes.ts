@@ -65,7 +65,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'post_reaction',
         message: 'Test notification - someone reacted to your post!',
         triggerAlias: 'TestUser',
-        postId: 'test-post-id'
+        postId: 'test-post-id',
+        deepLinkTab: 'posts'
       });
       res.json({ success: true, message: 'Test notification created' });
     } catch (error) {
@@ -420,6 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               postId: validatedData.postId,
               commentId: comment.id,
               triggerAlias: alias,
+              deepLinkTab: 'posts'
             });
             console.log('[Notifications] Comment reply notification created successfully');
           } else {
@@ -437,6 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               postId: validatedData.postId,
               commentId: comment.id,
               triggerAlias: alias,
+              deepLinkTab: 'posts'
             });
             console.log('[Notifications] Post reply notification created successfully');
           } else {
@@ -1993,6 +1996,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin access is handled through API routes only
   // The admin frontend will be a separate deployment or accessed via direct file serving
+
+  // Report submission endpoint
+  app.post("/api/support/report", async (req, res) => {
+    try {
+      const { category, description, email, priority } = req.body;
+      
+      if (!category || !description) {
+        return res.status(400).json({ message: "Category and description are required" });
+      }
+
+      // Store the report (for now, just log it - in production you'd save to database)
+      const report = {
+        id: require('crypto').randomUUID(),
+        category,
+        description,
+        email: email || 'anonymous',
+        priority: priority || 'medium',
+        sessionId: req.session.id,
+        createdAt: new Date(),
+        status: 'submitted'
+      };
+      
+      console.log('[Support Report] New report submitted:', {
+        id: report.id,
+        category: report.category,
+        priority: report.priority,
+        sessionId: report.sessionId
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Your report has been submitted successfully. We'll review it and get back to you soon.",
+        reportId: report.id
+      });
+    } catch (error) {
+      console.error("Support report error:", error);
+      res.status(500).json({ message: "Failed to submit report" });
+    }
+  });
 
   // Add test routes for development
   if (process.env.NODE_ENV === 'development') {
