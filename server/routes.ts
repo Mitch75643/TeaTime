@@ -304,6 +304,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(response);
     } catch (error) {
+      console.error("Failed to create post:", error);
+      if (error.name === 'ZodError') {
+        console.log("Validation error details:", JSON.stringify(error.issues, null, 2));
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          details: error.issues 
+        });
+      }
       if (error instanceof Error) {
         res.status(400).json({ message: error.message });
       } else {
