@@ -97,7 +97,7 @@ class AnonymousAuthService {
   async createOrGetUser(): Promise<LocalUserData> {
     // Check if user already exists locally
     const existingUser = this.loadFromLocalStorage();
-    if (existingUser) {
+    if (existingUser && existingUser.anonId && existingUser.anonId !== 'undefined') {
       this.currentUser = existingUser;
       // Sync with server in the background
       this.syncWithServer(existingUser.anonId).catch(console.error);
@@ -203,7 +203,11 @@ class AnonymousAuthService {
     try {
       const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (userData) {
-        return JSON.parse(userData) as LocalUserData;
+        const parsed = JSON.parse(userData) as LocalUserData;
+        // Ensure anonId is valid
+        if (parsed.anonId && parsed.anonId !== 'undefined') {
+          return parsed;
+        }
       }
     } catch (error) {
       console.error('Failed to load user from localStorage:', error);

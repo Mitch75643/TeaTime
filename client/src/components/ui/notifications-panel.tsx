@@ -61,9 +61,34 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
       markAsReadMutation.mutate(notification.id);
     }
 
-    // Navigate to the post/comment
+    // Navigate to the post/comment using proper deep link navigation
     if (notification.postId) {
-      setLocation(`/?focus=${notification.postId}`);
+      // Navigate to profile page with deep link parameters
+      const params = new URLSearchParams();
+      params.set('postId', notification.postId);
+      params.set('tab', 'posts');
+      params.set('highlight', 'true');
+      if (notification.commentId) {
+        params.set('commentId', notification.commentId);
+      }
+      
+      const profileUrl = `/profile?${params.toString()}`;
+      setLocation(profileUrl);
+      
+      // Dispatch deep link navigation event for profile page to handle
+      setTimeout(() => {
+        const deepLinkData = {
+          postId: notification.postId,
+          tab: 'posts' as const,
+          commentId: notification.commentId,
+          highlightPost: true
+        };
+        
+        window.dispatchEvent(new CustomEvent('deepLinkNavigation', { 
+          detail: deepLinkData 
+        }));
+      }, 100);
+      
       setIsOpen(false);
     }
   };
