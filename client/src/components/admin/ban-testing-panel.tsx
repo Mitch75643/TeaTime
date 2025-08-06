@@ -323,34 +323,7 @@ export function BanTestingPanel() {
               </CardContent>
             </Card>
 
-            {/* Test Permissions */}
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <TestTube className="w-5 h-5 text-green-500" />
-                  Test Permissions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 gap-3">
-                  <Button
-                    onClick={testPostAction}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg"
-                    size="lg"
-                  >
-                    🧪 Test Post Permission
-                  </Button>
 
-                  <Button
-                    onClick={testCommentAction}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-lg"
-                    size="lg"
-                  >
-                    🧪 Test Comment Permission
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Test Results */}
             {testResults.length > 0 && (
