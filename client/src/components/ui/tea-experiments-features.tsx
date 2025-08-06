@@ -209,7 +209,9 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
         content: newQuestion.trim(),
         category: "tea-experiments",
         pollOptions: pollOptionsObject,
-        postType: "poll"
+        postType: "poll",
+        postContext: "community",
+        communitySection: "tea-experiments"
       });
       
       // Reset form and collapse create section after animation starts
