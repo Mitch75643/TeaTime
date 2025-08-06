@@ -7,7 +7,8 @@ import { PostCard } from "@/components/ui/post-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, MessageCircle, ThumbsUp, Trophy, TrendingUp, Calendar, Filter, RefreshCw } from "lucide-react";
+import { Eye, MessageCircle, ThumbsUp, Trophy, TrendingUp, Calendar, Filter, RefreshCw, ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import type { Post } from "@shared/schema";
@@ -51,6 +52,7 @@ export default function UserPosts() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [location, navigate] = useLocation();
 
   // Fetch user's posts
   const { data: posts = [], isLoading: postsLoading } = useQuery<Post[]>({
@@ -143,16 +145,27 @@ export default function UserPosts() {
       <Header />
       
       <div className="px-4 pt-4 pb-20">
-        {/* Header */}
+        {/* Header with Back Button */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                Your Posts
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Track how your anonymous posts are performing in the community
-              </p>
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="text-sm">Back</span>
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  Your Posts Analytics
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Track how your anonymous posts are performing in the community
+                </p>
+              </div>
             </div>
             <Button
               variant="ghost"

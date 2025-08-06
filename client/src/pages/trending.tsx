@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Header } from "@/components/ui/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { PostCard } from "@/components/ui/post-card";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-import { Flame, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Flame, TrendingUp, ArrowLeft } from "lucide-react";
 import type { Post } from "@shared/schema";
 
 export default function Trending() {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [location, navigate] = useLocation();
 
   const { data: posts = [], isLoading, error } = useQuery({
     queryKey: ["/api/posts", activeCategory, "trending"],
@@ -31,10 +34,21 @@ export default function Trending() {
       
       <div className="sticky top-16 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="px-4 py-3">
-          <div className="flex items-center space-x-2 mb-3">
-            <TrendingUp className="h-5 w-5 text-red-500" />
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Trending Now</h2>
-            <Flame className="h-4 w-4 text-red-500" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="text-sm">Back</span>
+              </Button>
+              <TrendingUp className="h-5 w-5 text-red-500" />
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Trending Now</h2>
+              <Flame className="h-4 w-4 text-red-500" />
+            </div>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Posts ranked by reactions, comments, and community engagement
