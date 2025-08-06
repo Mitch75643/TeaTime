@@ -20,6 +20,8 @@ export const posts = pgTable("posts", {
   commentCount: integer("comment_count").default(0),
   isDrama: boolean("is_drama").default(false),
   sessionId: varchar("session_id"),
+  anonId: varchar("anon_id"), // Anonymous user identifier for cross-device filtering
+  deviceFingerprint: varchar("device_fingerprint"), // Device fingerprint for additional filtering
   postContext: varchar("post_context").default("home"),
   communitySection: varchar("community_section"),
   reportCount: integer("report_count").default(0),

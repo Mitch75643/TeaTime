@@ -55,21 +55,33 @@ export function useSmartFeed(options: SmartFeedOptions) {
         if (response.ok) {
           const allNewPosts = await response.json();
           
-          // Get current Express session ID for comparison
+          // Get current user's session and anonymous ID for comparison
           const sessionResponse = await fetch('/api/session');
           const sessionData = await sessionResponse.json();
           const currentSessionId = sessionData.sessionId;
           
-          // Filter out posts from the current user's session AND posts already visible
-          const genuinelyNewPosts = allNewPosts.filter((post: any) => 
-            post.sessionId !== currentSessionId && !visiblePostIds.has(post.id)
-          );
+          // Also get the current anonymous user's anonId for better filtering
+          const currentUser = user;
+          const currentAnonId = currentUser?.anonId;
+          
+          // Filter out posts from the current user AND posts already visible
+          // Check both sessionId and anonId to properly identify user's own posts
+          const genuinelyNewPosts = allNewPosts.filter((post: any) => {
+            const isOwnPost = (post.sessionId === currentSessionId) || 
+                             (currentAnonId && post.anonId === currentAnonId) ||
+                             (currentUser?.deviceFingerprint && post.deviceFingerprint === currentUser.deviceFingerprint);
+            const isAlreadyVisible = visiblePostIds.has(post.id);
+            
+            return !isOwnPost && !isAlreadyVisible;
+          });
           
           console.log(`[Smart Feed] Found ${allNewPosts.length} new posts, ${genuinelyNewPosts.length} genuinely new from others`);
-          console.log(`[Smart Feed] Current sessionId: ${currentSessionId}`);
+          console.log(`[Smart Feed] Current sessionId: ${currentSessionId}, anonId: ${currentAnonId}`);
+          console.log(`[Smart Feed] Device fingerprint: ${currentUser?.deviceFingerprint}`);
           console.log(`[Smart Feed] Visible posts count: ${visiblePostIds.size}`);
           if (allNewPosts.length > 0) {
-            console.log(`[Smart Feed] Sample post sessionId: ${allNewPosts[0].sessionId}`);
+            console.log(`[Smart Feed] Sample post - sessionId: ${allNewPosts[0].sessionId}, anonId: ${allNewPosts[0].anonId}, fingerprint: ${allNewPosts[0].deviceFingerprint}`);
+            console.log(`[Smart Feed] Post ownership check - sessionMatch: ${allNewPosts[0].sessionId === currentSessionId}, anonMatch: ${currentAnonId && allNewPosts[0].anonId === currentAnonId}, deviceMatch: ${currentUser?.deviceFingerprint && allNewPosts[0].deviceFingerprint === currentUser.deviceFingerprint}`);
           }
           
           if (genuinelyNewPosts.length > 0) {

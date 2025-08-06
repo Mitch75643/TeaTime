@@ -221,7 +221,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isHidden: moderationResult.action === 'hide'
       };
       
-      const post = await storage.createPost(postData, alias, sessionId);
+      // Get anonymous user data for post creation
+      const deviceFingerprint = req.headers['x-device-fingerprint'] as string;
+      const anonId = user?.anonId;
+      
+      const post = await storage.createPost(postData, alias, sessionId, anonId, deviceFingerprint);
       // Handle streak tracking for daily prompt submissions
       let streakResult = null;
       if (validatedData.category === 'daily' && postContext === 'daily') {

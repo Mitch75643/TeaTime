@@ -5,7 +5,7 @@ import { createHash } from "crypto";
 
 export interface IStorage {
   // Posts
-  createPost(post: InsertPost, alias: string, sessionId?: string, postContext?: string, communitySection?: string): Promise<Post>;
+  createPost(post: InsertPost, alias: string, sessionId?: string, anonId?: string, deviceFingerprint?: string): Promise<Post>;
   getPosts(category?: string, sortBy?: 'trending' | 'new', tags?: string, userSessionId?: string, postContext?: string, section?: string, storyCategory?: string): Promise<Post[]>;
   getPost(id: string): Promise<Post | undefined>;
   updatePostReactions(postId: string, reactions: Record<string, number>): Promise<void>;
@@ -227,7 +227,7 @@ export class MemStorage implements IStorage {
     this.debateVotes = new Map();
   }
 
-  async createPost(insertPost: InsertPost, alias: string, sessionId?: string): Promise<Post> {
+  async createPost(insertPost: InsertPost, alias: string, sessionId?: string, anonId?: string, deviceFingerprint?: string): Promise<Post> {
     const id = randomUUID();
     const post: Post = {
       ...insertPost,
@@ -240,6 +240,8 @@ export class MemStorage implements IStorage {
       isDrama: insertPost.category === 'drama',
       createdAt: new Date(),
       sessionId: sessionId || 'anonymous',
+      anonId: anonId || null,
+      deviceFingerprint: deviceFingerprint || null,
       postContext: insertPost.postContext || 'home',
       communitySection: insertPost.communitySection || null,
       reportCount: 0,
