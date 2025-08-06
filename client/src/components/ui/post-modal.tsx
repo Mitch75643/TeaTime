@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog";
 import { Button } from "./button";
 import { Textarea } from "./textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
@@ -282,6 +282,9 @@ export function PostModal({
               </div>
             </div>
           </DialogTitle>
+          <DialogDescription>
+            Share your thoughts anonymously with the community
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

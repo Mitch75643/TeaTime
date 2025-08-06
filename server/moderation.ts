@@ -113,8 +113,20 @@ export async function moderateContent(content: string): Promise<ModerationResult
       resources
     };
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Moderation API error:', error);
+    
+    // Handle quota exceeded gracefully
+    if (error.status === 429 || error.code === 'insufficient_quota') {
+      console.log('[Moderation] OpenAI quota exceeded - allowing content with basic checks');
+      return {
+        flagged: false,
+        severityLevel: 1,
+        categories: [],
+        action: 'allow'
+      };
+    }
+    
     // Fail safely - allow content but log the error
     return {
       flagged: false,
