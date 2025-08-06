@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { useAnonymousAuth } from '@/lib/anonymousAuth';
 
 interface SmartFeedOptions {
   queryKey: string[];
@@ -31,6 +32,7 @@ export function useSmartFeed(options: SmartFeedOptions) {
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAnonymousAuth();
 
   // Auto-polling for new posts
   useEffect(() => {
@@ -50,9 +52,14 @@ export function useSmartFeed(options: SmartFeedOptions) {
         
         const response = await fetch(`${apiEndpoint}?${params}`);
         if (response.ok) {
-          const newPosts = await response.json();
-          if (newPosts.length > 0) {
-            setNewPostsCount(newPosts.length);
+          const allNewPosts = await response.json();
+          // Filter out posts from the current user's session
+          const otherUsersNewPosts = allNewPosts.filter((post: any) => 
+            post.sessionId !== user?.sessionId
+          );
+          
+          if (otherUsersNewPosts.length > 0) {
+            setNewPostsCount(otherUsersNewPosts.length);
             setShowNewPostsBanner(true);
           }
         }
@@ -62,7 +69,7 @@ export function useSmartFeed(options: SmartFeedOptions) {
     }, pollingInterval);
 
     return () => clearInterval(interval);
-  }, [category, sortBy, postContext, lastFetchTime, apiEndpoint, pollingInterval]);
+  }, [category, sortBy, postContext, lastFetchTime, apiEndpoint, pollingInterval, user?.sessionId]);
 
   // Smart capped feed logic with engagement prioritization
   const applyCappedFeedLogic = (allPosts: any[]) => {
