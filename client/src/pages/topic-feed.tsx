@@ -609,6 +609,11 @@ export default function TopicFeed() {
                         
                         const { posts: displayedPosts, hasMorePosts, needsRefresh } = feedResult;
                         
+                        // Update visible posts tracking for community feed
+                        if (displayedPosts && displayedPosts.length > 0) {
+                          smartFeed.updateVisiblePosts(displayedPosts);
+                        }
+                        
                         return (
                           <div className="space-y-6">
                             {/* Show Story Recommendations first for Story Time */}

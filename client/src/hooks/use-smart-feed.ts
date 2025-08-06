@@ -29,6 +29,7 @@ export function useSmartFeed(options: SmartFeedOptions) {
   const [newPostsCount, setNewPostsCount] = useState(0);
   const [showNewPostsBanner, setShowNewPostsBanner] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(Date.now());
+  const [visiblePostIds, setVisiblePostIds] = useState<Set<string>>(new Set());
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -59,19 +60,20 @@ export function useSmartFeed(options: SmartFeedOptions) {
           const sessionData = await sessionResponse.json();
           const currentSessionId = sessionData.sessionId;
           
-          // Filter out posts from the current user's session
-          const otherUsersNewPosts = allNewPosts.filter((post: any) => 
-            post.sessionId !== currentSessionId
+          // Filter out posts from the current user's session AND posts already visible
+          const genuinelyNewPosts = allNewPosts.filter((post: any) => 
+            post.sessionId !== currentSessionId && !visiblePostIds.has(post.id)
           );
           
-          console.log(`[Smart Feed] Found ${allNewPosts.length} new posts, ${otherUsersNewPosts.length} from other users`);
+          console.log(`[Smart Feed] Found ${allNewPosts.length} new posts, ${genuinelyNewPosts.length} genuinely new from others`);
           console.log(`[Smart Feed] Current sessionId: ${currentSessionId}`);
+          console.log(`[Smart Feed] Visible posts count: ${visiblePostIds.size}`);
           if (allNewPosts.length > 0) {
             console.log(`[Smart Feed] Sample post sessionId: ${allNewPosts[0].sessionId}`);
           }
           
-          if (otherUsersNewPosts.length > 0) {
-            setNewPostsCount(otherUsersNewPosts.length);
+          if (genuinelyNewPosts.length > 0) {
+            setNewPostsCount(genuinelyNewPosts.length);
             setShowNewPostsBanner(true);
           }
         }
@@ -192,6 +194,8 @@ export function useSmartFeed(options: SmartFeedOptions) {
       setLastFetchTime(Date.now());
       setNewPostsCount(0);
       setShowNewPostsBanner(false);
+      // Clear visible post IDs on refresh so new posts can be properly tracked
+      setVisiblePostIds(new Set());
       setLoadedPostsCount(initialBatchSize);
       
       // Smooth scroll to top
@@ -223,6 +227,13 @@ export function useSmartFeed(options: SmartFeedOptions) {
     setLoadedPostsCount(prev => prev + 20);
   };
 
+  // Function to update visible posts tracking
+  const updateVisiblePosts = (posts: any[]) => {
+    const postIds = posts.map(post => post.id);
+    setVisiblePostIds(new Set(postIds));
+    console.log(`[Smart Feed] Updated visible posts tracking: ${postIds.length} posts`);
+  };
+
   return {
     isRefreshing,
     newPostsCount,
@@ -232,5 +243,6 @@ export function useSmartFeed(options: SmartFeedOptions) {
     handleRefresh,
     handleLoadNewPosts,
     handleLoadMore,
+    updateVisiblePosts,
   };
 }

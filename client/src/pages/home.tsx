@@ -90,6 +90,13 @@ export default function Home() {
   
   const { posts, hasMorePosts, needsRefresh } = feedResult;
 
+  // Update visible posts tracking whenever posts change
+  useEffect(() => {
+    if (posts && posts.length > 0) {
+      smartFeed.updateVisiblePosts(posts);
+    }
+  }, [posts, smartFeed.updateVisiblePosts]);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 overflow-y-auto">
       <Header />
