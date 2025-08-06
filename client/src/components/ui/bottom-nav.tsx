@@ -14,7 +14,7 @@ export function BottomNav() {
     { id: "home", label: "Home", icon: Home, path: "/" },
     { id: "daily", label: "Daily", icon: Coffee, path: "/daily-spill" },
     { id: "community", label: "Community", icon: Users, path: "/community" },
-    { id: "me", label: "Profile", icon: Settings, path: "/profile" },
+    { id: "me", label: "Settings", icon: Settings, path: "/profile" },
   ];
 
   return (
