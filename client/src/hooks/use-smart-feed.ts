@@ -53,10 +53,22 @@ export function useSmartFeed(options: SmartFeedOptions) {
         const response = await fetch(`${apiEndpoint}?${params}`);
         if (response.ok) {
           const allNewPosts = await response.json();
+          
+          // Get current Express session ID for comparison
+          const sessionResponse = await fetch('/api/session');
+          const sessionData = await sessionResponse.json();
+          const currentSessionId = sessionData.sessionId;
+          
           // Filter out posts from the current user's session
           const otherUsersNewPosts = allNewPosts.filter((post: any) => 
-            post.sessionId !== user?.sessionId
+            post.sessionId !== currentSessionId
           );
+          
+          console.log(`[Smart Feed] Found ${allNewPosts.length} new posts, ${otherUsersNewPosts.length} from other users`);
+          console.log(`[Smart Feed] Current sessionId: ${currentSessionId}`);
+          if (allNewPosts.length > 0) {
+            console.log(`[Smart Feed] Sample post sessionId: ${allNewPosts[0].sessionId}`);
+          }
           
           if (otherUsersNewPosts.length > 0) {
             setNewPostsCount(otherUsersNewPosts.length);
