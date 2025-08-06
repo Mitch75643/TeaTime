@@ -171,7 +171,9 @@ export default function TopicFeed() {
       }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
       if (!response.ok) throw new Error("Failed to fetch community posts");
-      return response.json();
+      const data = await response.json();
+      console.log(`[${topicId}] Community posts fetched:`, data.length);
+      return data;
     }
   });
 
@@ -193,7 +195,9 @@ export default function TopicFeed() {
       }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/user?${params}`);
       if (!response.ok) throw new Error("Failed to fetch user posts");
-      return response.json();
+      const data = await response.json();
+      console.log(`[${topicId}] User posts fetched:`, data.length);
+      return data;
     }
   });
 

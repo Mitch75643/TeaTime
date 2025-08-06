@@ -116,12 +116,14 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
   
   // Mutation for creating poll posts
   const createPostMutation = useMutation({
-    mutationFn: async (postData: { content: string; category: string; pollOptions: string[]; postType: string }) => {
+    mutationFn: async (postData: { content: string; category: string; pollOptions: any; postType: string; postContext: string; communitySection: string }) => {
       return apiRequest('POST', '/api/posts', postData);
     },
     onSuccess: () => {
-      // Invalidate queries to refresh the community feed
+      // Invalidate all queries to refresh tea experiments and community feeds
       queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/posts/community', 'tea-experiments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/posts/user', 'tea-experiments'] });
       toast({
         title: "Experiment launched!",
         description: "Your tea experiment is now live in the community feed",
