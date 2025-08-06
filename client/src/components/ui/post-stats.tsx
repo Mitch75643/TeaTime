@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Badge } from "./badge";
-import { Eye, ThumbsUp, Clock, TrendingUp, Trophy } from "lucide-react";
+import { Eye, Mail, Clock, TrendingUp, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
@@ -82,7 +82,7 @@ export function PostStats({
           <span>{stats.viewCount} view{stats.viewCount !== 1 ? 's' : ''}</span>
         </div>
         <div className="flex items-center space-x-1">
-          <ThumbsUp className="h-3 w-3" />
+          <Mail className="h-3 w-3" />
           <span>{totalReactions} reaction{totalReactions !== 1 ? 's' : ''}</span>
         </div>
 
