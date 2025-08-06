@@ -674,6 +674,24 @@ export class MemStorage implements IStorage {
     };
     this.notifications.set(id, newNotification);
     console.log('[Storage] Created notification:', id, 'for session:', notification.recipientSessionId, 'total notifications:', this.notifications.size);
+    
+    // Broadcast notification to WebSocket clients if available
+    if (global.wss) {
+      const message = {
+        type: 'notification_received',
+        data: {
+          sessionId: notification.recipientSessionId,
+          notification: newNotification
+        }
+      };
+      
+      console.log('[Storage] Broadcasting notification to WebSocket clients for session:', notification.recipientSessionId);
+      global.wss.clients.forEach((client: any) => {
+        if (client.readyState === 1) { // WebSocket.OPEN
+          client.send(JSON.stringify(message));
+        }
+      });
+    }
   }
 
   async getNotifications(sessionId: string): Promise<Notification[]> {

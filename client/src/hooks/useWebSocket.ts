@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface WebSocketMessage {
-  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote';
-  postId: string;
+  type: 'post_reaction' | 'drama_vote' | 'comment_added' | 'post_view' | 'poll_vote' | 'debate_vote' | 'notification_received';
+  postId?: string;
   data: any;
 }
 
@@ -71,6 +71,18 @@ export function useWebSocket() {
             case 'debate_vote':
               // Invalidate polls/debates and main posts
               queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+              break;
+
+            case 'notification_received':
+              // Handle real-time notification updates
+              console.log('[WebSocket] Notification received:', message.data);
+              
+              // Dispatch custom event for notification updates
+              window.dispatchEvent(new CustomEvent('notification_received', { detail: message.data }));
+              
+              // Invalidate notification queries to refresh badge count
+              queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
               break;
 
             default:

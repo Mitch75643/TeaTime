@@ -8,10 +8,11 @@ import { PostCard } from "@/components/ui/post-card";
 import { PostModal } from "@/components/ui/post-modal";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, Bell } from "lucide-react";
 import { SmartFeedBanner } from "@/components/ui/smart-feed-banner";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
 import { useSmartFeed } from "@/hooks/use-smart-feed";
+import { apiRequest } from "@/lib/queryClient";
 import type { Post } from "@shared/schema";
 
 const categories = [
@@ -32,6 +33,16 @@ export default function Home() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  // Test notification function (temporary for debugging)
+  const createTestNotification = async () => {
+    try {
+      await apiRequest("POST", "/api/test/notification", {});
+      console.log("Test notification created");
+    } catch (error) {
+      console.error("Failed to create test notification:", error);
+    }
+  };
 
   // Check for focus parameter in URL (from notifications)
   useEffect(() => {

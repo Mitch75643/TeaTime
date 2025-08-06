@@ -56,6 +56,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ sessionId: req.session.id });
   });
 
+  // Test notification creation (for debugging notification badge)
+  app.post("/api/test/notification", async (req, res) => {
+    try {
+      const sessionId = req.session.id!;
+      await storage.createNotification({
+        recipientSessionId: sessionId,
+        type: 'post_reaction',
+        message: 'Test notification - someone reacted to your post!',
+        triggerAlias: 'TestUser',
+        postId: 'test-post-id'
+      });
+      res.json({ success: true, message: 'Test notification created' });
+    } catch (error) {
+      console.error('Failed to create test notification:', error);
+      res.status(500).json({ message: 'Failed to create test notification' });
+    }
+  });
+
   // Get posts
   app.get("/api/posts", async (req, res) => {
     try {

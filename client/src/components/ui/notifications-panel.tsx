@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "./button";
 import { ScrollArea } from "./scroll-area";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "wouter";
+import { useWebSocketContext } from "@/components/providers/WebSocketProvider";
 import type { Notification } from "@shared/schema";
 
 interface NotificationsPanelProps {
@@ -18,6 +19,18 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { isConnected } = useWebSocketContext();
+
+  // Listen for real-time notification updates
+  useEffect(() => {
+    const handleNotificationUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+    };
+
+    window.addEventListener('notification_received', handleNotificationUpdate);
+    return () => window.removeEventListener('notification_received', handleNotificationUpdate);
+  }, [queryClient]);
 
   // Fetch notifications
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
@@ -25,10 +38,12 @@ export function NotificationsPanel({ className }: NotificationsPanelProps) {
     enabled: isOpen,
   });
 
-  // Fetch unread count
+  // Fetch unread count with more frequent updates
   const { data: unreadData } = useQuery<{ count: number }>({
     queryKey: ["/api/notifications/unread-count"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 5000, // Refresh every 5 seconds for better responsiveness
+    refetchOnWindowFocus: true, // Refresh when user returns to app
+    refetchOnMount: true, // Refresh on component mount
   });
 
   const unreadCount = unreadData?.count || 0;

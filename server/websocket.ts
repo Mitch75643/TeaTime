@@ -45,6 +45,9 @@ export class WebSocketManager {
     });
 
     console.log('[WebSocket] Server initialized on /ws path');
+    
+    // Make WebSocket server available globally for broadcasting notifications
+    global.wss = this.wss;
   }
 
   // Broadcast a message to all connected clients
