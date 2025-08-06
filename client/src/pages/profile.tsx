@@ -106,9 +106,12 @@ export default function Profile() {
     const deepLinkData = parseDeepLinkParams();
     
     if (deepLinkData) {
-      // Set the appropriate tab
+      // Set the appropriate tab - default to "posts" for notification deep links
       if (deepLinkData.tab) {
         setActiveTab(deepLinkData.tab);
+      } else if (deepLinkData.postId) {
+        // For notification deep links, always go to "posts" tab (Your Posts)
+        setActiveTab("posts");
       }
       
       // Highlight the specific post if provided
@@ -117,18 +120,27 @@ export default function Profile() {
         
         // Scroll to the post after a brief delay to ensure it's rendered
         setTimeout(() => {
-          scrollToPost(deepLinkData.postId!);
+          const postFound = scrollToPost(deepLinkData.postId!);
           
-          // Show notification context
-          toast({
-            title: "📍 Post Found",
-            description: "Here's the post from your notification",
-          });
+          if (postFound) {
+            // Show notification context
+            toast({
+              title: "📍 Post Found",
+              description: "Here's the post from your notification",
+            });
+          } else {
+            // Fallback message if post no longer exists
+            toast({
+              title: "⚠️ Post Not Found",
+              description: "This post no longer exists.",
+              variant: "destructive",
+            });
+          }
           
-          // Remove highlight after 3 seconds
+          // Remove highlight after 5 seconds
           setTimeout(() => {
             setHighlightedPostId(null);
-          }, 3000);
+          }, 5000);
         }, 500);
       }
       
@@ -151,16 +163,24 @@ export default function Profile() {
       if (postId && highlightPost) {
         setHighlightedPostId(postId);
         setTimeout(() => {
-          scrollToPost(postId);
+          const postFound = scrollToPost(postId);
           
-          toast({
-            title: "📍 Post Found",
-            description: "Here's the post from your notification",
-          });
+          if (postFound) {
+            toast({
+              title: "📍 Post Found",
+              description: "Here's the post from your notification",
+            });
+          } else {
+            toast({
+              title: "⚠️ Post Not Found",
+              description: "This post no longer exists.",
+              variant: "destructive",
+            });
+          }
           
           setTimeout(() => {
             setHighlightedPostId(null);
-          }, 3000);
+          }, 5000);
         }, 500);
       }
     };
@@ -173,14 +193,16 @@ export default function Profile() {
   }, []);
 
   // Function to scroll to a specific post
-  const scrollToPost = (postId: string) => {
+  const scrollToPost = (postId: string): boolean => {
     const postElement = postRefs.current[postId];
     if (postElement) {
       postElement.scrollIntoView({ 
         behavior: 'smooth', 
         block: 'center' 
       });
+      return true;
     }
+    return false;
   };
 
   // Get user's posts (using session ID for identification)
