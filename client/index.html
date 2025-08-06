@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Tfess - Anonymous Social Stories</title>
     <meta name="description" content="Share your stories anonymously with complete privacy on Tfess. Express yourself freely in a judgment-free community." />
+    <script>
+      // Apply dark mode immediately to prevent flash
+      (function() {
+        const stored = localStorage.getItem('vite-ui-theme');
+        const theme = stored || 'dark';
+        if (theme === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -38,6 +38,7 @@ The architecture prioritizes anonymous user interaction, real-time-feeling updat
 - **Enhanced Notification System**: Real-time notification badge system with WebSocket broadcasting for instant updates. Features include automatic notification creation for post interactions (comments, reactions), immediate badge count updates without page refresh, enhanced notification panel with 5-second refresh intervals, deep linking to specific posts when notifications are clicked, and comprehensive notification storage with read/unread tracking. Notifications appear instantly via WebSocket messages and update the red badge indicator immediately.
 - **Smart Feed Visual Caps**: The "X new posts - tap to refresh" banner now caps the displayed count at 20 posts maximum (showing "20+" for higher counts) to maintain clean visual presentation while preserving full system functionality for loading all available posts.
 - **Theme Context Labeling**: Daily content now includes "Theme" suffix in display names (e.g., "Drama Week Theme" instead of "Drama Week") to provide clearer context about the type of content users are viewing.
+- **Dark Mode Default**: App now starts in dark mode by default with immediate theme application to prevent white flashes on load. Users can switch to light mode through theme settings if preferred.
 
 ## External Dependencies
 - **Database**: Neon Database (@neondatabase/serverless) for PostgreSQL hosting.
