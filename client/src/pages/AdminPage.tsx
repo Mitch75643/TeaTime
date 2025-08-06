@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AdminAuth } from "@/components/AdminAuth";
 import { AdminPanel, BannedUsersPanel, RestrictedUsersPanel } from "@/components/AdminPanel";
+import { UserManagementPanel } from "@/components/UserManagementPanel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Settings, Users, UserX, UserMinus, ArrowLeft, Lock } from "lucide-react";
+import { Shield, Settings, Users, UserX, UserMinus, ArrowLeft, Lock, Database, Search, Copy, Eye } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function AdminPage() {
@@ -107,22 +108,30 @@ export default function AdminPage() {
           <AdminAuth onSuccess={() => setActiveTab("management")} />
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 gap-2 max-w-4xl mx-auto mb-8 p-2 h-auto">
-              <TabsTrigger value="auth" className="flex items-center gap-2 px-4 py-3 text-sm font-medium">
+            <TabsList className="grid w-full grid-cols-5 gap-2 max-w-5xl mx-auto mb-8 p-2 h-auto">
+              <TabsTrigger value="auth" className="flex items-center gap-2 px-3 py-3 text-sm font-medium">
                 <Shield className="w-4 h-4" />
                 Authentication
               </TabsTrigger>
               <TabsTrigger 
                 value="management" 
-                className="flex items-center gap-2 px-4 py-3 text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-3 text-sm font-medium"
                 disabled={!isRootHost}
               >
-                <Users className="w-4 h-4" />
+                <Settings className="w-4 h-4" />
                 Admin Management
               </TabsTrigger>
               <TabsTrigger 
+                value="users" 
+                className="flex items-center gap-2 px-3 py-3 text-sm font-medium"
+                disabled={!isRootHost}
+              >
+                <Database className="w-4 h-4" />
+                User Management
+              </TabsTrigger>
+              <TabsTrigger 
                 value="banned" 
-                className="flex items-center gap-2 px-4 py-3 text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-3 text-sm font-medium"
                 disabled={!isRootHost}
               >
                 <UserX className="w-4 h-4" />
@@ -130,7 +139,7 @@ export default function AdminPage() {
               </TabsTrigger>
               <TabsTrigger 
                 value="restricted" 
-                className="flex items-center gap-2 px-4 py-3 text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-3 text-sm font-medium"
                 disabled={!isRootHost}
               >
                 <UserMinus className="w-4 h-4" />
@@ -147,12 +156,28 @@ export default function AdminPage() {
                 <AdminPanel />
               ) : (
                 <div className="text-center py-8">
-                  <Shield className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <Settings className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h2 className="text-xl font-semibold text-foreground mb-2">
                     Admin Management
                   </h2>
                   <p className="text-muted-foreground">
                     Only the root host can access admin management features.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="users">
+              {isRootHost ? (
+                <UserManagementPanel />
+              ) : (
+                <div className="text-center py-8">
+                  <Database className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold text-foreground mb-2">
+                    User Management
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Only the root host can access user management features.
                   </p>
                 </div>
               )}

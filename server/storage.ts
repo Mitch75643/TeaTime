@@ -143,6 +143,31 @@ export interface IStorage {
     createdAt: Date;
   }>>;
   
+  // User Management for Admin
+  getAllUsersForManagement(): Promise<any[]>;
+  
+  // Get all banned users for admin panel
+  getAllBannedUsers(): Promise<BannedDevice[]>;
+  getAdminEmail(email: string, fingerprint: string): Promise<AdminEmail | undefined>;
+  getAdminEmailByEmail(email: string): Promise<AdminEmail | undefined>;
+  updateAdminEmailLastLogin(email: string): Promise<void>;
+  deactivateAdminEmail(email: string): Promise<void>;
+  createAdminSession(sessionData: InsertAdminSession): Promise<AdminSession>;
+  getAdminSession(sessionId: string): Promise<AdminSession | undefined>;
+  updateAdminSessionActivity(sessionId: string): Promise<void>;
+  deactivateAdminSession(sessionId: string): Promise<void>;
+  deactivateAdminSessionsByEmail(email: string): Promise<void>;
+  createAdminActivityLog(logData: InsertAdminActivityLog): Promise<AdminActivityLog>;
+  getAllActiveAdmins(): Promise<Array<{
+    email: string;
+    fingerprint: string;
+    fingerprintLabel: string;
+    role: string;
+    isRootHost: boolean;
+    lastLogin?: Date;
+    createdAt: Date;
+  }>>;
+  
   // Get all banned users for admin panel
   getAllBannedUsers(): Promise<BannedDevice[]>;
 }
@@ -1747,6 +1772,79 @@ export class MemStorage implements IStorage {
   // Get all banned users for admin panel (alias for getAllBannedDevices)
   async getAllBannedUsers(): Promise<BannedDevice[]> {
     return this.getAllBannedDevices();
+  }
+
+  async getAllUsersForManagement(): Promise<any[]> {
+    const anonymousUsers = Array.from(this.anonymousUsers.values());
+    const deviceSessions = Array.from(this.deviceSessions.values());
+    
+    // Create a comprehensive user list combining anonymous users and device sessions
+    const userMap = new Map();
+    
+    // First, add all anonymous users
+    anonymousUsers.forEach(user => {
+      if (!userMap.has(user.deviceFingerprint)) {
+        userMap.set(user.deviceFingerprint, {
+          id: user.anonId,
+          alias: user.alias,
+          avatarId: user.avatarId,
+          avatarColor: user.avatarColor,
+          deviceFingerprint: user.deviceFingerprint,
+          sessionId: null,
+          createdAt: user.createdAt,
+          lastActivity: user.lastActivity,
+          postCount: 0
+        });
+      }
+    });
+    
+    // Then, add device sessions and merge with existing users
+    deviceSessions.forEach(session => {
+      const existing = userMap.get(session.deviceFingerprint);
+      if (existing) {
+        // Update with session information
+        existing.sessionId = session.sessionId;
+        if (session.lastActivity && (!existing.lastActivity || new Date(session.lastActivity) > new Date(existing.lastActivity))) {
+          existing.lastActivity = session.lastActivity;
+        }
+      } else {
+        // Create new entry for session-only users
+        userMap.set(session.deviceFingerprint, {
+          id: session.sessionId,
+          alias: null,
+          avatarId: null,
+          avatarColor: null,
+          deviceFingerprint: session.deviceFingerprint,
+          sessionId: session.sessionId,
+          createdAt: session.createdAt,
+          lastActivity: session.lastActivity,
+          postCount: 0
+        });
+      }
+    });
+    
+    // Calculate post counts for each user
+    const posts = Array.from(this.posts.values());
+    posts.forEach(post => {
+      // Find user by session ID or device fingerprint
+      for (const [fingerprint, user] of userMap.entries()) {
+        if (post.sessionId === user.sessionId || 
+            (post.deviceFingerprint && post.deviceFingerprint === fingerprint)) {
+          user.postCount++;
+          break;
+        }
+      }
+    });
+    
+    // Convert map to array and sort by creation date (newest first)
+    const userList = Array.from(userMap.values());
+    userList.sort((a, b) => {
+      const aDate = new Date(a.createdAt || 0);
+      const bDate = new Date(b.createdAt || 0);
+      return bDate.getTime() - aDate.getTime();
+    });
+    
+    return userList;
   }
 }
 

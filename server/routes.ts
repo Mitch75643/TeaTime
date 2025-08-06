@@ -1698,6 +1698,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all users for management (root host only)
+  app.get("/api/admin/users/all", async (req, res) => {
+    try {
+      const sessionId = req.session.id;
+      const verification = await adminAuthService.verifyAdminSession(sessionId);
+      
+      if (!verification.valid || verification.admin?.role !== 'root_host') {
+        return res.status(403).json({ message: "Root host access required" });
+      }
+
+      const allUsers = await storage.getAllUsersForManagement();
+      
+      // Disable caching for user data to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      res.json(allUsers);
+      
+    } catch (error) {
+      console.error("Get all users error:", error);
+      res.status(500).json({ message: "Failed to get user list" });
+    }
+  });
+
   // Verify admin management password
   app.post("/api/admin/verify-management-password", async (req, res) => {
     try {

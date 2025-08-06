@@ -28,7 +28,10 @@ import {
   Search,
   Calendar,
   Clock,
-  RefreshCw
+  RefreshCw,
+  Copy,
+  Database,
+  Eye
 } from "lucide-react";
 
 export function AdminPanel() {
@@ -917,6 +920,333 @@ export function RestrictedUsersPanel() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+// User Management Component
+export function UserManagementPanel() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchBy, setSearchBy] = useState<'username' | 'fingerprint' | 'all'>('all');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  
+  const { toast } = useToast();
+
+  // Fetch all users with comprehensive data
+  const { data: allUsers = [], isLoading: isLoadingUsers, refetch: refetchUsers } = useQuery({
+    queryKey: ['/api/admin/users/all'],
+    retry: false,
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+
+  // Filter users based on search criteria
+  const filteredUsers = allUsers.filter((user: any) => {
+    if (!searchTerm.trim()) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    switch (searchBy) {
+      case 'username':
+        return user.alias?.toLowerCase().includes(searchLower);
+      case 'fingerprint':
+        return user.deviceFingerprint?.toLowerCase().includes(searchLower);
+      case 'all':
+      default:
+        return (
+          user.alias?.toLowerCase().includes(searchLower) ||
+          user.deviceFingerprint?.toLowerCase().includes(searchLower) ||
+          user.sessionId?.toLowerCase().includes(searchLower)
+        );
+    }
+  });
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard`,
+    });
+  };
+
+  const viewUserDetails = (user: any) => {
+    setSelectedUser(user);
+  };
+
+  return (
+    <div className="space-y-6 w-full max-w-6xl mx-auto">
+      {/* Header with Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="w-5 h-5 text-blue-600" />
+            User Management System
+          </CardTitle>
+          <CardDescription>
+            Comprehensive user database management with search, lookup, and detailed user information.
+          </CardDescription>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{allUsers.length}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Total Users</div>
+            </div>
+            <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">{filteredUsers.length}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Search Results</div>
+            </div>
+            <div className="bg-purple-50 dark:bg-purple-950/20 p-3 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">
+                {new Set(allUsers.map((u: any) => u.deviceFingerprint)).size}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Unique Devices</div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Search and Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Advanced User Search</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Label htmlFor="user-search">Search Users</Label>
+              <div className="relative mt-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="user-search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Enter username, fingerprint ID, or session ID..."
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="min-w-[180px]">
+              <Label htmlFor="search-type">Search By</Label>
+              <Select value={searchBy} onValueChange={(value: 'username' | 'fingerprint' | 'all') => setSearchBy(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Fields</SelectItem>
+                  <SelectItem value="username">Username Only</SelectItem>
+                  <SelectItem value="fingerprint">Fingerprint Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <Button
+                onClick={() => refetchUsers()}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Users List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">
+            User Database ({filteredUsers.length} 
+            {searchTerm && ` of ${allUsers.length}`} users)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingUsers ? (
+            <div className="text-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-blue-600" />
+              <p className="text-muted-foreground">Loading user database...</p>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-8">
+              <Database className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-medium text-foreground mb-2">
+                {searchTerm ? 'No Users Found' : 'No Users in Database'}
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                {searchTerm 
+                  ? `No users match your search for "${searchTerm}". Try a different search term or criteria.`
+                  : 'The user database is currently empty.'
+                }
+              </p>
+              {searchTerm && (
+                <Button
+                  variant="outline"
+                  onClick={() => setSearchTerm('')}
+                  className="mt-4"
+                >
+                  Clear Search
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              {filteredUsers.map((user: any, index: number) => (
+                <div key={user.id || user.sessionId || index} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-950/10 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2 flex-1">
+                      {/* Username */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Username:</span>
+                        <span className="font-medium text-foreground">{user.alias || 'Anonymous'}</span>
+                        {user.alias && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(user.alias, 'Username')}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Fingerprint ID */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fingerprint:</span>
+                        <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono">
+                          {user.deviceFingerprint || 'Not available'}
+                        </code>
+                        {user.deviceFingerprint && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(user.deviceFingerprint, 'Fingerprint ID')}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Session ID */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Session ID:</span>
+                        <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono">
+                          {user.sessionId || 'Not available'}
+                        </code>
+                        {user.sessionId && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(user.sessionId, 'Session ID')}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Additional Info */}
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        {user.createdAt && (
+                          <span>Joined: {new Date(user.createdAt).toLocaleDateString()}</span>
+                        )}
+                        {user.lastActivity && (
+                          <span>Last Active: {new Date(user.lastActivity).toLocaleDateString()}</span>
+                        )}
+                        {user.postCount !== undefined && (
+                          <span>Posts: {user.postCount}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => viewUserDetails(user)}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="w-3 h-3" />
+                        Details
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* User Details Dialog */}
+      {selectedUser && (
+        <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                User Details
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Username
+                  </Label>
+                  <p className="text-sm font-medium">{selectedUser.alias || 'Anonymous'}</p>
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Device Fingerprint
+                  </Label>
+                  <p className="text-xs font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                    {selectedUser.deviceFingerprint || 'Not available'}
+                  </p>
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Session ID
+                  </Label>
+                  <p className="text-xs font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                    {selectedUser.sessionId || 'Not available'}
+                  </p>
+                </div>
+                
+                {selectedUser.createdAt && (
+                  <div>
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Account Created
+                    </Label>
+                    <p className="text-sm">{new Date(selectedUser.createdAt).toLocaleString()}</p>
+                  </div>
+                )}
+                
+                {selectedUser.lastActivity && (
+                  <div>
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Last Activity
+                    </Label>
+                    <p className="text-sm">{new Date(selectedUser.lastActivity).toLocaleString()}</p>
+                  </div>
+                )}
+                
+                {selectedUser.postCount !== undefined && (
+                  <div>
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Total Posts
+                    </Label>
+                    <p className="text-sm">{selectedUser.postCount}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
