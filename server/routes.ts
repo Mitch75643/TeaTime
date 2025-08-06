@@ -102,8 +102,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { topicId, sortBy } = req.params;
       const { postContext = 'community', section, storyCategory, hotTopicFilter } = req.query;
       
-      console.log(`Fetching ${topicId} posts: context=${postContext}, section=${topicId}`);
-      
       const posts = await storage.getPosts(
         undefined, // category
         sortBy as 'trending' | 'new',
@@ -114,8 +112,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storyCategory as string, // storyCategory
         hotTopicFilter as string // hotTopicFilter
       );
-      
-      console.log(`Found ${posts.length} posts for ${topicId}`);
       res.json(posts);
     } catch (error) {
       console.error("Failed to fetch community posts:", error);
@@ -150,7 +146,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create post
   app.post("/api/posts", checkDeviceBanMiddleware, async (req, res) => {
     try {
-      // Debug logging removed after fixing the issue
       const validatedData = insertPostSchema.parse(req.body);
       const sessionId = req.session.id!;
       
@@ -309,14 +304,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(response);
     } catch (error) {
-      console.error("Failed to create post:", error);
-      if (error.name === 'ZodError') {
-        console.log("Validation error details:", JSON.stringify(error.issues, null, 2));
-        return res.status(400).json({ 
-          message: "Validation failed", 
-          details: error.issues 
-        });
-      }
       if (error instanceof Error) {
         res.status(400).json({ message: error.message });
       } else {
