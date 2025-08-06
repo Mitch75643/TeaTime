@@ -341,7 +341,7 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   allowComments: true,
 }).extend({
   content: z.string().min(1).max(1250), // Max for story-time, will validate dynamically on server
-  category: z.enum(["school", "work", "relationships", "family", "money", "hot-takes", "drama", "gossip", "story", "debate", "poll", "daily", "other"]),
+  category: z.enum(["school", "work", "relationships", "family", "money", "hot-takes", "drama", "gossip", "story", "debate", "poll", "daily", "tea-experiments", "other"]),
   tags: z.array(z.string()).optional().default([]),
   postContext: z.string().optional().default("home"),
   avatarId: z.string().optional(),
