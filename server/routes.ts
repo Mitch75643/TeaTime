@@ -146,6 +146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create post
   app.post("/api/posts", checkDeviceBanMiddleware, async (req, res) => {
     try {
+      console.log("Raw request body:", JSON.stringify(req.body, null, 2));
+      console.log("pollOptions received:", typeof req.body.pollOptions, req.body.pollOptions);
       const validatedData = insertPostSchema.parse(req.body);
       const sessionId = req.session.id!;
       
