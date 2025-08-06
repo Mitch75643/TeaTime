@@ -2,13 +2,7 @@ import { useState } from "react";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Badge } from "./badge";
-import { Progress } from "./progress";
-import { Input } from "./input";
-import { FlaskConical, BarChart3, Zap, TestTube, Beaker, Plus, RefreshCw, Clock, Flame, ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { ChemistryAnimation, useChemistryAnimation } from "./chemistry-animation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { FlaskConical, BarChart3, Zap, TestTube, Beaker, Plus, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PollOption {
@@ -72,13 +66,7 @@ const getTodaysPrompt = () => {
 
 const activePoll = getTodaysPrompt();
 
-const pollTemplates = [
-  { category: "Relationships", options: ["Yes, go for it!", "No, red flag!", "Maybe, be careful"] },
-  { category: "Life Choices", options: ["Take the risk", "Play it safe", "Get more info first"] },
-  { category: "Fashion/Style", options: ["Love it!", "Hate it", "It's okay"] },
-  { category: "Food Decisions", options: ["Definitely try it", "Too weird for me", "Maybe once"] },
-  { category: "Career Moves", options: ["Great opportunity", "Too risky", "Need more details"] }
-];
+
 
 interface UserPoll {
   id: string;
@@ -98,43 +86,13 @@ interface TeaExperimentsFeaturesProps {
 export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsFeaturesProps) {
   const [userVote, setUserVote] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
-  const [newQuestion, setNewQuestion] = useState("");
-  const [newOptions, setNewOptions] = useState(["", ""]);
-  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [showCommunityResults, setShowCommunityResults] = useState(false);
   const [communityPolls, setCommunityPolls] = useState<UserPoll[]>([]);
   const [isLiveExperimentExpanded, setIsLiveExperimentExpanded] = useState(true);
-  const [isCreateExperimentExpanded, setIsCreateExperimentExpanded] = useState(false);
   
-  // Chemistry animation hook
-  const { isVisible: isChemistryVisible, triggerAnimation, completeAnimation } = useChemistryAnimation();
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   
-  // React Query hooks
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-  
-  // Mutation for creating poll posts
-  const createPostMutation = useMutation({
-    mutationFn: async (postData: { content: string; category: string; pollOptions: string[]; postType: string }) => {
-      return apiRequest('POST', '/api/posts', postData);
-    },
-    onSuccess: () => {
-      // Invalidate queries to refresh the community feed
-      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-      toast({
-        title: "Experiment launched!",
-        description: "Your tea experiment is now live in the community feed",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to launch experiment",
-        description: error.message || "Please try again",
-        variant: "destructive",
-      });
-    },
-  });
   
 
 
@@ -175,54 +133,7 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
     onVote(optionId);
   };
 
-  const updateOption = (index: number, value: string) => {
-    const updated = [...newOptions];
-    updated[index] = value;
-    setNewOptions(updated);
-  };
 
-  const addOption = () => {
-    if (newOptions.length < 4) {
-      setNewOptions([...newOptions, ""]);
-    }
-  };
-
-  const removeOption = (index: number) => {
-    if (newOptions.length > 2) {
-      setNewOptions(newOptions.filter((_, i) => i !== index));
-    }
-  };
-
-  const createPoll = () => {
-    if (newQuestion.trim() && newOptions.every(opt => opt.trim())) {
-      // Trigger chemistry animation first
-      triggerAnimation();
-      
-      // Create real poll post in database
-      const filteredOptions = newOptions.filter(opt => opt.trim());
-      createPostMutation.mutate({
-        content: newQuestion.trim(),
-        category: "tea-experiments",
-        pollOptions: filteredOptions,
-        postType: "poll"
-      });
-      
-      // Reset form and collapse create section after animation starts
-      setTimeout(() => {
-        setNewQuestion("");
-        setNewOptions(["", ""]);
-        setSelectedTemplate(null);
-        setIsCreateExperimentExpanded(false);
-      }, 500);
-      
-      onCreatePoll(newQuestion.trim(), filteredOptions);
-    }
-  };
-
-  const useTemplate = (templateIndex: number) => {
-    setSelectedTemplate(templateIndex);
-    setNewOptions([...pollTemplates[templateIndex].options]);
-  };
 
   return (
     <div className="space-y-4">
@@ -351,116 +262,31 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
         )}
       </Card>
 
-      {/* Create New Experiment - Collapsible & Smaller */}
+      {/* Create First Post - Redirect to Post Modal */}
       <Card className="border-purple-200 dark:border-purple-800">
-        <CardHeader 
-          className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 cursor-pointer hover:bg-opacity-80 transition-colors"
-          onClick={() => setIsCreateExperimentExpanded(!isCreateExperimentExpanded)}
-        >
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300 text-sm sm:text-base">
-              <Plus className="h-4 w-4" />
-              🧪 Create Your Experiment
-            </CardTitle>
-            {isCreateExperimentExpanded ? 
-              <ChevronUp className="h-4 w-4 text-purple-700 dark:text-purple-300" /> : 
-              <ChevronDown className="h-4 w-4 text-purple-700 dark:text-purple-300" />
-            }
-          </div>
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+          <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300 text-sm sm:text-base">
+            <Plus className="h-4 w-4" />
+            🧪 Create Your First Post
+          </CardTitle>
         </CardHeader>
         
-        {isCreateExperimentExpanded && (
-          <CardContent className="p-2 sm:p-3">
-            <div className="space-y-3">
-              {/* Question Input - Smaller */}
-              <div>
-                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                  Your Dilemma or Question:
-                </label>
-                <Input
-                  placeholder="What decision do you need help with?"
-                  value={newQuestion}
-                  onChange={(e) => setNewQuestion(e.target.value)}
-                  className="text-xs sm:text-sm w-full"
-                />
-            </div>
-
-              {/* Template Selection - Smaller */}
-              <div>
-                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                  Quick Templates:
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2">
-                  {pollTemplates.map((template, index) => (
-                    <Button
-                      key={index}
-                      variant={selectedTemplate === index ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => useTemplate(index)}
-                      className="text-xs h-auto p-1 sm:p-2"
-                    >
-                      {template.category}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Options - Smaller */}
-              <div>
-                <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                  Answer Options:
-                </label>
-                <div className="space-y-2">
-                  {newOptions.map((option, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        placeholder={`Option ${index + 1}`}
-                        value={option}
-                        onChange={(e) => updateOption(index, e.target.value)}
-                        className="flex-1 text-xs sm:text-sm"
-                      />
-                      {newOptions.length > 2 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => removeOption(index)}
-                          className="text-red-500 px-2"
-                        >
-                          ✕
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  {newOptions.length < 4 && (
-                    <Button variant="outline" size="sm" onClick={addOption} className="text-xs">
-                      <Plus className="h-3 w-3 mr-1" />
-                      Add Option
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Create Button - Smaller */}
-              <Button 
-                onClick={createPoll}
-                disabled={!newQuestion.trim() || !newOptions.every(opt => opt.trim())}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs sm:text-sm"
-              >
-                <TestTube className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                Launch Experiment
-              </Button>
-            </div>
-          </CardContent>
-        )}
+        <CardContent className="p-3 sm:p-4">
+          <div className="text-center space-y-3">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Ready to create your first experiment? Click below to design a poll and let the community help you decide!
+            </p>
+            <Button 
+              onClick={() => onCreatePoll("", [])}
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm"
+            >
+              <TestTube className="h-4 w-4 mr-2" />
+              Create Your Experiment
+            </Button>
+          </div>
+        </CardContent>
       </Card>
 
-      
-      
-      {/* Chemistry Animation */}
-      <ChemistryAnimation 
-        isVisible={isChemistryVisible}
-        onComplete={completeAnimation}
-      />
     </div>
   );
 }
