@@ -570,7 +570,7 @@ function getDefaultCategory(section: string): string {
     case "story-time": return "story";
     case "hot-topics": return "hot-takes";
     case "daily-debate": return "debate";
-    case "tea-experiments": return "poll";
+    case "tea-experiments": return "tea-experiments";
     case "daily-tea": return "daily";
     case "just-for-fun": return "other";
     case "suggestions": return "other";
