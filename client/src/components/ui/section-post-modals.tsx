@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog";
 import { Button } from "./button";
@@ -468,30 +468,80 @@ export function SectionPostModal({
             </div>
           )}
 
-          {/* Tea Experiments - Poll Options */}
+          {/* Tea Experiments - Enhanced Poll Creation */}
           {section === "tea-experiments" && (
-            <div className="space-y-3">
-              <Label>Create Your Poll</Label>
-              <div className="space-y-2">
-                <div>
-                  <Label htmlFor="option-a" className="text-sm">Option A</Label>
-                  <Input
-                    id="option-a"
-                    value={pollOptionA}
-                    onChange={(e) => setPollOptionA(e.target.value)}
-                    placeholder="First choice..."
-                    className="mt-1"
-                  />
+            <div className="space-y-4">
+              {/* Lab Theme Header */}
+              <div className="text-center py-3 px-4 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                <div className="flex justify-center items-center gap-2 mb-2">
+                  <span className="text-lg">🧪</span>
+                  <span className="text-lg">⚗️</span>
+                  <span className="text-lg">🔬</span>
                 </div>
-                <div>
-                  <Label htmlFor="option-b" className="text-sm">Option B</Label>
-                  <Input
-                    id="option-b"
-                    value={pollOptionB}
-                    onChange={(e) => setPollOptionB(e.target.value)}
-                    placeholder="Second choice..."
-                    className="mt-1"
-                  />
+                <h3 className="text-lg font-bold text-blue-700 dark:text-blue-300">
+                  Create Your Experiment
+                </h3>
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  Design a poll to get community decisions
+                </p>
+              </div>
+
+              {/* Quick Templates */}
+              <div>
+                <Label className="text-sm font-medium">Quick Templates:</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {[
+                    { category: "Yes/No", options: ["Yes", "No"] },
+                    { category: "Should I?", options: ["Do it", "Don't do it"] },
+                    { category: "Which?", options: ["Option A", "Option B"] },
+                    { category: "Better?", options: ["This one", "That one"] }
+                  ].map((template, index) => (
+                    <Button
+                      key={index}
+                      variant={pollOptionA === template.options[0] ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setPollOptionA(template.options[0]);
+                        setPollOptionB(template.options[1]);
+                      }}
+                      className="text-xs h-auto p-2"
+                    >
+                      {template.category}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Poll Options */}
+              <div className="space-y-3">
+                <Label>Answer Options:</Label>
+                <div className="space-y-2">
+                  <div>
+                    <Label htmlFor="option-a" className="text-sm flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-xs flex items-center justify-center font-medium">A</span>
+                      Option A
+                    </Label>
+                    <Input
+                      id="option-a"
+                      value={pollOptionA}
+                      onChange={(e) => setPollOptionA(e.target.value)}
+                      placeholder="First choice..."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="option-b" className="text-sm flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 text-xs flex items-center justify-center font-medium">B</span>
+                      Option B
+                    </Label>
+                    <Input
+                      id="option-b"
+                      value={pollOptionB}
+                      onChange={(e) => setPollOptionB(e.target.value)}
+                      placeholder="Second choice..."
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -503,6 +553,7 @@ export function SectionPostModal({
               {section === "daily-debate" ? "Your Bold Statement" : 
                section === "hot-topics" ? "Your Response" : 
                section === "story-time" ? "Tell your story..." : 
+               section === "tea-experiments" ? "Your Dilemma or Question" :
                category === "daily" ? "Your Response to Today's Prompt" : "Your Post"}
             </Label>
             <Textarea
@@ -540,7 +591,8 @@ export function SectionPostModal({
               disabled={createPostMutation.isPending}
               className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white"
             >
-              {createPostMutation.isPending ? "Posting..." : "Share"}
+              {createPostMutation.isPending ? "Posting..." : 
+               section === "tea-experiments" ? "🧪 Launch Experiment" : "Share"}
             </Button>
           </div>
         </div>

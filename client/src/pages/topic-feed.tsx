@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -111,7 +111,7 @@ export default function TopicFeed() {
   
   // Get topic ID from URL params
   const topicId = params.topicId || 'celebrity-tea';
-  const topic = topicConfig[topicId];
+  const topic = topicConfig[topicId] || topicConfig['celebrity-tea']; // Fallback to prevent undefined
 
   // Initialize smart feed for community posts
   const smartFeed = useSmartFeed({
