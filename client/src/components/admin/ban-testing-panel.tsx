@@ -325,34 +325,7 @@ export function BanTestingPanel() {
 
 
 
-            {/* Test Results */}
-            {testResults.length > 0 && (
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Test Results</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {testResults.map((result, index) => (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-lg border text-sm ${
-                          result.success
-                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200"
-                            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start mb-1">
-                          <span className="font-medium">{result.action}</span>
-                          <span className="text-xs opacity-70">{result.timestamp}</span>
-                        </div>
-                        <div className="text-xs">{result.details}</div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            
           </div>
         </div>
 
