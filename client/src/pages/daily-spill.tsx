@@ -431,7 +431,7 @@ export default function DailySpill() {
                   {currentTheme.emoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-base text-gray-900 dark:text-gray-100 truncate">{currentTheme.name}</p>
+                  <p className="font-bold text-base text-gray-900 dark:text-gray-100 truncate">{currentTheme.name} Theme</p>
                   <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{currentTheme.description}</p>
                 </div>
               </div>
