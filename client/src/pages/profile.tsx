@@ -60,6 +60,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BanTestingPanel } from "@/components/admin/ban-testing-panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 
 export default function Profile() {
@@ -69,6 +71,48 @@ export default function Profile() {
   const [adminPasswordOpen, setAdminPasswordOpen] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
+  
+  // Help & Support modals
+  const [helpModalOpen, setHelpModalOpen] = useState("");
+  const [reportForm, setReportForm] = useState({
+    issue: "",
+    description: "",
+    includeUsername: false
+  });
+
+  const handleReportSubmit = async () => {
+    if (!reportForm.description.trim()) {
+      toast({
+        title: "Please describe the issue",
+        description: "We need more details to help you.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await apiRequest("POST", "/api/support/report", {
+        issue: reportForm.issue || "General Issue",
+        description: reportForm.description,
+        includeUsername: reportForm.includeUsername,
+        timestamp: new Date().toISOString()
+      });
+
+      toast({
+        title: "Report submitted",
+        description: "Thank you for your feedback! We'll look into it.",
+      });
+
+      setReportForm({ issue: "", description: "", includeUsername: false });
+      setHelpModalOpen("");
+    } catch (error) {
+      toast({
+        title: "Failed to submit report",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
   const { profile, getCachedProfile, updateProfile } = useUserProfile();
   
   // Use cached profile data to prevent flashing - try multiple sources immediately
@@ -890,17 +934,37 @@ export default function Profile() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="ghost" className="w-full justify-start">
-              How to use Tfess
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start" 
+              onClick={() => setHelpModalOpen("how-to-use")}
+            >
+              🔹 How to use Tfess
+              <ChevronRight className="ml-auto h-4 w-4" />
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              Community Guidelines
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => setHelpModalOpen("guidelines")}
+            >
+              📝 Community Guidelines
+              <ChevronRight className="ml-auto h-4 w-4" />
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              Report a Problem
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => setHelpModalOpen("report")}
+            >
+              🔹 Report a Problem
+              <ChevronRight className="ml-auto h-4 w-4" />
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              About Tfess
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => setHelpModalOpen("about")}
+            >
+              🔹 About Tfess
+              <ChevronRight className="ml-auto h-4 w-4" />
             </Button>
           </CardContent>
         </Card>
@@ -970,6 +1034,251 @@ export default function Profile() {
                 className="flex-1"
               >
                 Access
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Help & Support Modals */}
+      
+      {/* How to Use Tfess Modal */}
+      <Dialog open={helpModalOpen === "how-to-use"} onOpenChange={() => setHelpModalOpen("")}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Getting Started on Tfess</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 pt-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="mb-4">Learn how to get started with Tfess, from posting your first tea to voting in debates. This guide walks you through:</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">📝 Creating Posts in Different Sections</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>Navigate to any section (Home, Community, Daily, etc.)</li>
+                    <li>Tap the floating '+' button or create post option</li>
+                    <li>Choose your category and write your anonymous story</li>
+                    <li>Add reactions and engage with the community</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">☕ Responding to Daily Prompts</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>Check the Daily section for new prompts</li>
+                    <li>Share your honest thoughts anonymously</li>
+                    <li>Build your streak by posting daily</li>
+                    <li>See how others respond to the same topics</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">💬 Reacting and Commenting</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>Tap emoji reactions on posts you relate to</li>
+                    <li>Add anonymous comments to share your perspective</li>
+                    <li>Vote in drama polls and community debates</li>
+                    <li>All interactions remain completely anonymous</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">⚙️ Managing Your Profile</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>Customize your anonymous avatar and username</li>
+                    <li>Set up notifications for daily prompts</li>
+                    <li>View your post analytics and engagement</li>
+                    <li>Sync across devices while staying anonymous</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-center pt-4">
+              <Button onClick={() => setHelpModalOpen("")} className="w-full">
+                Got it, thanks!
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Community Guidelines Modal */}
+      <Dialog open={helpModalOpen === "guidelines"} onOpenChange={() => setHelpModalOpen("")}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Community Guidelines</DialogTitle>
+            <p className="text-xs text-gray-500 text-center mt-1">Last Updated: August 2025</p>
+          </DialogHeader>
+          <div className="space-y-6 pt-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="mb-4">Keep Tfess safe, fair, and anonymous. By using this app, you agree to:</p>
+              
+              <div className="space-y-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">🤐 Respect Others' Anonymity</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4 text-blue-800 dark:text-blue-200">
+                    <li>Never try to identify other anonymous users</li>
+                    <li>Don't share personal information about others</li>
+                    <li>Keep conversations anonymous and respectful</li>
+                  </ul>
+                </div>
+
+                <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
+                  <h4 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">🚫 Avoid Harassment or Offensive Behavior</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4 text-orange-800 dark:text-orange-200">
+                    <li>No bullying, threats, or hate speech</li>
+                    <li>Be respectful even when disagreeing</li>
+                    <li>Report inappropriate content when you see it</li>
+                  </ul>
+                </div>
+
+                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">⛔ No Spamming or Impersonation</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4 text-green-800 dark:text-green-200">
+                    <li>Don't flood feeds with repetitive content</li>
+                    <li>One anonymous voice per person</li>
+                    <li>Keep posts authentic and meaningful</li>
+                  </ul>
+                </div>
+
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+                  <h4 className="font-semibold text-red-900 dark:text-red-100 mb-2">🚨 Report Abuse When You See It</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4 text-red-800 dark:text-red-200">
+                    <li>Help keep our community safe</li>
+                    <li>Use the report function for violations</li>
+                    <li>Trust that reports are handled fairly</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-center pt-4">
+              <Button onClick={() => setHelpModalOpen("")} className="w-full">
+                I understand
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Report a Problem Modal */}
+      <Dialog open={helpModalOpen === "report"} onOpenChange={() => setHelpModalOpen("")}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">Report a Problem</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Having an issue? Let us know! We're here to help with bugs, feature problems, or inappropriate content.
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="issue-type">What type of issue are you reporting?</Label>
+                <select 
+                  id="issue-type"
+                  value={reportForm.issue}
+                  onChange={(e) => setReportForm(prev => ({ ...prev, issue: e.target.value }))}
+                  className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Select an issue type</option>
+                  <option value="Bug in the app">🐛 Bug in the app</option>
+                  <option value="Feature not working">⚠️ Feature not working</option>
+                  <option value="Inappropriate content">🚨 Something inappropriate</option>
+                  <option value="Account issue">👤 Account issue</option>
+                  <option value="Other">❓ Other</option>
+                </select>
+              </div>
+
+              <div>
+                <Label htmlFor="issue-description">Describe the issue</Label>
+                <Textarea
+                  id="issue-description"
+                  value={reportForm.description}
+                  onChange={(e) => setReportForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Please provide as much detail as possible..."
+                  className="w-full mt-1 min-h-[100px]"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="include-username"
+                  checked={reportForm.includeUsername}
+                  onCheckedChange={(checked) => setReportForm(prev => ({ ...prev, includeUsername: !!checked }))}
+                />
+                <Label htmlFor="include-username" className="text-sm">
+                  Include my anonymous username for follow-up (optional)
+                </Label>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setHelpModalOpen("");
+                  setReportForm({ issue: "", description: "", includeUsername: false });
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleReportSubmit}
+                disabled={!reportForm.description.trim()}
+                className="flex-1"
+              >
+                Submit Report
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* About Tfess Modal */}
+      <Dialog open={helpModalOpen === "about"} onOpenChange={() => setHelpModalOpen("")}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="text-center flex items-center justify-center gap-2">
+              <span className="text-2xl">☕</span>
+              About Tfess
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 pt-4 text-center">
+            <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="mb-4">
+                Tfess is an anonymous social app built for raw expression, honest thoughts, and community-powered interaction. 
+                Built for modern gossip, confessions, debates, and more.
+              </p>
+              
+              <div className="space-y-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Version:</span>
+                  <Badge variant="secondary">1.0.0</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Developer:</span>
+                  <span className="text-sm">Tfess Team</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Support:</span>
+                  <span className="text-sm text-blue-600 dark:text-blue-400">support@tfess.app</span>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <p className="text-xs text-orange-800 dark:text-orange-200">
+                  🎭 Your anonymity is our priority. Share freely, connect safely.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-center">
+              <Button onClick={() => setHelpModalOpen("")} className="w-full">
+                Close
               </Button>
             </div>
           </div>
