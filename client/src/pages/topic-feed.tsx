@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -171,9 +171,7 @@ export default function TopicFeed() {
       }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/all?${params}`);
       if (!response.ok) throw new Error("Failed to fetch community posts");
-      const data = await response.json();
-      console.log(`[${topicId}] Community posts fetched:`, data.length);
-      return data;
+      return response.json();
     }
   });
 
@@ -195,23 +193,14 @@ export default function TopicFeed() {
       }
       const response = await fetch(`/api/posts/${topicId}/${sortBy}/user?${params}`);
       if (!response.ok) throw new Error("Failed to fetch user posts");
-      const data = await response.json();
-      console.log(`[${topicId}] User posts fetched:`, data.length);
-      return data;
+      return response.json();
     }
   });
 
   const isLoading = isLoadingCommunity || isLoadingUser;
 
-  // Handle invalid topic redirect in useEffect to avoid hooks order issues
-  useEffect(() => {
-    if (!topic) {
-      setLocation('/community');
-    }
-  }, [topic, setLocation]);
-
-  // Don't render anything if topic is invalid
   if (!topic) {
+    setLocation('/community');
     return null;
   }
 

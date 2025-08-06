@@ -116,14 +116,12 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
   
   // Mutation for creating poll posts
   const createPostMutation = useMutation({
-    mutationFn: async (postData: { content: string; category: string; pollOptions: any; postType: string; postContext: string; communitySection: string }) => {
+    mutationFn: async (postData: { content: string; category: string; pollOptions: string[]; postType: string }) => {
       return apiRequest('POST', '/api/posts', postData);
     },
     onSuccess: () => {
-      // Invalidate all queries to refresh tea experiments and community feeds
+      // Invalidate queries to refresh the community feed
       queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/posts/community', 'tea-experiments'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/posts/user', 'tea-experiments'] });
       toast({
         title: "Experiment launched!",
         description: "Your tea experiment is now live in the community feed",
@@ -202,18 +200,11 @@ export function TeaExperimentsFeatures({ onCreatePoll, onVote }: TeaExperimentsF
       
       // Create real poll post in database
       const filteredOptions = newOptions.filter(opt => opt.trim());
-      // Backend expects pollOptions as an object with optionA and optionB
-      const pollOptionsObject = {
-        optionA: filteredOptions[0] || "",
-        optionB: filteredOptions[1] || ""
-      };
       createPostMutation.mutate({
         content: newQuestion.trim(),
         category: "tea-experiments",
-        pollOptions: pollOptionsObject,
-        postType: "poll",
-        postContext: "community",
-        communitySection: "tea-experiments"
+        pollOptions: filteredOptions,
+        postType: "poll"
       });
       
       // Reset form and collapse create section after animation starts
