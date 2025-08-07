@@ -110,3 +110,7 @@
     "bufferutil": "^4.0.8"
   }
 }
+"scripts": {
+  "build": "cd client && npm install && npm run build",
+  "start": "node server/index.js"
+}
