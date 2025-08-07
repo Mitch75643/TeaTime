@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { HotTopicsFeatures } from "@/components/ui/hot-topics-features";
 import { DailyDebateFeatures } from "@/components/ui/daily-debate-features";
 import { TeaExperimentsFeatures } from "@/components/ui/tea-experiments-features";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { useSmartFeed } from "@/hooks/use-smart-feed";
+// import { useSmartFeed } from "@/hooks/use-smart-feed"; // Removed to fix hook order conflicts
 
 import { SuggestionsFeatures } from "@/components/ui/suggestions-features";
 import { CelebrationAnimation, useCelebration } from "@/components/ui/celebration-animations";
@@ -113,12 +113,7 @@ export default function TopicFeed() {
   const topicId = params.topicId || 'celebrity-tea';
   const topic = topicConfig[topicId] || topicConfig['celebrity-tea']; // Fallback to prevent undefined
 
-  // Initialize smart feed for community posts
-  const smartFeed = useSmartFeed({
-    queryKey: ['/api/posts/community', topicId, sortBy, storyCategory, hotTopicFilter],
-    apiEndpoint: `/api/posts/${topicId}/${sortBy}/all`,
-    postContext: 'community',
-  });
+  // Remove smartFeed hook as it conflicts with the other queries below
 
   // Scroll to top when topic changes
   useEffect(() => {
@@ -601,76 +596,33 @@ export default function TopicFeed() {
                     </Button>
                   </div>
                     ) : (
-                      (() => {
-                        // Apply smart capped feed logic only for "new" sort, not trending
-                        const feedResult = sortBy === "new" 
-                          ? smartFeed.applyCappedFeedLogic(communityPosts)
-                          : smartFeed.applyBatching(communityPosts);
-                        
-                        const { posts: displayedPosts, hasMorePosts, needsRefresh } = feedResult;
-                        
-                        // Update visible posts tracking for community feed
-                        React.useEffect(() => {
-                          if (displayedPosts && displayedPosts.length > 0) {
-                            smartFeed.updateVisiblePosts(displayedPosts);
-                          }
-                        }, [displayedPosts, smartFeed.updateVisiblePosts]);
-                        
-                        return (
-                          <div className="space-y-6">
-                            {/* Show Story Recommendations first for Story Time */}
-                            {topicId === "story-time" && (
-                              <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
-                                <div className="flex items-center gap-2 mb-4">
-                                  <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                                    ✨ Recommended for You
-                                  </span>
-                                </div>
-                                <StoryRecommendations 
-                                  limit={3}
-                                  showPreferences={true}
-                                  className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4"
-                                />
-                              </div>
-                            )}
-                            
-                            {/* Community Posts */}
-                            {displayedPosts.map((post: Post) => (
-                              <div key={post.id} className="w-full">
-                                <PostCard 
-                                  post={post} 
-                                  hideStoryCategory={topicId === "story-time"}
-                                />
-                              </div>
-                            ))}
-                            
-                            {/* Refresh to Load More Button for Capped Feed */}
-                            {needsRefresh && hasMorePosts && sortBy === "new" && (
-                              <div className="text-center py-6">
-                                <div className="mb-4">
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                    Showing {displayedPosts.length} posts optimized for visibility
-                                  </p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-500">
-                                    {Math.floor(displayedPosts.length * 0.2)} zero-engagement • {Math.floor(displayedPosts.length * 0.1)} low-engagement • {displayedPosts.length - Math.floor(displayedPosts.length * 0.2) - Math.floor(displayedPosts.length * 0.1)} regular posts
-                                  </p>
-                                </div>
-                                <Button
-                                  onClick={smartFeed.handleRefresh}
-                                  disabled={smartFeed.isRefreshing}
-                                  variant="outline"
-                                  className="px-6 py-2 text-sm border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/20"
-                                >
-                                  🔁 Refresh to load more posts
-                                </Button>
-                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                  {communityPosts.length - displayedPosts.length} more posts available
-                                </p>
-                              </div>
-                            )}
+                      <div className="space-y-6">
+                        {/* Show Story Recommendations first for Story Time */}
+                        {topicId === "story-time" && (
+                          <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+                            <div className="flex items-center gap-2 mb-4">
+                              <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                                ✨ Recommended for You
+                              </span>
+                            </div>
+                            <StoryRecommendations 
+                              limit={3}
+                              showPreferences={true}
+                              className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4"
+                            />
                           </div>
-                        );
-                      })()
+                        )}
+                        
+                        {/* Community Posts */}
+                        {communityPosts.map((post: Post) => (
+                          <div key={post.id} className="w-full">
+                            <PostCard 
+                              post={post} 
+                              hideStoryCategory={topicId === "story-time"}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}

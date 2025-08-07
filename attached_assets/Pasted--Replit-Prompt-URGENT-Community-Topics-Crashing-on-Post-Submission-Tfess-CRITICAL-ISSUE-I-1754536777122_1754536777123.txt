@@ -1,0 +1,69 @@
+🛠️ Replit Prompt — URGENT: Community Topics Crashing on Post Submission (Tfess)
+❗ CRITICAL ISSUE:
+In the Community page of my Tfess app, ALL topic sections are crashing when a user tries to submit a post.
+
+🔍 What’s Happening:
+When a post is submitted under any Community topic (e.g. Hot Topics, Celebrity Tea, Story Time, etc.):
+
+The app freezes or crashes immediately.
+
+Sometimes the form resets, other times the app navigates away or locks up.
+
+The submitted post either:
+
+Never shows up
+
+Or breaks the UI completely
+
+This affects all Community topic sections, not just one.
+
+Posts do not appear in the Community feed after submitting — user sees nothing or is stuck.
+
+✅ What I Need Replit to Fix:
+Stability Fix:
+
+Submitting a post in any Community topic must not crash or reload the app.
+
+Prevent null references or state mismatch issues after post submission.
+
+Fix Feed Rendering Logic:
+
+Posts should appear immediately in the correct Community feed once submitted.
+
+Prevent feed from going blank or freezing.
+
+Cross-Device Visibility:
+
+Once posted, the post should also show up on other devices (like it does in Home or Trending).
+
+Confirm real-time sync or load on refresh.
+
+Preserve Form and Navigation:
+
+Do not reset the form and throw the user back to the post screen if the post is submitted successfully.
+
+Take the user to the Community Feed tab where their post appears.
+
+🧪 How to Test the Fix:
+Go to any Community topic (e.g. Story Time).
+
+Click “+ Create Post” and submit a new post.
+
+Confirm:
+
+✅ App does NOT crash or freeze
+
+✅ Post appears in the Community Feed immediately
+
+✅ Post shows on other devices
+
+✅ No visual or form errors appear
+
+🧠 Additional Context:
+This functionality was working fine before under the checkpoint titled:
+“Update feeds to show fewer posts and require manual refreshes.”
+Please review the diff from that checkpoint if needed — the current behavior is a regression from that working state.
+
+🚨 Priority Level:
+This is a critical stability issue affecting core app functionality — please fix this ASAP to restore proper posting in all Community sections.
+
