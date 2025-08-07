@@ -30,19 +30,10 @@ export function Header() {
         <div className="bg-gradient-to-r from-orange-500/95 via-orange-600/95 to-amber-500/95 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="text-center">
-              {/* Logo and Title Container */}
-              <div className="flex items-center justify-center space-x-3 mb-2">
-                <div className="bg-white/10 p-2 rounded-full backdrop-blur-sm shadow-lg">
-                  <img 
-                    src={postynLogo} 
-                    alt="Postyn Logo" 
-                    className="h-8 w-8 sm:h-10 sm:w-10 object-contain filter brightness-0 invert"
-                  />
-                </div>
-                <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-lg">
-                  Postyn
-                </h1>
-              </div>
+              {/* Title */}
+              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-2">
+                Postyn
+              </h1>
               
               {/* Tagline */}
               <p className="text-white/90 text-sm sm:text-base font-medium tracking-wide drop-shadow-sm">
