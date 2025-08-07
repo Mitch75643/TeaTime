@@ -28,10 +28,10 @@ export function Header() {
       {/* Modern Postyn Brand Header */}
       <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 shadow-lg">
         <div className="bg-gradient-to-r from-orange-500/95 via-orange-600/95 to-amber-500/95 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="text-center">
+          <div className="max-w-7xl mx-auto px-6 py-6">
+            <div className="flex flex-col items-center justify-center">
               {/* Title */}
-              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-2">
+              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-2 transform -translate-x-1">
                 Postyn
               </h1>
               
