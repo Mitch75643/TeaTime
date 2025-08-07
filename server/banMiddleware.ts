@@ -28,7 +28,7 @@ export async function checkDeviceBanMiddleware(req: Request, res: Response, next
         banReason: banInfo.banReason,
         isTemporary: banInfo.isTemporary,
         expiresAt: banInfo.expiresAt,
-        message: "Access denied - device is banned from Tfess due to policy violations"
+        message: "Access denied - device is banned from Postyn due to policy violations"
       });
     }
 

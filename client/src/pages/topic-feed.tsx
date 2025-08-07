@@ -81,7 +81,7 @@ const topicConfig: Record<string, TopicInfo> = {
     id: "suggestions",
     name: "Feedback/Suggestions",
     emoji: "💡",
-    description: "Ideas and feedback for improving Tfess",
+    description: "Ideas and feedback for improving Postyn",
     gradient: "bg-gradient-to-br from-cyan-500 to-blue-500", // Match Community card exactly
     textColor: "text-white", 
     count: 56

@@ -5,7 +5,7 @@ import { type PushSubscription, type ContentPrompt } from "@shared/schema";
 // VAPID keys configuration
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || 'BFzKJv8W5XsNEhRjH5_gkKEL8N5PQRqNfz8T4w7oHt5YJXxoI8tVc1Nq3fFgEzEf8CiCrxR3d3pKfP2X4mwXyc0';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || 'UeR4_9mJZ8x7kY2sD4fNqX8tV9oP5aL3iU7hG2kW9fM';
-const VAPID_EMAIL = process.env.VAPID_EMAIL || 'notifications@tfess.app';
+const VAPID_EMAIL = process.env.VAPID_EMAIL || 'notifications@postyn.app';
 
 export class PushNotificationService {
   private notificationQueue: Array<{

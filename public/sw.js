@@ -1,5 +1,5 @@
 // Service Worker for Push Notifications with Deep Link Navigation
-const CACHE_NAME = 'tfess-sw-v1';
+const CACHE_NAME = 'postyn-sw-v1';
 
 // Install event
 self.addEventListener('install', (event) => {
@@ -40,14 +40,14 @@ self.addEventListener('push', (event) => {
     };
 
     event.waitUntil(
-      self.registration.showNotification(data.title || 'Tfess', options)
+      self.registration.showNotification(data.title || 'Postyn', options)
     );
   } catch (error) {
     console.error('[SW] Error handling push message:', error);
     
     // Fallback notification
     event.waitUntil(
-      self.registration.showNotification('Tfess', {
+      self.registration.showNotification('Postyn', {
         body: 'You have a new notification',
         icon: '/favicon.ico',
         badge: '/favicon.ico'

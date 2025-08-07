@@ -1,5 +1,5 @@
 /**
- * Biometric Authentication Service for Tfess
+ * Biometric Authentication Service for Postyn
  * Handles Face ID, Touch ID, and other platform biometric authentication
  */
 
@@ -20,7 +20,7 @@ export interface BiometricAuthService {
 }
 
 class BiometricAuthServiceImpl implements BiometricAuthService {
-  private readonly STORAGE_PREFIX = 'tfess_biometric_';
+  private readonly STORAGE_PREFIX = 'postyn_biometric_';
   
   /**
    * Check if biometric authentication is supported on this device

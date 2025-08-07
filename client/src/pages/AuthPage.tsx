@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Fingerprint, Key, User, Mail, AlertCircle } from "lucide-react";
 import { LoginPage } from "@/components/auth/LoginPage";
 import { useLocation } from "wouter";
-import tfessLogo from "../assets/fessr-logo.png";
+import postynLogo from "../assets/fessr-logo.png";
 
 export function AuthPage() {
   const [, setLocation] = useLocation();
@@ -17,7 +17,7 @@ export function AuthPage() {
   };
 
   const handleStayAnonymous = () => {
-    localStorage.setItem('tfess_auth_seen', 'true');
+    localStorage.setItem('postyn_auth_seen', 'true');
     setLocation('/');
   };
 
@@ -36,13 +36,13 @@ export function AuthPage() {
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-20 h-20 flex items-center justify-center">
             <img 
-              src={tfessLogo} 
-              alt="Tfess Logo" 
+              src={postynLogo} 
+              alt="Postyn Logo" 
               className="w-16 h-16 object-contain"
             />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-            Welcome to Tfess
+            Welcome to Postyn
           </CardTitle>
           <CardDescription className="text-lg">
             Share your stories anonymously with complete privacy

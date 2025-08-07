@@ -31,7 +31,7 @@ html {
   --ring: hsl(24, 100%, 39%); /* #CC6200 */
   --radius: 0.5rem;
   
-  /* Custom Tfess colors - Orange Theme */
+  /* Custom Postyn colors - Orange Theme */
   --primary-500: hsl(24, 100%, 50%); /* #FF7A00 main orange */
   --primary-600: hsl(24, 100%, 39%); /* #CC6200 darker orange */
   --primary-700: hsl(24, 100%, 30%); /* Even darker for active states */

@@ -28,7 +28,7 @@ To test admin bypass in development:
 ### Expected Behavior
 - **Regular users**: 4 posts max, then 5-minute cooldown
 - **Admin users**: Unlimited posts, no cooldowns, no restrictions
-- **Cooldown message**: Friendly, Tfess-branded tone
+- **Cooldown message**: Friendly, Postyn-branded tone
 - **Cross-page tracking**: Limit applies across all pages (Home, Daily Spill, Community, Feedback)
 
 ### Test Results Log

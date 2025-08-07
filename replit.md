@@ -1,7 +1,16 @@
 # replit.md
 
 ## Overview
-Tfess is an anonymous social platform for sharing personal stories and gossip across various life categories, including a unique "Am I in the Wrong?" feature for community voting. It emphasizes anonymous interaction through reaction systems and community-driven content moderation, aiming to provide a space for candid sharing and engagement. The platform's vision includes fostering a vibrant community around shared experiences and opinions.
+Postyn (formerly Tfess) is an anonymous social platform for sharing personal stories and gossip across various life categories, including a unique "Am I in the Wrong?" feature for community voting. It emphasizes anonymous interaction through reaction systems and community-driven content moderation, aiming to provide a space for candid sharing and engagement. The platform's vision includes fostering a vibrant community around shared experiences and opinions.
+
+## Recent Changes
+- **Complete Rebrand from Tfess to Postyn** (Aug 2025): Successfully completed comprehensive rebrand across entire codebase, including:
+  - Updated all user-facing text and branding elements (HTML titles, welcome messages, headers)
+  - Renamed localStorage keys from "tfess_*" to "postyn_*" (anon_id, user_data, device_fp, etc.)
+  - Updated biometric storage prefixes and VAPID email configuration
+  - Changed logo variable names from "tfessLogo" to "postynLogo"
+  - Updated fingerprinting text and service comments
+  - Maintained backward compatibility with legacy key cleanup
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

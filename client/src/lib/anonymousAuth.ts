@@ -34,7 +34,7 @@ function generateFunUsername(): string {
 function generateDeviceFingerprint(): string {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  ctx?.fillText('Tfess', 10, 10);
+  ctx?.fillText('Postyn', 10, 10);
   
   const fingerprint = [
     navigator.userAgent,
@@ -57,10 +57,10 @@ function generateDeviceFingerprint(): string {
 
 // Local storage keys
 const STORAGE_KEYS = {
-  ANON_ID: 'tfess_anon_id',
-  USER_DATA: 'tfess_user_data',
-  DEVICE_FINGERPRINT: 'tfess_device_fp',
-  IS_UPGRADED: 'tfess_is_upgraded',
+  ANON_ID: 'postyn_anon_id',
+  USER_DATA: 'postyn_user_data',
+  DEVICE_FINGERPRINT: 'postyn_device_fp',
+  IS_UPGRADED: 'postyn_is_upgraded',
 } as const;
 
 export interface LocalUserData {
@@ -275,7 +275,7 @@ class AnonymousAuthService {
 
   // Mark user as having posted (for upgrade prompting)
   markUserAsPosted() {
-    localStorage.setItem('fessr_has_posted', 'true');
+    localStorage.setItem('postyn_has_posted', 'true');
   }
 
   // Increment visit count
@@ -374,11 +374,12 @@ class AnonymousAuthService {
   // Clear user data (for testing or logout)
   clearUserData() {
     Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-    localStorage.removeItem('fessr_has_posted');
-    localStorage.removeItem('fessr_visit_count');
-    localStorage.removeItem('fessr_auth_seen');
-    localStorage.removeItem('tfess_has_posted'); // Clear both old and new keys
+    localStorage.removeItem('postyn_has_posted');
+    localStorage.removeItem('postyn_visit_count');
+    localStorage.removeItem('postyn_auth_seen');
+    localStorage.removeItem('tfess_has_posted'); // Clear legacy keys for migration
     localStorage.removeItem('tfess_visit_count');
+    localStorage.removeItem('fessr_has_posted'); // Clear old keys from previous iterations
     this.currentUser = null;
     this.notify();
   }
@@ -429,7 +430,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
   React.useEffect(() => {
     // Check if user has already made an authentication choice
     const existingUser = localStorage.getItem(STORAGE_KEYS.USER_DATA);
-    const hasSeenAuth = localStorage.getItem('fessr_auth_seen') === 'true';
+    const hasSeenAuth = localStorage.getItem('postyn_auth_seen') === 'true';
     
     if (existingUser || hasSeenAuth) {
       // User has already authenticated or chosen to stay anonymous
@@ -437,7 +438,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
       setHasChosenAuth(true);
     } else {
       // Auto-create anonymous user for immediate functionality
-      localStorage.setItem('fessr_auth_seen', 'true');
+      localStorage.setItem('postyn_auth_seen', 'true');
       anonymousAuth.createOrGetUser();
       setHasChosenAuth(true);
     }
@@ -492,7 +493,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
             color: 'transparent',
             marginBottom: '0.5rem'
           }
-        }, 'Welcome to Fessr'),
+        }, 'Welcome to Postyn'),
         React.createElement('p', {
           key: 'subtitle',
           style: {
@@ -573,7 +574,7 @@ export function AnonymousAuthProvider({ children }: AnonymousAuthProviderProps) 
             cursor: 'pointer'
           },
           onClick: () => {
-            localStorage.setItem('fessr_auth_seen', 'true');
+            localStorage.setItem('postyn_auth_seen', 'true');
             window.location.href = '/auth';
           }
         }, [

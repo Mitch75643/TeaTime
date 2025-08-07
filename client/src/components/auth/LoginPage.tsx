@@ -10,7 +10,7 @@ import { Shield, Fingerprint, Key, User, Mail, AlertCircle, Check } from "lucide
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { checkBiometricSupport, authenticateWithBiometrics, isBiometricEnabled } from "@/lib/biometricAuth";
 import { useLocation } from "wouter";
-import tfessLogo from "../../assets/fessr-logo.png";
+import postynLogo from "../../assets/fessr-logo.png";
 
 interface LoginPageProps {
   onLoginSuccess?: () => void;
@@ -150,13 +150,13 @@ export function LoginPage({ onLoginSuccess, onStayAnonymous }: LoginPageProps) {
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto w-16 h-16 flex items-center justify-center">
             <img 
-              src={tfessLogo} 
-              alt="Tfess Logo" 
+              src={postynLogo} 
+              alt="Postyn Logo" 
               className="w-12 h-12 object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-            Welcome to Tfess
+            Welcome to Postyn
           </CardTitle>
           <CardDescription>
             Choose how you'd like to continue - completely anonymous or with secure sync
