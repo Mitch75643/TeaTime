@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Fingerprint, Key, User, Mail, AlertCircle } from "lucide-react";
 import { LoginPage } from "@/components/auth/LoginPage";
 import { useLocation } from "wouter";
-import postynLogo from "../assets/fessr-logo.png";
+import postynLogo from "../assets/postyn-logo.png";
 
 export function AuthPage() {
   const [, setLocation] = useLocation();

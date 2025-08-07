@@ -203,8 +203,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let moderationResult;
       try {
         moderationResult = await comprehensiveModeration(validatedData.content);
-      } catch (moderationError) {
-        console.warn("Moderation service unavailable, using fallback:", moderationError.message);
+      } catch (moderationError: any) {
+        console.warn("Moderation service unavailable, using fallback:", moderationError?.message || moderationError);
         // Fallback to allow post creation without moderation
         moderationResult = {
           action: 'allow',
@@ -866,7 +866,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const newUser = await storage.createAnonymousUser({
             alias: `AnonUser${Math.floor(Math.random() * 1000)}`,
             avatarId: 'happy-face',
-            avatarColor: avatarColor,
             deviceFingerprint: req.body.deviceFingerprint || null
           }, sessionId);
           
@@ -1172,7 +1171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the actual post data for recommendations
       const recommendedPosts = await Promise.all(
         recommendations.map(async (rec) => {
-          const post = await storage.getPostById(rec.recommendedPostId);
+          const post = await storage.getPostsByIds([rec.recommendedPostId]).then(posts => posts[0] || null);
           return {
             ...rec,
             post,
@@ -1524,7 +1523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('[Admin System] Auto-initializing root admin fingerprint...');
           await storage.createAdminFingerprint({
             fingerprint: fingerprint,
-            fingerprintLabel: 'Root Host Device - Auto-Initialized',
+            label: 'Root Host Device - Auto-Initialized',
             addedBy: 'system',
             isActive: true
           });
@@ -1964,7 +1963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!existingFingerprint) {
         await storage.createAdminFingerprint({
           fingerprint: userFingerprint,
-          fingerprintLabel: 'User Main Device',
+          label: 'User Main Device',
           addedBy: 'system',
           isActive: true
         });
