@@ -1,4 +1,4 @@
-import { User, Flame } from "lucide-react";
+
 import { Button } from "./button";
 import { NotificationsPanel } from "./notifications-panel";
 import { AuthButton } from "../auth/AuthButton";
