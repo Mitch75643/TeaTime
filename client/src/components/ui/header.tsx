@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { MentalHealthQuickAccess } from "@/components/ui/mental-health-support";
-
+import postynLogo from "../../assets/fessr-logo.png";
 
 export function Header() {
   const [, setLocation] = useLocation();
@@ -24,55 +24,36 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40">
-      {/* Modern Postyn Brand Header */}
-      <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 shadow-lg">
-        <div className="bg-gradient-to-r from-orange-500/95 via-orange-600/95 to-amber-500/95 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="flex flex-col items-center justify-center">
-              {/* Title */}
-              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-lg mb-2 transform -translate-x-1">
-                Postyn
-              </h1>
-              
-              {/* Tagline */}
-              <p className="text-white/90 text-sm sm:text-base font-medium tracking-wide drop-shadow-sm">
-                Share your truth. Spill the tea.
-              </p>
-            </div>
-          </div>
+    <header className="gradient-primary text-white px-4 py-3 sticky top-0 z-40">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <img 
+            src={postynLogo} 
+            alt="Postyn Logo" 
+            className="h-7 w-7 sm:h-8 sm:w-8 object-contain filter brightness-0 invert translate-y-1 translate-x-0.5"
+          />
+          <h1 className="text-xl sm:text-2xl font-bold leading-none tracking-wide -translate-x-0.5">Postyn</h1>
         </div>
-      </div>
-
-      {/* Navigation Bar */}
-      <div className="bg-gradient-to-r from-orange-600 to-orange-700 border-t border-orange-400/20 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {/* Navigation could go here if needed */}
-            </div>
-            <div className="flex items-center space-x-2">
-              <MentalHealthQuickAccess />
-              <NotificationsPanel />
-              {user ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleProfileClick}
-                  className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-12 h-12 ml-1"
-                >
-                  <AvatarDisplay
-                    avatarId={userAvatarId}
-                    size="md"
-                    className="border-2 border-white/40 shadow-lg"
-                    gradientColors={avatarColor}
-                  />
-                </Button>
-              ) : (
-                <AuthButton />
-              )}
-            </div>
-          </div>
+        <div className="flex items-center space-x-2">
+          <MentalHealthQuickAccess />
+          <NotificationsPanel />
+          {user ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleProfileClick}
+              className="p-1 rounded-full hover:bg-white/10 transition-colors text-white w-12 h-12 ml-1"
+            >
+              <AvatarDisplay
+                avatarId={userAvatarId}
+                size="md"
+                className="border-2 border-white/40 shadow-lg"
+                gradientColors={avatarColor}
+              />
+            </Button>
+          ) : (
+            <AuthButton />
+          )}
         </div>
       </div>
     </header>
