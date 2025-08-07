@@ -7,7 +7,7 @@ import { useLocation } from "wouter";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useAnonymousAuth } from "@/lib/anonymousAuth";
 import { MentalHealthQuickAccess } from "@/components/ui/mental-health-support";
-import postynLogo from "../../assets/fessr-logo.png";
+
 
 export function Header() {
   const [, setLocation] = useLocation();
